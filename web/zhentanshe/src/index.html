@@ -350,7 +350,7 @@ body{font-family:var(--sans);background:var(--paper);color:var(--ink);line-heigh
           <span class="t">证据链</span>
           <span class="n" id="evCount">0 条</span>
           <span class="sp"></span>
-          <button class="jev-btn" id="jevBtn" style="display:none" onclick="jevJudge()" title="用 Bocha Jev 决策模型对每条材料做是非判断">Jev 裁决</button>
+          <button class="jev-btn" id="jevBtn" style="display:none" onclick="jevJudge()" title="用 Bocha Jev 决策模型对每条材料做是非判断">Jev 判断</button>
           <span class="n" id="evMode"></span>
         </div>
         <div class="filters" id="filters"></div>
@@ -732,7 +732,7 @@ function categorizeTerms(entities){
 /* Jev 裁决：用 Bocha Jev 对每条材料做「是否直接回答问题」的是非判断 + 相关度打分。
    规则负责硬约束，Jev 负责软判断，两者互补。 */
 async function jevJudge(){
-  if(!S.jevConfigured){ toast('Jev 裁决功能未启用'); return; }
+  if(!S.jevConfigured){ toast('Jev 判断功能未启用'); return; }
   if(!S.lastRaw || !S.items.length){ toast('先查一次'); return; }
   const btn = document.getElementById('jevBtn');
   if(btn){ btn.disabled = true; btn.textContent = '判断中…'; }
@@ -754,35 +754,35 @@ async function jevJudge(){
       }
     });
     renderEvidence(S.items);
-    toast('Jev 裁决完成');
+    toast('Jev 判断完成');
   }catch(e){ toast('Jev 调用失败：' + e.message); }
-  if(btn){ btn.disabled = false; btn.textContent = 'Jev 裁决'; }
+  if(btn){ btn.disabled = false; btn.textContent = 'Jev 判断'; }
 }
 
-/* 证伪：主动检索反对证据（波普尔式 falsification test） */
+/* 反对意见：主动检索反对证据 */
 async function falsify(){
   const raw = S.lastRaw;
   if(!raw) return;
   const box = document.getElementById('falsifyBox');
   if(!box) return;
-  box.innerHTML = '<div class="falsify-none">正在检索反对证据…</div>';
+  box.innerHTML = '<div class="falsify-none">正在搜索反对意见…</div>';
   const q = raw.replace(/[？?！!。]/g, '') + ' 质疑 反驳 辟谣 错误';
   try{
     const r = await searchOne(q, 'quick');
     const items = decorate((r.items || []).slice());
     const high = items.filter(i => ['official','academic','media'].includes(i.tier));
     if(!items.length){
-      box.innerHTML = '<div class="falsify-none">这一轮没搜到反对证据。<b>这不等于「一定对」</b>，只说明没找到反例。</div>';
+      box.innerHTML = '<div class="falsify-none">没搜到反对这条的内容。<b>但这不代表它一定对</b>，只是暂时没人反驳。</div>';
       return;
     }
-    box.innerHTML = `<div class="falsify-h">反对证据 · ${items.length} 条（高可信 ${high.length}）</div>` +
+    box.innerHTML = `<div class="falsify-h">反对这条的内容 · ${items.length} 条（其中官方/学术/主流 ${high.length} 条）</div>` +
       items.slice(0, 5).map(it => `<div class="falsify-item">
         <div class="fi-top"><span class="tier ${it.tier}">${SRC[it.tier].n}</span>
         <a href="${esc(it.url)}" target="_blank" rel="noopener">${esc((it.title||'').slice(0,60))}</a></div>
         <div class="fi-sn">${esc((it.passage||'').slice(0,120))}</div>
       </div>`).join('');
   }catch(e){
-    box.innerHTML = '<div class="falsify-none">证伪检索失败：' + esc(e.message) + '</div>';
+    box.innerHTML = '<div class="falsify-none">搜索失败：' + esc(e.message) + '</div>';
   }
 }
 
@@ -1217,7 +1217,7 @@ function render(raw, items, mode, errs){
     <div class="panel ans-panel">
       <div class="ans-head">
         <span class="ans-badge">答案</span>
-        <span class="ans-tag">抽取式 · 每条可回溯</span>
+        <span class="ans-tag">每句都摘自原文</span>
         <span class="ans-meta">${ans.points.length} 条证据 · ${cf.overall} 分置信</span>
       </div>
 
@@ -1227,8 +1227,8 @@ function render(raw, items, mode, errs){
         <div class="ans-main-src">—— ${esc(ans.points[0].site)}<span>点击定位原文 ↗</span></div>
       </div>
       <div class="falsify-row">
-        <button class="falsify-btn" onclick="event.stopPropagation();falsify()">试着证伪这条</button>
-        <span>主动找反例：搜不到反对证据，才更有理由相信</span>
+        <button class="falsify-btn" onclick="event.stopPropagation();falsify()">搜反对意见</button>
+        <span>专门去找有没有人说这条不对</span>
       </div>
       <div id="falsifyBox"></div>`:`<div class="ans-none">本次召回没有抽到与问题直接相关的原文。<br>建议换个说法，或切到「深度研究」。</div>`}
 
@@ -1253,7 +1253,7 @@ function render(raw, items, mode, errs){
 
     ${claims.length?`
     <div class="panel">
-      <h3>表述分布<span class="r">词法信号 · 非语义裁决</span></h3>
+      <h3>说法分布<span class="r">只看字面，不看语义</span></h3>
       ${claims.map(c=>`
         <div class="cl-row ${c.summary?'sum':''}">
           <span class="cl-badge ${c.cls}">${c.label}</span>
@@ -1301,7 +1301,7 @@ function render(raw, items, mode, errs){
     </div>
 
     <div class="panel">
-      <h3>污染检测<span class="r">SEO / GEO 干扰信号</span></h3>
+      <h3>内容异常检测<span class="r">同文转载 / 引流干扰</span></h3>
       <div class="pc-grid">
         <div class="pc-cell ${pc.dup.length===0?'ok':'warn'}">
           <div class="pc-k">同文转载</div>
@@ -1327,12 +1327,12 @@ function render(raw, items, mode, errs){
           ${d.onlyLow?'<span class="pc-w">均为低可信源</span>':''}
         </div>`).join('')}
       </div>`:''}
-      <div class="tip-line">同文：同一句话在多个站点逐字出现，可能是正常转载，也可能是采集/洗稿。夸张用语与域名集中度用于识别 SEO 农场与 GEO 投喂。</div>
+      <div class="tip-line">同一句话在多个站点逐字出现，可能是正常转载，也可能是洗稿。夸张用语和域名集中度用来识别批量生产的营销内容。</div>
     </div>
 
     ${xv.length?`
     <div class="panel">
-      <h3>交叉验证<span class="r">按独立站点数排序</span></h3>
+      <h3>多来源比对<span class="r">按独立站点数排序</span></h3>
       <div class="xv-legend">
         <span><i class="dot ok"></i>≥2 站 = 交叉印证</span>
         <span><i class="dot warn"></i>1 站 = 孤证</span>

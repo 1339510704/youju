@@ -27,6 +27,54 @@ async function sha(str) {
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 16);
 }
 
+/* ---------------- 来路与时效 ----------------
+   两个实测出来的坑：
+   1) 元宝的 VR 条目（天气/百科等结构化卡）url 经常是空字符串，
+      但正文里写着「# 转跳地址：https://...」——来路必须从正文里捞回来，否则点不开原文。
+   2) 结果只按 score 排，date 完全不参与，所以问「今天天气」会混进两天前的旧闻。
+      这里给每条算清 ageDays，并在有时效意图的查询里把过期的沉底。 */
+function pickUrl(o) {
+  const u = String(o.url || "").trim();
+  if (/^https?:\/\//i.test(u)) return { url: u, from: "api" };
+  const body = String(o.passage || "") + " " + String(o.content || "");
+  const m = body.match(/https?:\/\/[^\s"'<>）)，,。；;]+/);
+  if (m) return { url: m[0].replace(/[.,;:)\]）】]+$/, ""), from: "body" };
+  return { url: "", from: "none" };
+}
+
+function parseDate(s) {
+  if (!s) return null;
+  const m = String(s).match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:[ T](\d{1,2}):(\d{2}))?/);
+  if (!m) return null;
+  const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), Number(m[4] || 0), Number(m[5] || 0));
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function daysAgo(d) {
+  if (!d) return null;
+  const now = new Date();
+  const a = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const b = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  return Math.round((a - b) / 86400000);
+}
+
+function ageLabel(age, raw) {
+  if (age === null || age === undefined) return raw || "时间未知";
+  if (age <= 0) return "今天";
+  if (age === 1) return "昨天";
+  if (age < 7) return age + " 天前";
+  if (age < 30) return Math.floor(age / 7) + " 周前";
+  if (age < 365) return Math.floor(age / 30) + " 个月前";
+  return Math.floor(age / 365) + " 年前";
+}
+
+// 查询里带"当下"意图才做时效压权重排，避免把「历史事件」类查询也强行按今天过滤
+const FRESH_RE = /(今天|今日|现在|目前|实时|最新|刚刚|今早|今晚|昨天|昨日|本周|这周|本周|当前|此刻|天气)/;
+// 常见地名，用来判断"问天气但没说城市"
+const CITY_RE = /(北京|上海|广州|深圳|杭州|成都|武汉|西安|南京|天津|重庆|苏州|郑州|长沙|青岛|沈阳|大连|厦门|福州|合肥|昆明|济南|哈尔滨|长春|石家庄|太原|南昌|贵阳|南宁|兰州|西宁|银川|乌鲁木齐|拉萨|海口|呼和浩特|香港|澳门|台北|无锡|宁波|佛山|东莞|温州|常州|徐州|烟台|洛阳|珠海|中山|惠州|江门|汕头|湛江|保定|唐山|廊坊|秦皇岛|淄博|潍坊|临沂|济宁|泰安|威海|日照|绍兴|嘉兴|金华|台州|湖州|扬州|镇江|盐城|淮安|连云港|宿迁|泰州|芜湖|蚌埠|安庆|九江|赣州|宜昌|襄阳|荆州|株洲|湘潭|衡阳|岳阳|常德|柳州|桂林|遵义|曲靖|大理|绵阳|德阳|宜宾|泸州|南充|天水|宝鸡|咸阳|榆林|大同|阳泉|长治|晋城|包头|鄂尔多斯|齐齐哈尔|大庆|吉林|鞍山|抚顺|本溪|丹东|锦州|营口|盘锦|葫芦岛)/;
+
+function freshnessIntent(q) { return FRESH_RE.test(q); }
+
 /* ---------------- 元宝检索 ---------------- */
 async function wsaSearch(env, query, cnt, mode, industry, site) {
   // Cnt 只接受 10/20/30/40/50，其他值会被 WSA 拒绝（illegal Cnt）
@@ -70,6 +118,9 @@ async function wsaSearch(env, query, cnt, mode, industry, site) {
   const resp = outer.Response || outer;
   if (resp.Error) throw new Error(resp.Error.Message || "search error");
 
+  const now = new Date();
+  const todayStr = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-" + String(now.getDate()).padStart(2, "0");
+
   const items = (resp.Pages || []).map((p) => {
     let o = {};
     try {
@@ -77,19 +128,51 @@ async function wsaSearch(env, query, cnt, mode, industry, site) {
     } catch (e) {
       o = { passage: String(p) };
     }
+    const picked = pickUrl(o);
+    const passageText = o.passage || o.content || "";
+    let age = daysAgo(parseDate(o.date));
+    // VR 天气卡的 date 是"抓取时间"，不是内容时效；改用正文里有没有今天的日期来判断
+    if (o.vr && (o.vr_category || "") === "weather" && String(passageText).includes(todayStr)) age = 0;
     return {
       title: o.title || "",
-      url: o.url || "",
+      url: picked.url,
+      urlFrom: picked.from,
       site: o.site || "",
       date: o.date || "",
-      passage: o.passage || o.content || "",
+      ageDays: age,
+      ageLabel: ageLabel(age, o.date || ""),
+      freshNow: age !== null && age <= 1,
+      stale: age !== null && age > 1,
+      passage: passageText,
+      content: o.content || "",
       score: o.score || 0,
       vr: !!o.vr,
       vrCategory: o.vr_category || "",
     };
   });
 
-  return { ok: true, query, count: items.length, items };
+  // 有时效意图时：今天的排前，过期的沉底（同档内仍按相关度）
+  if (freshnessIntent(query)) {
+    items.sort((a, b) => {
+      const sa = a.freshNow ? 0 : (a.ageDays === null ? 1 : 2);
+      const sb = b.freshNow ? 0 : (b.ageDays === null ? 1 : 2);
+      if (sa !== sb) return sa - sb;
+      return (b.score || 0) - (a.score || 0);
+    });
+  }
+
+  // 问天气但没说城市：元宝会返回随机城市（实测给了西班牙、屏东），必须提醒
+  let notice = "";
+  if (/天气|气温|温度|下雨|降雨|空气质量|台风/.test(query) && !CITY_RE.test(query)) {
+    notice = "没指定城市——元宝返回的是不同地区的天气，不一定是你所在地。建议带上城市名重问，例如「北京今天天气」。";
+  }
+
+  return {
+    ok: true, query, count: items.length, items,
+    freshMode: freshnessIntent(query),
+    notice,
+    todayStr,
+  };
 }
 
 /* ---------------- 博查搜索（第二引擎，多引擎召回） ---------------- */
