@@ -255,42 +255,75 @@ async function runWatch(env, w) {
   return w;
 }
 
-/* ---------- 来源场景信誉档案（KV 飞轮） ---------- */
-async function bumpRep(env, host, verdict, sample) {
-  if (!host) return;
-  const key = "rep:" + host;
-  const cur = (await env.WATCH_KV.get(key, "json")) || { n: 0, ok: 0, warn: 0, no: 0 };
-  cur.n++;
-  if (verdict === "采信") cur.ok++;
-  else if (verdict === "降级") cur.warn++;
-  else cur.no++;
-  cur.score = (cur.ok * 1 + cur.warn * 0.4) / Math.max(1, cur.n);
-  cur.updated = new Date().toISOString();
-  // 留一条样本链接，供来源战绩页展示「这个域名到底给了什么」
-  if (sample && sample.url) {
-    cur.sample = {
-      url: String(sample.url).slice(0, 500),
-      title: String(sample.title || "").slice(0, 160),
-      at: cur.updated,
-    };
-  }
-  await env.WATCH_KV.put(key, JSON.stringify(cur));
+/* ---------- 来源场景信誉档案（KV 飞轮） ----------
+   ⚠️ KV 免费额度只有【1000 次写 / 天】。原来的存法是「一个域名一个 key」：
+      每次查证要把 20～60 个域名各读一次写一次 —— 几十次查证就把当天写额度烧光。
+      现在把全部域名收进一个 key（rep:agg）：一次查证 = 1 读 + 1 写。
+      代价是多人同时查证可能互相覆盖统计（信誉本来就是估算值，可接受）。 */
+const REP_ALL = "rep:agg";
+const REP_MAX_HOSTS = 800;
 
-  const idx = (await env.WATCH_KV.get("rep:index", "json")) || [];
-  if (!idx.includes(host)) {
-    idx.push(host);
-    await env.WATCH_KV.put("rep:index", JSON.stringify(idx.slice(0, 500)));
-  }
-}
+async function loadRepAll(env) {
+  const agg = await env.WATCH_KV.get(REP_ALL, "json");
+  if (agg) return agg;
 
-async function listRep(env) {
+  // 老数据一次性搬家（rep:index + rep:<host>），搬完只留 agg
   const idx = (await env.WATCH_KV.get("rep:index", "json")) || [];
+  if (!idx.length) return {};
   const out = {};
   for (const h of idx) {
     const r = await env.WATCH_KV.get("rep:" + h, "json");
     if (r) out[h] = r;
   }
+  if (Object.keys(out).length) {
+    await env.WATCH_KV.put(REP_ALL, JSON.stringify(out));
+  }
   return out;
+}
+
+function mergeRep(cur, verdict, sample, now) {
+  const c = cur || { n: 0, ok: 0, warn: 0, no: 0 };
+  c.n = (c.n || 0) + 1;
+  if (verdict === "采信") c.ok = (c.ok || 0) + 1;
+  else if (verdict === "降级") c.warn = (c.warn || 0) + 1;
+  else c.no = (c.no || 0) + 1;
+  c.score = ((c.ok || 0) * 1 + (c.warn || 0) * 0.4) / Math.max(1, c.n);
+  c.updated = now;
+  // 留一条样本链接，供来源战绩页展示「这个域名到底给了什么」
+  if (sample && sample.url && verdict !== "采信") {
+    c.sample = {
+      url: String(sample.url).slice(0, 500),
+      title: String(sample.title || "").slice(0, 160),
+      at: now,
+    };
+  }
+  return c;
+}
+
+// 批量更新：一次读 + 一次写，无论这次上报多少条
+async function bumpRepBatch(env, rows) {
+  const list = (rows || []).filter((r) => r && r.host).slice(0, 60);
+  if (!list.length) return 0;
+  const all = await loadRepAll(env);
+  const now = new Date().toISOString();
+  list.forEach((r) => { all[r.host] = mergeRep(all[r.host], r.verdict, r.sample, now); });
+
+  // 只保留最常出现的域名，别让这个 key 无限长大
+  const keys = Object.keys(all);
+  if (keys.length > REP_MAX_HOSTS) {
+    keys.sort((a, b) => (all[b].n || 0) - (all[a].n || 0));
+    keys.slice(REP_MAX_HOSTS).forEach((k) => { delete all[k]; });
+  }
+  await env.WATCH_KV.put(REP_ALL, JSON.stringify(all));
+  return list.length;
+}
+
+async function bumpRep(env, host, verdict, sample) {
+  return bumpRepBatch(env, [{ host, verdict, sample }]);
+}
+
+async function listRep(env) {
+  return await loadRepAll(env);
 }
 
 /* ---------- 用户自建权威域名库（可信来源白名单） ---------- */
@@ -351,28 +384,37 @@ function pubqIsSafe(text) {
   return !PUBQ_BLOCK.some((w) => t.includes(w));
 }
 
+async function loadPubqAll(env) {
+  const arr = await env.WATCH_KV.get("pubq:all", "json");
+  if (arr) return arr;
+  // 老数据一次性搬家（pubq:index + pubq:<id>）
+  const idx = (await env.WATCH_KV.get("pubq:index", "json")) || [];
+  if (!idx.length) return [];
+  const out = [];
+  for (const id of idx) {
+    const v = await env.WATCH_KV.get("pubq:" + id, "json");
+    if (v) out.push(v);
+  }
+  if (out.length) await env.WATCH_KV.put("pubq:all", JSON.stringify(out));
+  return out;
+}
+
 async function addPubQuestion(env, text) {
   const q = String(text || "").trim().slice(0, 200);
   if (q.length < 4) throw new Error("问题太短");
   if (!pubqIsSafe(q)) throw new Error("内容不符合规范，换个说法试试");
   const id = (await sha(q + Date.now() + Math.random())).slice(0, 12);
   const cur = { id, q, at: new Date().toISOString() };
-  await env.WATCH_KV.put("pubq:" + id, JSON.stringify(cur));
-  const idx = (await env.WATCH_KV.get("pubq:index", "json")) || [];
-  idx.unshift(id);
-  await env.WATCH_KV.put("pubq:index", JSON.stringify(idx.slice(0, 200))); // 只留最近 200 条
+  const all = await loadPubqAll(env);
+  all.unshift(cur);
+  await env.WATCH_KV.put("pubq:all", JSON.stringify(all.slice(0, 200))); // 只留最近 200 条
   return cur;
 }
 
 async function listPubQuestions(env, limit) {
-  const idx = (await env.WATCH_KV.get("pubq:index", "json")) || [];
+  const all = await loadPubqAll(env);
   const n = Math.max(1, Math.min(50, parseInt(limit, 10) || 20));
-  const out = [];
-  for (const id of idx.slice(0, n)) {
-    const v = await env.WATCH_KV.get("pubq:" + id, "json");
-    if (v) out.push(v);
-  }
-  return out;
+  return all.slice(0, n);
 }
 
 async function listWatches(env) {
@@ -539,10 +581,10 @@ export default {
       if (p === "/api/reputation" && request.method === "POST") {
         const b = await request.json().catch(() => ({}));
         const rows = b.items || [];
-        for (const r of rows.slice(0, 60)) {
-          try { await bumpRep(env, r.host, r.verdict, r.sample); } catch (e) { /* skip */ }
-        }
-        return json({ ok: true, count: rows.length });
+        // 一次读写搞定，不再「一个域名一次 put」
+        let n = 0;
+        try { n = await bumpRepBatch(env, rows); } catch (e) { /* 写失败不影响查证 */ }
+        return json({ ok: true, count: n });
       }
 
       /* --- 用户自建权威域名库 --- */

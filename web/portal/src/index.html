@@ -51,6 +51,12 @@ h1 em{font-style:normal;color:var(--teal)}
 .st{font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--teal-bg);color:var(--teal);white-space:nowrap}
 .st.wip{background:var(--amber-bg);color:var(--amber)}
 .card .ds{font-size:13px;color:var(--ink2);margin-top:10px;line-height:1.75;flex:1}
+.card .tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:12px}
+.card .tags span{
+  font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.02em;
+  color:var(--teal);background:var(--teal-bg);border:1px solid #BBF7D0;
+  border-radius:99px;padding:3px 9px;white-space:nowrap;
+}
 .card .go{margin-top:14px;font-size:12px;font-weight:800;color:var(--teal);display:flex;align-items:center;gap:5px;transition:.15s}
 .card:hover .go{gap:9px}
 
@@ -90,6 +96,12 @@ h1 em{font-style:normal;color:var(--teal)}
         <span class="st">已上线</span>
       </div>
       <div class="ds">问一个问题，答案逐句摘自真实网页，点一句就能定位到原文高亮。相互矛盾的说法并排摆出来，不替你选。</div>
+      <div class="tags">
+        <span>逐句溯源</span>
+        <span>交叉验证</span>
+        <span>冲突并排</span>
+        <span>查不到直说</span>
+      </div>
       <div class="go">打开使用 →</div>
     </a>
 
@@ -99,6 +111,12 @@ h1 em{font-style:normal;color:var(--teal)}
         <span class="st">已上线</span>
       </div>
       <div class="ds">给你一句话，你判真、假还是说不准。证据从真实检索里来，按来源可信度分级，可一路点回原文。</div>
+      <div class="tags">
+        <span>真实检索</span>
+        <span>来源六档分级</span>
+        <span>闯关十题</span>
+        <span>自动高亮</span>
+      </div>
       <div class="go">打开使用 →</div>
     </a>
   </div>
