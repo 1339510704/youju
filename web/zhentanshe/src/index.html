@@ -227,6 +227,9 @@ body{font-family:var(--sans);background:var(--paper);color:var(--ink);line-heigh
 .tier.selfmedia{background:var(--amber)} .tier.marketing{background:var(--red)}
 .src .site{font-family:var(--mono);font-size:10px;color:var(--ink3)}
 .src .dt{font-family:var(--mono);font-size:9.5px;color:var(--ink3);margin-left:auto}
+.src .dt.old{color:var(--red);background:var(--red-bg);padding:1px 7px;border-radius:99px;font-weight:700}
+.stale-warn{font-size:12.5px;line-height:1.8;color:#7A5A16;background:var(--amber-bg);border:1px solid #FDE68A;border-radius:10px;padding:11px 14px;margin-bottom:12px}
+.stale-warn b{color:#5C4410}
 .src .ttl{font-size:12px;font-weight:700;line-height:1.45;color:var(--ink)}
 .src .snip{font-size:11.5px;line-height:1.7;color:var(--ink2);margin-top:6px;background:#FAFAF9;border-left:2px solid #D6D3D1;padding:6px 9px;border-radius:0 5px 5px 0}
 .src.high .snip{border-left-color:var(--teal);background:var(--teal-bg)}
@@ -829,14 +832,27 @@ function gateScore(it, items){
   // ① 场景权威（信源层级权重）
   dims.auth = it.weight;
 
-  // ② 时效匹配：只有「时间敏感型」问题才严卡日期
-  const TIME_SENS = /(最新|最近|今年|本月|本周|今天|现在|当前|实时|新闻|价格|股价|行情|天气|发布|上线|新规|政策)/;
+  // ② 时效匹配
+  //    旧实现只匹配到「年-月」，且 180 天内一律给满分 —— 于是问「今天天气」时
+  //    半年前的旧闻时效分和今天一样，全都能进答案。这是"全是历史数据"的直接原因。
+  //    现在直接用后端算好的 ageDays，按天分档；时间敏感型问题严格卡今天。
+  const TIME_SENS = /(最新|最近|今年|本月|本周|今天|今日|现在|当前|实时|刚刚|昨天|昨日|新闻|价格|股价|行情|天气|发布|上线|新规|政策)/;
   const strictTime = TIME_SENS.test(S.lastRaw || '');
-  let f = strictTime ? 0.5 : 0.6;
-  const m = (it.date || '').match(/(\d{4})[-\/.](\d{1,2})/);
-  if(m){
-    const age = (Date.now() - new Date(+m[1], +m[2] - 1, 1).getTime()) / 86400000;
-    f = age <= 180 ? 1 : age <= 730 ? 0.6 : (strictTime ? 0.25 : 0.6);
+  const age = (typeof it.ageDays === 'number') ? it.ageDays : null;
+  let f;
+  if (age === null) {
+    f = strictTime ? 0.4 : 0.6;               // 没有可信时间，时间敏感问题不给高分
+  } else if (strictTime) {
+    f = age <= 0 ? 1.0
+      : age === 1 ? 0.85
+      : age <= 3 ? 0.5
+      : age <= 7 ? 0.22
+      : 0.06;                                  // 一周以上，时间敏感问题基本排除
+  } else {
+    f = age <= 30 ? 1.0
+      : age <= 180 ? 0.75
+      : age <= 730 ? 0.45
+      : 0.3;
   }
   dims.fresh = f;
 
@@ -1114,7 +1130,7 @@ async function run(){
   const s1=stepEl(`问题改写：生成 ${variants.length} 条检索式`); await wait(260); stepDone(s1);
   const s2=stepEl(`并行召回 ${variants.length} 路`);
 
-  let all=[], errs=[];
+  let all=[], errs=[], notice='';
   if(S.connected){
     const jobs = variants.map(v=>searchOne(v,mode).catch(e=>({ok:false,error:String(e)})));
     if(S.bocha && S.bochaOk){
@@ -1122,7 +1138,10 @@ async function run(){
         .then(r=>r.json()).catch(e=>({ok:false,error:String(e)})));
     }
     const rs=await Promise.all(jobs);
-    rs.forEach(r=>{ if(r&&r.ok&&r.items) all=all.concat(r.items); else if(r&&r.error) errs.push(r.error); });
+    rs.forEach(r=>{
+      if(r&&r.ok&&r.items){ all=all.concat(r.items); if(r.notice) notice=notice||r.notice; }
+      else if(r&&r.error) errs.push(r.error);
+    });
     stepDone(s2, `并行召回 ${jobs.length} 路 · 拿到 ${all.length} 条`);
   }else{
     stepDone(s2, '未连接代理');
@@ -1154,7 +1173,7 @@ async function run(){
   items.forEach(it=>{ const p=pickSentence(it.passage,S.kws); it.snip=p.html; it.snipPlain=p.plain; });
   stepDone(s5, '已提取');
 
-  S.items=items; S.lastRaw=raw;
+  S.items=items; S.lastRaw=raw; S.notice=notice;
   render(raw, items, mode, errs);
   $('#go').disabled=false; $('#go').textContent='开始查证';
   saveHistory(raw, mode, items.length);
@@ -1190,6 +1209,18 @@ function render(raw, items, mode, errs){
   const topSources = high.slice(0,8);
   const errHtml = errs.length ? `<div style="font-size:12px;color:var(--red);margin-bottom:10px">部分检索失败：${esc(errs.slice(0,2).join(' / '))}</div>` : '';
 
+  // 时效提醒：问今天/天气却没指定城市，或结果里新鲜内容不足时明确告知
+  const freshMode = /(最新|最近|今年|本月|本周|今天|今日|现在|当前|实时|刚刚|昨天|昨日|新闻|价格|股价|行情|天气|发布|上线|新规|政策)/.test(raw||'');
+  const freshCount = items.filter(i=>i.freshNow).length;
+  let staleWarn = '';
+  if(S.notice){
+    staleWarn = `<div class="stale-warn">${esc(S.notice)}</div>`;
+  }
+  if(freshMode && items.length && freshCount===0){
+    const oldest = items.slice().sort((a,b)=>(b.ageDays||0)-(a.ageDays||0))[0];
+    staleWarn += `<div class="stale-warn">这条问题要的是「当下的信息」，但<b>没有召回到今天的内容</b>——最新一条也是 ${esc(oldest && oldest.ageLabel || '时间未知')}。下面是能查到的最新资料，不代表当前情况。</div>`;
+  }
+
   const ans = extractAnswer(raw, items);
   const xv = crossCheck(items, ans.entities);
   const stance = splitStance(ans.points);
@@ -1205,6 +1236,7 @@ function render(raw, items, mode, errs){
       <div id="progList"></div>
     </div>
     ${errHtml}
+    ${staleWarn}
     <div class="verdict">
       <div class="vh ${cls}">
         <span class="tag">${tag}</span>
@@ -1436,7 +1468,7 @@ function renderEvidence(items){
         <span class="site">${esc(it.site||'')}</span>
         ${it.engine==='bocha'?'<span class="eng-badge">博查</span>':''}
         <span class="gate ${g.cls}">${g.verdict}</span>
-        <span class="dt">${esc((it.date||'').slice(0,16))}</span>
+        <span class="dt ${it.stale?'old':''}">${esc(it.ageLabel || (it.date||'').slice(0,16))}</span>
       </div>
       <div class="ttl">${esc(it.title||'（无标题）')}</div>
       ${(it.jevDirect != null)?`<div class="jev-row">

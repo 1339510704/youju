@@ -1,0 +1,16 @@
+name = "yuanbaotech"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+account_id = "4bbd55c894f7cb80337f01f497baa1a9"
+
+[[rules]]
+type = "Text"
+globs = ["**/*.html"]
+fallthrough = true
+
+[[routes]]
+pattern = "yuanbao.robai.dpdns.org"
+custom_domain = true
+
+[observability]
+enabled = true

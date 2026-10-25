@@ -10,12 +10,16 @@
   --fg:#F4EEFF; --dim:#A794D6; --violet:#8B5CF6; --violet2:#B388FF;
   --yellow:#FFD23F; --pink:#FF5CA8; --green:#3BE38A; --red:#FF5C5C; --cyan:#4FE0E0;
   --accentGlow:rgba(139,92,246,.45);
+  --txt-body:#CFC4E8; --txt-expl:#D9D0F2; --txt-foot:#6B5E8C; --prog-bg:#2A1F48;
+  --mark-bg:rgba(255,210,63,.30); --mark-ink:#FFE9A3;
 }
 [data-theme="light"]{
   --bg:#F6F4FB; --bg2:#EDE9F7; --panel:#FFFFFF; --line:#D9D2EC;
-  --fg:#231A3B; --dim:#6B5E8C; --violet:#6D3FD1; --violet2:#8B5CF6;
+  --fg:#1A1430; --dim:#54476F; --violet:#5B2FC0; --violet2:#8B5CF6;
   --yellow:#C7960B; --pink:#D63384; --green:#1E9E63; --red:#D63333; --cyan:#0E8FA6;
   --accentGlow:rgba(109,63,209,.22);
+  --txt-body:#2B2340; --txt-expl:#2B2340; --txt-foot:#6B5E8C; --prog-bg:#D9D2EC;
+  --mark-bg:rgba(255,205,60,.62); --mark-ink:#3B2A00;
 }
 :root{
   --arcade:"Press Start 2P","Courier New",monospace;
@@ -62,7 +66,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opac
 .game{display:none}
 .game.on{display:block}
 .prog{display:flex;gap:4px;margin-bottom:16px}
-.prog i{flex:1;height:6px;border-radius:99px;background:#2A1F48;overflow:hidden}
+.prog i{flex:1;height:6px;border-radius:99px;background:var(--prog-bg);overflow:hidden}
 .prog i.done{background:var(--green)}
 .prog i.now{background:var(--yellow);animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
@@ -92,8 +96,8 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opac
 .ev .site{font-family:var(--mono);font-size:10px;color:var(--dim)}
 .ev .site a{color:var(--dim);text-decoration:none;border-bottom:1px dashed var(--line)}
 .ev .site a:hover{color:var(--fg);border-color:var(--fg)}
-.ev .tx{font-size:12.5px;line-height:1.7;color:#CFC4E8}
-.ev .tx mark{background:var(--yellow);color:#201400;border-radius:3px;padding:0 3px;font-weight:700}
+.ev .tx{font-size:12.5px;line-height:1.7;color:var(--txt-body)}
+.ev .tx mark{background:var(--mark-bg);color:var(--mark-ink);border-radius:3px;padding:1px 3px;font-weight:700}
 .ev .hl-row{display:flex;justify-content:flex-end;margin-top:6px}
 .hlbtn{font-family:var(--mono);font-size:9.5px;padding:3px 10px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--dim);cursor:pointer;transition:.15s}
 .hlbtn:hover{border-color:var(--violet2);color:var(--violet2)}
@@ -140,7 +144,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opac
 .res .tag{font-family:var(--arcade);font-size:8px;padding:4px 9px;border-radius:5px;color:#0E0A1A}
 .res.ok .tag{background:var(--green)} .res.no .tag{background:var(--red)} .res.mid .tag{background:var(--yellow)}
 .res .pts{margin-left:auto;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--yellow)}
-.res .expl{font-size:12.5px;line-height:1.8;color:#D6CCF0}
+.res .expl{font-size:12.5px;line-height:1.8;color:var(--txt-expl)}
 .res .expl b{color:var(--yellow)}
 .next{width:100%;margin-top:12px;padding:12px;border-radius:10px;border:0;background:var(--violet);color:#fff;font-size:14.5px;font-weight:900;cursor:pointer;font-family:var(--sans)}
 .next:hover{filter:brightness(1.1)}
@@ -154,10 +158,29 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opac
 .end .sc .k{font-family:var(--mono);font-size:9.5px;color:var(--dim)}
 .end .sc .v{font-size:22px;font-weight:900;color:var(--fg)}
 .end .vd{margin:18px auto 0;max-width:480px;font-size:12.5px;color:var(--dim);line-height:1.8}
-.foot{text-align:center;font-family:var(--mono);font-size:10px;color:#4A3D6E;margin-top:30px;line-height:1.9}
+.foot{text-align:center;font-family:var(--mono);font-size:10px;color:var(--txt-foot);margin-top:30px;line-height:1.9}
+/* ===== 浅色主题对比度兜底 ===== */
+[data-theme="light"] .ev .tx,[data-theme="light"] .res .expl{color:var(--txt-body)}
+[data-theme="light"] .case{box-shadow:0 8px 26px rgba(35,26,59,.10)}
+[data-theme="light"] .ev{background:#FFFFFF;border-color:#D9D2EC}
+[data-theme="light"] .tier{color:#101020}
+[data-theme="light"] .res.ok{background:rgba(30,158,99,.10)}
+[data-theme="light"] .res.no{background:rgba(214,51,51,.09)}
+[data-theme="light"] .res.mid{background:rgba(199,150,11,.12)}
+[data-theme="light"] .searching,[data-theme="light"] .evhead .h{color:var(--dim)}
+[data-theme="light"] .jb{background:#FFFFFF}
+[data-theme="light"] .jb .s{color:var(--dim)}
+[data-theme="light"] body::after{opacity:.03}
 </style>
 </head>
 <body>
+<style>
+.mode-tabs{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:4px;margin-bottom:22px;gap:3px}
+.mode-tab{padding:9px 22px;border:0;border-radius:99px;background:transparent;color:var(--dim);font-size:13px;font-weight:800;cursor:pointer;font-family:var(--sans);transition:.15s;white-space:nowrap}
+.mode-tab:hover{color:var(--fg)}
+.mode-tab.on{background:linear-gradient(135deg,var(--violet2),var(--violet));color:#fff;box-shadow:0 6px 18px var(--accentGlow)}
+.start .mode-hint{font-size:12px;color:var(--dim);margin-top:-8px;margin-bottom:18px;min-height:18px}
+</style>
 <div class="wrap">
 
   <div class="hud">
@@ -172,15 +195,21 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opac
   </div>
 
   <div class="start" id="start">
-    <h1>这条消息<br><span>靠谱吗</span></h1>
-    <div class="sub">写一句你想验证的说法，系统会用真实搜索去召回证据——不是预设题库，查到什么就是什么。选「真 / 假 / 说不准」，说"不知道"不扣分，瞎判才扣。</div>
-    <div class="rules">
-      <div class="rule"><div class="n">RULE 01</div><div class="t">真实检索</div><div class="d">每一条证据都来自真实搜索，带真链接，可以点进去看原文。</div></div>
-      <div class="rule"><div class="n">RULE 02</div><div class="t">敢说不准</div><div class="d">证据不足或自相矛盾时，选「说不准」是正确操作。</div></div>
-      <div class="rule"><div class="n">RULE 03</div><div class="t">连击加成</div><div class="d">连续判对倍率叠加，判错清零但不结束。</div></div>
+    <div class="mode-tabs">
+      <button class="mode-tab on" data-m="quiz">闯关模式</button>
+      <button class="mode-tab" data-m="free">自己验证</button>
     </div>
 
-    <div class="claimbox">
+    <h1>这条消息<br><span>靠谱吗</span></h1>
+    <div class="sub" id="startSub">一题一题来。给你一句说法，你判真 / 假 / 说不准。想看证据可以点「搜证据」去真实检索——说"不知道"不扣分，瞎判才扣。</div>
+
+    <div class="rules">
+      <div class="rule"><div class="n">RULE 01</div><div class="t">先判再搜</div><div class="d">凭常识先判断，拿不准可以搜真实证据再定，搜过有加分。</div></div>
+      <div class="rule"><div class="n">RULE 02</div><div class="t">敢说不准</div><div class="d">证据不足或自相矛盾时，选「说不准」是正确操作。</div></div>
+      <div class="rule"><div class="n">RULE 03</div><div class="t">连击加成</div><div class="d">连续判对倍率叠加，判错只清零，不结束。</div></div>
+    </div>
+
+    <div class="claimbox" id="claimbox" style="display:none">
       <textarea id="claimInput" placeholder="输入一句想验证的说法，例如：每天走一万步是健康的最低标准" maxlength="120"></textarea>
       <div class="examples" id="examples">
         <button class="ex-chip" data-c="每天喝8杯水对身体有好处">每天喝8杯水对身体有好处</button>
@@ -197,7 +226,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opac
       <div class="err" id="startErr"></div>
     </div>
 
-    <button class="btn" id="startBtn">开始鉴定</button>
+    <button class="btn" id="startBtn">开始闯关（10 题）</button>
   </div>
 
   <div class="game" id="game">
@@ -205,14 +234,14 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opac
     <div class="case">
       <div class="no">CASE <span id="cno">01</span> · 待鉴定</div>
       <div class="tx" id="ctx"></div>
-      <div class="meta"><span id="ctype">用户输入</span><span>证据来源：真实检索</span></div>
+      <div class="meta"><span id="ctype">类型</span><span id="csrc">来源：用户输入</span></div>
     </div>
 
     <div class="evhead">
       <span class="t">EVIDENCE</span>
-      <span class="h" id="ehint">检索中…</span>
+      <span class="h" id="ehint">尚未搜查</span>
       <span class="sp"></span>
-      <button class="sbtn" id="sbtn" style="display:none">换一批证据</button>
+      <button class="sbtn" id="sbtn">搜证据</button>
     </div>
     <div class="evs" id="evs"></div>
 
@@ -230,7 +259,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opac
         <div class="stance-txt" id="stanceTxt"></div>
       </div>
       <div class="expl" id="rexpl"></div>
-      <button class="next" id="next">再验一条</button>
+      <button class="next" id="next">下一题</button>
       <button class="sbtn" id="endBtn" style="width:100%;margin-top:8px">结束本局，看结算</button>
     </div>
   </div>
@@ -247,7 +276,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opac
     <button class="btn" id="again" style="margin-top:20px;font-size:15px;padding:12px 28px">再来一局</button>
   </div>
 
-  <div class="foot">真假鉴定所 · 赛道05 游戏 · 每条证据来自真实检索，没有预设题库</div>
+  <div class="foot">真假鉴定所 · 赛道05 游戏 · 闯关题库为人工判定，证据均来自真实检索</div>
 </div>
 
 <script>
@@ -257,8 +286,39 @@ const TNAME={official:'官方',academic:'学术',media:'主流',vertical:'垂直
 const HI_TIERS=['official','academic','media'];
 const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-const S={round:0,score:0,streak:0,best:0,right:0,wrong:0,answered:false,
-  claim:'',cnt:10,items:[],judged:null,avgStance:null};
+/* ============================================================
+   闯关题库：说法 + 人工判定 + 解释
+   注意：这里不存任何预设"证据"，证据一律走 /api/search 真实检索
+   ============================================================ */
+const LV=[
+ {c:'10 月起电动车全面禁行，所有电动车不得上路',t:'政策',a:'假',
+  e:'只有"禁止进电梯"是官方规定，官方通告还写了「本通告不涉及道路通行管理」。自媒体把局部规定放大成了全域禁行。'},
+ {c:'今天北京最高气温 16℃，夜间最低 2℃',t:'天气',a:'真',
+  e:'气象台、京报网口径一致：白天 16℃、夜间 2℃。多条独立高可信来源互证，可以采信。'},
+ {c:'补充维生素 B 族能防脱发，28 天见效',t:'健康',a:'假',
+  e:'系统综述显示营养正常人群没有充分证据表明 B 族能防脱发。支持方只有营销文案。'},
+ {c:'「蓝鲸计划」是 2026 年国家重点建设项目',t:'身份',a:'说不准',
+  e:'只有自媒体"内部人士"和招商广告，没有官方或主流媒体。证据不足，不硬下结论。'},
+ {c:'喝弱碱性水能改变体质、防癌',t:'健康',a:'假',
+  e:'人体酸碱由肺和肾调节，喝水改变不了。主流医学与官方科普均否定。'},
+ {c:'2026 年国庆节放假 7 天，10 月 1 日至 7 日',t:'政策',a:'真',
+  e:'国务院办公厅放假安排与主流媒体一致，属可查证的官方信息。'},
+ {c:'某网红奶茶被检出致癌物，全国下架',t:'食品安全',a:'说不准',
+  e:'只有截图和转述，没有市场监管部门抽检通报。官方通报出来前只能标存疑。'},
+ {c:'中国 2025 年 GDP 增速为 5% 左右',t:'经济',a:'真',
+  e:'国家统计局与主流媒体口径一致，属可查证宏观数据。'},
+ {c:'手机充电一整夜会严重损伤电池寿命',t:'数码',a:'说不准',
+  e:'现代手机充满即停，但"完全无害"也缺长期对照。两种绝对说法都过头。'},
+ {c:'每天走一万步是保持健康的最低标准',t:'健康',a:'说不准',
+  e:'"一万步"源自营销，不是医学标准。研究显示 6000–8000 步已有收益，但个体差异大。'},
+ {c:'这款理财产品保本保收益，年化 8%',t:'金融',a:'假',
+  e:'资管新规后不得承诺保本保收益。"保本 + 高收益"同时出现基本可判违规宣传。'},
+ {c:'熬夜会让人变笨，这个说法有科学依据',t:'健康',a:'真',
+  e:'多项研究显示睡眠剥夺影响注意力、记忆巩固与决策。方向性结论有共识。'}
+];
+
+const S={mode:'quiz',qi:0,round:0,score:0,streak:0,best:0,right:0,wrong:0,
+  answered:false,searched:false,claim:'',cnt:10,items:[],avgStance:null,order:[]};
 
 /* ---- 主题色 ---- */
 function applyTheme(name){
@@ -269,13 +329,27 @@ function applyTheme(name){
 (function initTheme(){
   let saved = 'dark';
   try{ saved = localStorage.getItem('zjjds-theme') || 'dark'; }catch(e){}
-  // 旧版本存过紫/红/青/橙，统一归到黑/白两档，避免读到不存在的主题名
   if(!['dark','light'].includes(saved)) saved = 'dark';
   applyTheme(saved);
   document.querySelectorAll('.th-dot').forEach(b => { b.onclick = () => applyTheme(b.dataset.th); });
 })();
 
-/* ---- 开始界面：示例 + 证据条数 ---- */
+/* ---- 模式切换 ---- */
+document.querySelectorAll('.mode-tab').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('.mode-tab').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    S.mode=b.dataset.m;
+    const quiz = S.mode==='quiz';
+    $('#claimbox').style.display = quiz ? 'none' : 'block';
+    $('#startBtn').textContent = quiz ? '开始闯关（10 题）' : '开始鉴定';
+    $('#startSub').textContent = quiz
+      ? '一题一题来。给你一句说法，你判真 / 假 / 说不准。想看证据可以点「搜证据」去真实检索——说"不知道"不扣分，瞎判才扣。'
+      : '写一句你想验证的说法，系统会用真实搜索去召回证据——不是预设题库，查到什么就是什么。';
+  };
+});
+
+/* ---- 示例 + 条数 ---- */
 document.querySelectorAll('.ex-chip').forEach(b=>{
   b.onclick=()=>{ $('#claimInput').value=b.dataset.c; $('#claimInput').focus(); };
 });
@@ -286,22 +360,104 @@ document.querySelectorAll('.cnt-opt').forEach(b=>{
   };
 });
 
-async function start(){
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+function resetStats(){ S.score=0;S.streak=0;S.best=0;S.right=0;S.wrong=0;S.answered=false;S.items=[];S.avgStance=null;hud(); }
+function hud(){ $('#hs').textContent=S.score; $('#hc').textContent=S.streak; $('#hstreak').className='hbox'+(S.streak>=3?' hot':''); }
+
+/* ================= 入口 ================= */
+function start(){ return S.mode==='quiz' ? startQuiz() : startFree(); }
+
+/* ================= 闯关模式 ================= */
+function startQuiz(){
+  resetStats();
+  S.qi=0;
+  S.order = shuffle(LV.map((_,i)=>i)).slice(0,10);
+  $('#start').style.display='none'; $('#end').classList.remove('on'); $('#game').classList.add('on');
+  renderQuiz();
+}
+
+function renderQuiz(){
+  const L=LV[S.order[S.qi]];
+  S.answered=false; S.searched=false; S.items=[]; S.avgStance=null;
+  S.claim=L.c;
+  $('#cno').textContent=String(S.qi+1).padStart(2,'0');
+  $('#ctx').textContent=L.c;
+  $('#ctype').textContent=L.t;
+  $('#csrc').textContent='待你判断';
+  $('#prog').innerHTML=S.order.map((_,i)=>`<i class="${i<S.qi?'done':i===S.qi?'now':''}"></i>`).join('');
+  $('#res').classList.remove('on');
+  $('#stanceMeter').style.display='none';
+  $('#evs').innerHTML='';
+  $('#ehint').textContent='还没搜证，先凭判断';
+  $('#sbtn').style.display='inline-block';
+  $('#sbtn').disabled=false;
+  $('#sbtn').textContent='搜证据';
+  document.querySelectorAll('.jb').forEach(b=>b.disabled=false);
+  hud();
+}
+
+/* 闯关模式：搜证（可选，真实检索） */
+async function searchQuiz(){
+  if(S.searched) return;
+  S.searched=true;
+  $('#sbtn').disabled=true; $('#sbtn').textContent='检索中…';
+  $('#ehint').innerHTML='<span class="searching">真实检索中<span class="dots">…</span></span>';
+  try{
+    const r=await fetch(`${API}/api/search?q=${encodeURIComponent(S.claim)}&cnt=10`);
+    const d=await r.json();
+    if(!d.ok) throw new Error(d.error||'检索失败');
+    S.items=(d.items||[]).slice(0,8);
+    renderEvidence();
+    $('#ehint').textContent = S.items.length ? `真实召回 ${S.items.length} 条` : '没召回到相关结果';
+    $('#sbtn').textContent='已搜';
+    scoreRelevance(S.claim);
+  }catch(e){
+    $('#ehint').textContent='检索出错：'+(e.message||e);
+    $('#sbtn').disabled=false; $('#sbtn').textContent='重试'; S.searched=false;
+  }
+}
+
+function judgeQuiz(v){
+  const L=LV[S.order[S.qi]];
+  S.answered=true;
+  document.querySelectorAll('.jb').forEach(b=>b.disabled=true);
+  const ok = v===L.a;
+  const searched = S.items.length>0;
+  let pts=0;
+  if(ok){ pts=100+(searched?20:0)+S.streak*15; S.streak++;S.right++;S.best=Math.max(S.best,S.streak); }
+  else { S.streak=0;S.wrong++; }
+  S.score+=pts; hud();
+
+  const r=$('#res');
+  r.className='res on '+(ok?(v==='说不准'?'mid':'ok'):'no');
+  $('#rtag').textContent=ok?'判对':'判错';
+  $('#rtitle').textContent=ok?(v==='说不准'?'保持谨慎，很好':'鉴定准确'):`正确答案是「${L.a}」`;
+  $('#rpts').textContent=(pts>0?'+':'')+pts+(ok&&S.streak>1?` · ${S.streak} 连击`:'');
+  $('#rexpl').innerHTML=`<b>为什么：</b>${esc(L.e)}`;
+  $('#next').textContent = S.qi>=S.order.length-1 ? '查看结算' : '下一题';
+  $('#endBtn').style.display='block';
+}
+
+/* ================= 自由验证模式 ================= */
+async function startFree(){
   const claim=$('#claimInput').value.trim();
   if(!claim){ $('#startErr').textContent='先写一句你想验证的说法'; return; }
   if(claim.length<4){ $('#startErr').textContent='说法有点太短，写详细一点'; return; }
   $('#startErr').textContent='';
-  S.claim=claim; S.round=0;S.score=0;S.streak=0;S.best=0;S.right=0;S.wrong=0;
+  resetStats();
+  S.claim=claim; S.round=0;
   $('#start').style.display='none'; $('#end').classList.remove('on'); $('#game').classList.add('on');
-  await runRound(claim);
+  await runFreeRound(claim);
 }
 
-async function runRound(claim){
-  S.answered=false; S.items=[]; S.judged=null; S.avgStance=null;
+async function runFreeRound(claim){
+  S.answered=false; S.searched=false; S.items=[]; S.avgStance=null;
   S.round++;
   $('#cno').textContent=String(S.round).padStart(2,'0');
   $('#ctx').textContent=claim;
-  $('#prog').innerHTML=`<i class="now"></i>`;
+  $('#ctype').textContent='用户输入';
+  $('#csrc').textContent='证据来源：真实检索';
+  $('#prog').innerHTML='<i class="now"></i>';
   $('#res').classList.remove('on');
   $('#stanceMeter').style.display='none';
   $('#sbtn').style.display='none';
@@ -311,7 +467,6 @@ async function runRound(claim){
   hud();
 
   try{
-    // WSA 的 Cnt 只接受 10/20/30/40/50，用户选的 6/10/20 在前端再裁一次，保证数量符合用户选择
     const fetchCnt = S.cnt <= 10 ? 10 : S.cnt;
     const r = await fetch(`${API}/api/search?q=${encodeURIComponent(claim)}&cnt=${fetchCnt}`);
     const data = await r.json();
@@ -331,77 +486,17 @@ async function runRound(claim){
   }
 }
 
-function renderEvidence(){
-  $('#evs').innerHTML = S.items.map((it,i)=>{
-    const link = it.url ? esc(it.url) : '';
-    const siteHtml = link
-      ? `<a href="${link}" target="_blank" rel="noopener noreferrer">${esc(it.site||it.url)}</a>`
-      : esc(it.site||'来源未知');
-    return `<div class="ev show" data-i="${i}">
-      <div class="top"><span class="tier ${it.tier}">${TNAME[it.tier]||it.tier}</span><span class="site">${siteHtml}</span></div>
-      <div class="tx" id="evtx${i}">${esc(it.title)}${it.title&&it.passage?' — ':''}${esc(it.passage).slice(0,220)}</div>
-      <div class="hl-row"><button class="hlbtn" data-i="${i}">高亮关键句</button></div>
-    </div>`;
-  }).join('');
-  document.querySelectorAll('.hlbtn').forEach(b=>{
-    b.onclick=()=>toggleHighlight(parseInt(b.dataset.i,10), b);
-  });
-}
-
-/* 点击「高亮关键句」：找出段落里跟说法重叠度最高的一句，用 <mark> 包起来 */
-function toggleHighlight(i, btn){
-  const on = btn.classList.toggle('on');
-  const box = $('#evtx'+i);
-  const it = S.items[i];
-  if(!on){ box.innerHTML = esc(it.title)+(it.title&&it.passage?' — ':'')+esc(it.passage).slice(0,220); btn.textContent='高亮关键句'; return; }
-  btn.textContent='取消高亮';
-  const sentences = String(it.passage||'').split(/(?<=[。！？.!?])/).filter(s=>s.trim().length>3);
-  const claimWords = S.claim.replace(/[的了是对吗能会否否则]/g,'').split('').filter(Boolean);
-  let best=sentences[0]||'', bestScore=-1;
-  sentences.forEach(s=>{
-    let sc=0; claimWords.forEach(w=>{ if(s.includes(w)) sc++; });
-    if(sc>bestScore){ bestScore=sc; best=s; }
-  });
-  const full = esc(it.title)+(it.title&&it.passage?' — ':'')+esc(it.passage).slice(0,220);
-  if(best && it.passage && it.passage.includes(best.trim())){
-    const escBest = esc(best);
-    const marked = full.replace(escBest, '<mark>'+escBest+'</mark>');
-    box.innerHTML = marked;
-  }else{
-    box.innerHTML = full;
-  }
-}
-
-/* 用 Jev 给每条证据打相关性/立场分，算出整体倾向（仅做参考，不当标准答案） */
-async function scoreRelevance(claim){
-  if(!S.items.length) return;
-  try{
-    const r = await fetch(`${API}/api/judge`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ claim, items: S.items.slice(0,12) })
-    });
-    const data = await r.json();
-    if(!data.ok) return;
-    const valid = data.results.filter(x=>typeof x.stance==='number');
-    if(!valid.length) return;
-    const avg = valid.reduce((a,x)=>a+x.stance,0)/valid.length; // 0=反驳 1=中立 2=支持
-    S.avgStance = avg;
-  }catch(e){ /* 打分失败不影响主流程 */ }
-}
-
-function judge(v){
-  if(S.answered)return; S.answered=true;
+function judgeFree(v){
+  S.answered=true;
   document.querySelectorAll('.jb').forEach(b=>b.disabled=true);
-
   const hi = S.items.filter(it=>HI_TIERS.includes(it.tier)).length;
-  // 没有预设答案：用 Jev 给的整体立场作参考锚点评估这次判断是否"站得住"
   let refVerdict = null;
   if(S.avgStance!=null){
     if(S.avgStance < 0.65) refVerdict='假';
     else if(S.avgStance > 1.35) refVerdict='真';
     else refVerdict='说不准';
   }
-  const ok = refVerdict ? (v===refVerdict) : (v==='说不准'); // 证据打分失败时，选"说不准"算稳妥不扣分
+  const ok = refVerdict ? (v===refVerdict) : (v==='说不准');
 
   let pts=0;
   if(ok){ pts=100+Math.min(hi*8,40)+S.streak*15; S.streak++;S.right++;S.best=Math.max(S.best,S.streak); }
@@ -418,7 +513,7 @@ function judge(v){
 
   if(S.avgStance!=null){
     $('#stanceMeter').style.display='block';
-    const pct = Math.max(0,Math.min(100, (S.avgStance/2)*100));
+    const pct = Math.max(0,Math.min(100,(S.avgStance/2)*100));
     $('#stanceMk').style.left = pct+'%';
     $('#stanceTxt').textContent = `${S.items.length} 条证据里，Jev 判断平均立场偏向 ${S.avgStance<0.65?'反驳这个说法':S.avgStance>1.35?'支持这个说法':'中立/证据分歧'}（分数 ${S.avgStance.toFixed(2)} / 2，仅供参考，不是权威结论）`;
   }
@@ -426,13 +521,114 @@ function judge(v){
     ? `这 ${S.items.length} 条证据里有 ${hi} 条来自官方/学术/主流信源，点证据卡片上的域名可以直接跳转去看原文核对。`
     : `这次召回里没有官方/学术/主流信源，多是垂直或自媒体内容——证据强度本身就弱，"说不准"往往是更稳的选择。`;
   $('#next').textContent='再验一条';
+  $('#endBtn').style.display='block';
 }
 
-function next(){ $('#claimInput').value=''; runRoundReset(); }
-function runRoundReset(){
+/* ================= 共用 ================= */
+/* ---------- 自动高亮：找出与说法最相关的那一句，直接标出来 ---------- */
+function autoMark(text, claim){
+  const plain = String(text || '').slice(0, 220);
+  if (!plain) return esc(plain);
+
+  const clean = s => String(s || '').replace(/[，。！？、,.!?；;：:\s"'“”（）()《》【】]/g, '');
+  const C = clean(claim);
+  if (C.length < 2) return esc(plain);
+
+  // 说法里所有 2~3 字片段，用作命中字典（长片段权重高）
+  const grams = new Set();
+  for (let len = 3; len >= 2; len--) {
+    for (let i = 0; i + len <= C.length; i++) grams.add(C.slice(i, i + len));
+  }
+
+  const sentences = plain.split(/(?<=[。！？.!?；;，,])/).map(x => x).filter(x => x.trim().length > 1);
+  if (!sentences.length) return esc(plain);
+
+  let best = '', bestScore = 0;
+  for (const sen of sentences) {
+    const S2 = clean(sen);
+    let sc = 0;
+    grams.forEach(w => { if (S2.includes(w)) sc += w.length; });
+    if (sc > bestScore) { bestScore = sc; best = sen; }
+  }
+
+  // 重叠太少就老实不标，别硬凑
+  if (!best || bestScore < 4) return esc(plain);
+
+  const idx = plain.indexOf(best);
+  if (idx < 0) return esc(plain);
+  return esc(plain.slice(0, idx)) + '<mark>' + esc(best) + '</mark>' + esc(plain.slice(idx + best.length));
+}
+
+function renderEvidence(){
+  $('#evs').innerHTML = S.items.map((it,i)=>{
+    const link = it.url ? esc(it.url) : '';
+    const siteHtml = link
+      ? `<a href="${link}" target="_blank" rel="noopener noreferrer">${esc(it.site||it.url)}</a>`
+      : esc(it.site||'来源未知');
+    const body = String(it.passage||'').slice(0,220);
+    const titlePart = esc(it.title);
+    const sep = (it.title && body) ? ' — ' : '';
+    return `<div class="ev show" data-i="${i}">
+      <div class="top"><span class="tier ${it.tier}">${TNAME[it.tier]||it.tier}</span><span class="site">${siteHtml}</span></div>
+      <div class="tx" id="evtx${i}">${titlePart}${sep}${autoMark(body, S.claim)}</div>
+      <div class="hl-row"><button class="hlbtn on" data-i="${i}">显示原文</button></div>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('.hlbtn').forEach(b=>{
+    b.onclick=()=>togglePlain(parseInt(b.dataset.i,10), b);
+  });
+}
+
+/* 按钮只做「高亮 / 原文」切换，默认已经是高亮状态 */
+function togglePlain(i, btn){
+  const box = $('#evtx'+i);
+  const it = S.items[i];
+  const body = String(it.passage||'').slice(0,220);
+  const sep = (it.title && body) ? ' — ' : '';
+  const isMarked = box.innerHTML.indexOf('<mark>') >= 0;
+
+  if (isMarked) {
+    box.textContent = (it.title || '') + sep + body;
+    btn.textContent = '高亮关键词';
+    btn.classList.remove('on');
+  } else {
+    box.innerHTML = esc(it.title) + sep + autoMark(body, S.claim);
+    btn.textContent = '显示原文';
+    btn.classList.add('on');
+  }
+}
+
+async function scoreRelevance(claim){
+  if(!S.items.length) return;
+  try{
+    const r = await fetch(`${API}/api/judge`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ claim, items: S.items.slice(0,12) })
+    });
+    const data = await r.json();
+    if(!data.ok) return;
+    const valid = data.results.filter(x=>typeof x.stance==='number');
+    if(!valid.length) return;
+    S.avgStance = valid.reduce((a,x)=>a+x.stance,0)/valid.length;
+  }catch(e){}
+}
+
+function judge(v){
+  if(S.answered) return;
+  return S.mode==='quiz' ? judgeQuiz(v) : judgeFree(v);
+}
+
+function next(){
+  if(S.mode==='quiz'){
+    S.qi++;
+    if(S.qi >= S.order.length) return endSession();
+    return renderQuiz();
+  }
+  $('#claimInput').value='';
   $('#game').classList.remove('on'); $('#start').style.display='block';
   $('#startErr').textContent='';
 }
+
 function endSession(){
   $('#game').classList.remove('on'); $('#end').classList.add('on');
   $('#escore').textContent=S.score; $('#eright').textContent=S.right;
@@ -444,16 +640,17 @@ function endSession(){
   else {r='实习生';v='没关系，鉴定不是比谁快，是比谁愿意先看证据再判。';}
   $('#erank').textContent='「'+r+'」'; $('#evd').textContent=v;
 }
-function hud(){ $('#hs').textContent=S.score; $('#hc').textContent=S.streak; $('#hstreak').className='hbox'+(S.streak>=3?' hot':''); }
 
 $('#startBtn').onclick=start;
 $('#again').onclick=()=>{ $('#end').classList.remove('on'); $('#start').style.display='block'; };
 $('#next').onclick=next;
 $('#endBtn').onclick=endSession;
+$('#sbtn').onclick=()=>{ if(S.mode==='quiz') searchQuiz(); };
 document.querySelectorAll('.jb').forEach(b=>b.onclick=()=>judge(b.dataset.v));
 document.addEventListener('keydown',e=>{
   if(!$('#game').classList.contains('on'))return;
   if(e.key==='1')judge('真'); else if(e.key==='2')judge('假'); else if(e.key==='3')judge('说不准');
+  else if(e.key==='s'&&S.mode==='quiz')searchQuiz();
   else if(e.key==='Enter'&&$('#res').classList.contains('on'))next();
 });
 </script>
