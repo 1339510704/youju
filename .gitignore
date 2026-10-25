@@ -31,3 +31,8 @@ build/
 [Dd]esktop.ini
 Thumbs.db
 .DS_Store
+
+# 临时调试脚本
+_tmp_*
+*.probe.*
+
