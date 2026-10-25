@@ -1,0 +1,78 @@
+/* 家庭菜单页私有样式（公共样式都在 app.wxss） */
+
+/* 底部条的说明文字：比 actionbar-label 再顺一点 */
+.actionbar-info .actionbar-label { line-height: 1.4; }
+
+/* 加菜品弹层：左边菜品图，右边最上面「菜名 + 输入框」，下面「花费小红花」 */
+.dish-edit-hero { display: flex; align-items: stretch; gap: 24rpx; margin: 4rpx 0; }
+.dish-edit-img { position: relative; width: 200rpx; height: 200rpx; border-radius: 22rpx; overflow: hidden; flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--fill); }
+.dish-edit-img-ph { border: 2rpx dashed var(--line-2); }
+.dish-edit-thumb { width: 100%; height: 100%; }
+/* 没图时：铺一张占位图，底部压一条「＋ 加图片」提示，一眼知道这里能点 */
+.dish-edit-ph { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.dish-edit-ph-tip {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 8rpx 0; text-align: center;
+  font-size: 21rpx; color: #fff; background: rgba(34, 28, 24, .42); letter-spacing: .5rpx;
+}
+.img-clear { position: absolute; top: 6rpx; right: 6rpx; width: 38rpx; height: 38rpx; line-height: 38rpx;
+  text-align: center; border-radius: 50%; background: rgba(0,0,0,.5); color: #fff; font-size: 30rpx; }
+.dish-edit-side { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 24rpx; }
+/* 菜名输入框：占满标签右侧剩余宽度（同一行的行内布局） */
+.dish-name-input { flex: 1; min-width: 0; width: auto; }
+.edit-field { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; }
+.edit-field-label { font-size: 30rpx; color: var(--text-2); flex-shrink: 0; }
+.dish-flower-edit { display: flex; align-items: center; gap: 14rpx; }
+.dish-flower-val { min-width: 52rpx; text-align: center; font-size: 34rpx; font-weight: 700; }
+
+/* 「公开」单独一行（文字简化后不用再占右边一列），与上方图片区留出空隙 */
+.dish-pub-row { margin-top: 20rpx; padding: 12rpx 0; }
+.dish-pub-text { display: flex; align-items: baseline; gap: 10rpx; min-width: 0; }
+
+/* 编辑菜品弹层整体收紧：让「保存 + 删除」一屏就能看到，不用下滑 */
+.dish-sheet .sheet-label { margin: 20rpx 0 10rpx; }
+.dish-sheet .sheet-input { height: 92rpx; }
+/* 兜底：万一屏幕特别小还是要滚动，「保存 / 删除」也始终贴在弹层底部，不会被顶出可视区 */
+.dish-sheet .sheet-foot {
+  position: sticky; bottom: 0; z-index: 2;
+  background: #fff; margin-top: 24rpx; padding-top: 8rpx;
+}
+
+/* 删除：改成文字链接，比整块按钮省一行高度，也没那么容易误触 */
+.dish-del { margin-top: 22rpx; padding: 12rpx 0; text-align: center; font-size: 28rpx; color: var(--danger); }
+.dish-del:active { opacity: .6; }
+
+/* 备注多行输入：默认 2 行高度，文字多了靠 auto-height 自己长高 */
+.sheet-textarea { width: 100%; box-sizing: border-box; min-height: 124rpx; background: var(--fill);
+  border-radius: 16rpx; padding: 20rpx; font-size: 28rpx; line-height: 1.5; }
+
+/* 公共菜单行 */
+.pub-row { align-items: center; }
+
+/* 已点明细弹层行 */
+.cart-row { align-items: center; }
+
+/* 公共菜行：信息 + 操作区 */
+.pub-body { min-width: 0; }
+.pub-creator { font-size: 22rpx; color: var(--text-3); margin-top: 6rpx; }
+.pub-like-count { font-size: 22rpx; color: var(--gold); margin-top: 4rpx; }
+.pub-acts .btn { min-width: 120rpx; }
+.btn.liked { background: rgba(232,80,31,.08); color: #E8501F; border-color: rgba(232,80,31,.3); }
+
+/* 公共菜缩略图 + 操作区 + 点赞按钮 */
+.dish-thumb { width: 96rpx; height: 96rpx; border-radius: 14rpx; flex-shrink: 0; background: var(--fill); }
+.pub-acts { display: flex; flex-direction: column; align-items: stretch; gap: 10rpx; flex-shrink: 0; }
+.dish-like { font-size: 24rpx; color: var(--text-2); text-align: center; padding: 8rpx 14rpx;
+  border-radius: 22rpx; background: var(--fill); border: 2rpx solid transparent; }
+.dish-like.liked { color: #E8501F; background: rgba(232,80,31,.08); border-color: rgba(232,80,31,.25); }
+
+/* ---- 下单弹层里的「用餐安排」（用餐日期 / 到点提醒 / 提醒谁） ---- */
+.plan { margin-top: 28rpx; padding: 8rpx 24rpx; background: var(--fill); border-radius: var(--radius); }
+.plan-row {
+  display: flex; align-items: center; justify-content: space-between;
+  min-height: 88rpx; padding: 6rpx 0;
+}
+.plan-label { font-size: 30rpx; color: var(--text-2); flex-shrink: 0; }
+.plan-val { display: flex; align-items: center; gap: 12rpx; flex-wrap: wrap; justify-content: flex-end; }
+.plan-clear { font-size: 26rpx; color: var(--brand-btn); padding: 6rpx 4rpx; }
+.plan-tip { font-size: 23rpx; color: var(--text-3); line-height: 1.5; padding: 4rpx 0 12rpx; }

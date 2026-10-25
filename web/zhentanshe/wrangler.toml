@@ -1,0 +1,24 @@
+name = "zhentanshe"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+account_id = "4bbd55c894f7cb80337f01f497baa1a9"
+
+[[rules]]
+type = "Text"
+globs = ["**/*.html"]
+fallthrough = true
+
+[[routes]]
+pattern = "zhentanshe.robai.dpdns.org"
+custom_domain = true
+
+[[kv_namespaces]]
+binding = "WATCH_KV"
+id = "917ed16e68c54df987c62fd96e63eefa"
+
+# 每 6 小时跑一次监测
+[triggers]
+crons = ["0 */6 * * *"]
+
+[observability]
+enabled = true

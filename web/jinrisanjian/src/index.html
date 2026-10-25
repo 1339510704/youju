@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>今日三件 · 说说你的近况，排出该做的事</title>
+<style>
+:root{
+  --bg:#F7F9FC; --card:#FFFFFF; --ink:#18202E; --ink2:#5B6B84; --ink3:#93A2B8; --line:#E5EBF4;
+  --blue:#3B6EF5; --blue2:#6C93FF; --sky:#E8F0FF;
+  --green:#12A66A; --green-bg:#E9F8F1; --amber:#B45309; --amber-bg:#FFF7E6; --red:#E5484D; --red-bg:#FDECEC;
+  --sans:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif;
+  --serif:"Songti SC","Noto Serif SC","SimSun",serif;
+  --mono:"JetBrains Mono",Consolas,monospace;
+  --r:16px;
+  --sh:0 2px 8px rgba(24,32,46,.04),0 10px 30px rgba(24,32,46,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.62;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding:0 22px 70px}
+/* 顶栏 */
+header{display:flex;align-items:center;gap:12px;padding:20px 0 12px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .ic{width:36px;height:36px;border-radius:11px;background:linear-gradient(140deg,var(--blue2),var(--blue));display:grid;place-items:center;color:#fff;font-size:18px;box-shadow:0 6px 16px rgba(59,110,245,.3)}
+.logo .nm{font-weight:800;font-size:18px;letter-spacing:-.3px}
+.logo .nm span{color:var(--blue)}
+header .sp{flex:1}
+.pill{font-size:11.5px;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:99px;padding:5px 12px;box-shadow:var(--sh);display:inline-flex;align-items:center;gap:6px}
+.pill .d{width:7px;height:7px;border-radius:50%;background:var(--amber)}
+.pill.ok{color:var(--green)}.pill.ok .d{background:var(--green)}
+/* Hero */
+.hero{padding:30px 0 20px}
+.hero .kicker{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;color:var(--blue);margin-bottom:12px}
+.hero h1{font-family:var(--serif);font-size:clamp(30px,4.8vw,50px);font-weight:700;line-height:1.2;letter-spacing:.01em}
+.hero h1 em{font-style:normal;color:var(--blue);position:relative}
+.hero p{margin-top:14px;font-size:15px;color:var(--ink2);max-width:620px;line-height:1.85}
+.hero p b{color:var(--ink);font-weight:700}
+/* 输入卡 */
+.card{background:var(--card);border-radius:var(--r);border:1px solid var(--line);box-shadow:var(--sh);padding:20px 22px}
+.card h2{font-size:14px;font-weight:800;display:flex;align-items:center;gap:9px;margin-bottom:12px}
+.card h2 .i{color:var(--blue)}
+.card h2 .h{margin-left:auto;font-size:11.5px;font-weight:400;color:var(--ink3)}
+textarea{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:13px 15px;font-family:var(--sans);font-size:14px;line-height:1.85;color:var(--ink);resize:vertical;min-height:110px;outline:none;background:#FBFCFE;transition:.15s}
+textarea:focus{border-color:var(--blue2);background:#fff;box-shadow:0 0 0 4px rgba(59,110,245,.1)}
+textarea::placeholder{color:#A7B4C7}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.chip{font-size:12px;font-weight:700;padding:6px 14px;border-radius:99px;border:1px solid var(--line);background:#fff;color:var(--ink2);cursor:pointer;transition:.15s;font-family:var(--sans)}
+.chip:hover{border-color:var(--blue2);color:var(--blue);background:var(--sky)}
+.chip.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.btnrow{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;align-items:center}
+.btn{padding:12px 26px;border:0;border-radius:11px;background:var(--blue);color:#fff;font-size:14.5px;font-weight:800;cursor:pointer;transition:.15s;font-family:var(--sans);box-shadow:0 6px 16px rgba(59,110,245,.25)}
+.btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(59,110,245,.32)}
+.btn.ghost{background:#fff;color:var(--ink2);border:1.5px solid var(--line);box-shadow:none;font-weight:700}
+.btn.ghost:hover{border-color:var(--blue2);color:var(--blue);transform:none}
+.hint{font-size:11.5px;color:var(--ink3)}
+/* 结果 */
+.result{margin-top:24px;display:none}
+.result.on{display:block;animation:up .35s ease}
+@keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.rh{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.rh h2{font-family:var(--serif);font-size:25px;font-weight:700;letter-spacing:.01em}
+.rh .sub{font-size:12.5px;color:var(--ink2);margin-top:4px}
+.badges{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.badge{font-size:11.5px;font-weight:700;border-radius:99px;padding:5px 12px;background:var(--sky);color:var(--blue)}
+.badge.demo{background:var(--amber-bg);color:var(--amber)}
+/* 分组 */
+.grp{margin-top:22px}
+.grp-h{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.grp-h .t{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--blue);background:var(--sky);padding:3px 10px;border-radius:99px}
+.grp-h .l{flex:1;height:1px;background:var(--line)}
+.grp-h .c{font-size:11px;color:var(--ink3)}
+/* 待办卡 */
+.todo{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);padding:16px 18px;margin-bottom:10px;transition:.18s;position:relative;overflow:hidden}
+.todo:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(24,32,46,.09)}
+.todo::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--line)}
+.todo.hi::before{background:var(--red)}
+.todo.md::before{background:var(--amber)}
+.todo.lo::before{background:var(--green)}
+.td-top{display:flex;align-items:flex-start;gap:10px}
+.td-n{flex:none;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ink3);padding-top:3px;min-width:18px}
+.td-bd{flex:1;min-width:0}
+.td-tx{font-size:15.5px;font-weight:800;line-height:1.45;letter-spacing:-.01em}
+.td-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.td-tag{font-size:10.5px;font-weight:700;border-radius:99px;padding:2px 9px;background:#F1F5FC;color:var(--ink2)}
+.td-tag.hi{background:var(--red-bg);color:var(--red)}
+.td-tag.md{background:var(--amber-bg);color:var(--amber)}
+.td-tag.lo{background:var(--green-bg);color:var(--green)}
+.td-why{font-size:12.5px;color:var(--ink2);line-height:1.75;margin-top:9px}
+.td-why b{color:var(--ink)}
+.td-adv{margin-top:9px;font-size:12.5px;line-height:1.75;background:var(--sky);border-radius:9px;padding:9px 12px;color:var(--ink)}
+.td-adv .lb{font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--blue);display:block;margin-bottom:3px;font-family:var(--mono)}
+/* 引用依据 */
+.cites{margin-top:11px;border-top:1px dashed var(--line);padding-top:10px}
+.cites-h{font-size:10.5px;font-family:var(--mono);letter-spacing:.1em;color:var(--ink3);margin-bottom:7px}
+.cite{display:flex;gap:9px;align-items:flex-start;font-size:12px;line-height:1.65;padding:6px 0}
+.cite .sq{flex:none;width:3px;border-radius:2px;background:var(--blue2);align-self:stretch;min-height:16px}
+.cite .ct{flex:1;min-width:0}
+.cite .ct a{color:var(--ink);font-weight:700;text-decoration:none;border-bottom:1px solid var(--line)}
+.cite .ct a:hover{color:var(--blue);border-color:var(--blue2)}
+.cite .sn{display:block;color:var(--ink2);margin-top:2px;font-size:11.5px}
+.cite .src{flex:none;font-family:var(--mono);font-size:9.5px;color:var(--ink3);white-space:nowrap;padding-top:2px}
+/* 侧栏 */
+.side{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;margin-top:20px}
+@media(max-width:760px){.side{grid-template-columns:1fr}}
+.mini{background:#fff;border-radius:var(--r);border:1px solid var(--line);box-shadow:var(--sh);padding:16px 18px}
+.mini h3{font-size:13px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.mini h3 .i{color:var(--blue)}
+.mini ul{list-style:none;display:grid;gap:7px}
+.mini li{font-size:12.5px;color:var(--ink2);display:flex;gap:8px;line-height:1.6}
+.mini li::before{content:"›";color:var(--blue);font-weight:800;flex:none}
+.mini li b{color:var(--ink);font-weight:700}
+.mini li a{color:var(--blue);text-decoration:none}
+.mini li a:hover{text-decoration:underline}
+.mini.warn{background:var(--amber-bg);border-color:#F5E0B7}
+.mini.warn h3 .i{color:var(--amber)}
+.mini.warn li{color:#7A5A16}
+.mini.warn li::before{color:var(--amber)}
+.empty{border:1.5px dashed var(--line);border-radius:var(--r);padding:46px 20px;text-align:center;color:#A7B4C7;font-size:13px}
+.foot{text-align:center;font-size:11.5px;color:#A7B4C7;margin-top:34px;line-height:1.9}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo"><div class="ic">☀</div><div class="nm">今日<span>三件</span></div></div>
+    <div class="sp"></div>
+    <div class="pill" id="stagePill"><span class="d"></span><span id="stageTxt">界面预览版</span></div>
+  </header>
+
+  <section class="hero">
+    <div class="kicker">说说你的近况，别自己列待办</div>
+    <h1>你只说要往哪走<br>我们把<em>该做的事</em>排出来</h1>
+    <p>
+      想备孕、想考研、想结婚——你知道目标，但不确定<strong>先做什么</strong>。
+      这里按你的情况和公开信息，排出<b>可落地、可执行</b>的清单：
+      每件事都写清<b>为什么现在做</b>、<b>具体怎么做</b>，并附上<b>引用依据</b>，能点开原文核对。
+    </p>
+  </section>
+
+  <div class="card">
+    <h2><span class="i">✎</span>你最近在考虑什么<span class="h">越具体，排得越准</span></h2>
+    <textarea id="situation" placeholder="例：最近在考虑备孕，但不知道该提前多久开始准备，也不知道要查哪些项目。我今年 30 岁，平时上班久坐，作息不太规律。"></textarea>
+    <div class="chips" id="chips">
+      <button class="chip" data-k="beiyun">备孕</button>
+      <button class="chip" data-k="kaoyan">考研</button>
+      <button class="chip" data-k="jiehun">结婚</button>
+      <button class="chip" data-k="huanzhu">换工作</button>
+      <button class="chip" data-k="tijian">体检</button>
+    </div>
+    <div class="btnrow">
+      <button class="btn" id="go">生成我该做的事</button>
+      <button class="btn ghost" id="demo">看个例子</button>
+      <span class="hint">点上面的标签可快速填入示例</span>
+    </div>
+  </div>
+
+  <div class="result" id="result"></div>
+
+  <div class="foot">
+    今日三件 · 让"该做什么"有据可查，而不是靠感觉<br>
+    建议仅供参考，医疗、法律、教育相关政策请以官方最新发布为准
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ============================================================
+   演示数据集
+   ⚠️ 当前版本只做界面，还没有接元宝搜索与真实生成。
+   下面的条目是「示例数据」，用来展示成品的形态。
+   ============================================================ */
+const DATA={
+  beiyun:{
+    label:'备孕',
+    headline:'备孕这件事，按时间线排给你',
+    groups:[
+      {t:'现在就做',c:'越早越省事',items:[
+        {p:'hi',title:'孕前检查：夫妻双方一起做，别只查女方',
+         why:'孕前检查能提前发现贫血、甲状腺异常、传染病等影响受孕和胎儿的问题，早发现就能早处理。',
+         adv:'挂号选「孕前保健」或「优生优育门诊」。常见项目：血常规、甲功、TORCH、乙肝/梅毒/HIV、妇科超声；男方加精液常规。',
+         tags:['时间敏感','双方都要'],
+         cites:[
+           {t:'《孕前和孕期保健指南》',s:'孕前 3 个月即应开始保健，包括健康教育、常规检查与专项检查。',d:'nhc.gov.cn',u:'http://www.nhc.gov.cn/'},
+           {t:'孕前优生健康检查项目',s:'免费孕前优生健康检查覆盖血常规、病毒筛查等 19 项。',d:'chinacdc.cn',u:'https://www.chinacdc.cn/'}
+         ]},
+        {p:'hi',title:'开始补叶酸，提前 3 个月',
+         why:'叶酸能降低胎儿神经管缺陷风险，但需要提前补充才能在受孕早期达到有效水平。',
+         adv:'通常建议每天 0.4mg，从孕前 3 个月吃到孕早期结束。有特殊病史的人剂量要听医生的，别自己加量。',
+         tags:['提前 3 个月','每天一次'],
+         cites:[
+           {t:'叶酸增补建议',s:'育龄妇女应从孕前 3 个月开始每日增补叶酸。',d:'chinacdc.cn',u:'https://www.chinacdc.cn/'}
+         ]},
+        {p:'md',title:'把作息和体重先拉回正常区间',
+         why:'长期熬夜、体重过高或过低都会影响排卵和精子质量，这是最常见的可改善因素。',
+         adv:'不用追求完美：先把入睡时间固定下来，每周 3 次 30 分钟中等强度运动。BMI 偏离正常范围的人，减重/增重 5%~10% 就能明显改善。',
+         tags:['生活方式','可自己调整'],
+         cites:[
+           {t:'孕前健康教育要点',s:'孕前应保持适宜体重、规律作息、戒烟戒酒。',d:'nhc.gov.cn',u:'http://www.nhc.gov.cn/'}
+         ]}
+      ]},
+      {t:'1 个月内',c:'把不确定的问清楚',items:[
+        {p:'md',title:'停掉不该吃的药，问清楚该吃的',
+         why:'部分药物有致畸风险，但也有药不能随便停（比如甲状腺、癫痫用药），需要医生判断。',
+         adv:'把正在吃的所有药（含保健品）列一张清单，挂号时直接给医生看，让他逐条标"可继续/需更换/必须停"。',
+         tags:['要问医生','别自行停药'],
+         cites:[
+           {t:'妊娠期用药原则',s:'孕前应评估长期用药，由医师调整方案。',d:'nhc.gov.cn',u:'http://www.nhc.gov.cn/'}
+         ]}
+      ]},
+      {t:'3 个月内',c:'环境与习惯',items:[
+        {p:'lo',title:'戒烟戒酒，包括二手烟',
+         why:'吸烟饮酒会同时影响受孕概率和胎儿发育，且二手烟同样有害。',
+         adv:'家里有人抽烟就把这件事变成家庭约定；戒断困难可以去戒烟门诊，这是有循证方法的。',
+         tags:['长期','家庭一起'],
+         cites:[
+           {t:'孕前保健：戒烟戒酒',s:'孕前夫妇双方均应戒烟戒酒。',d:'nhc.gov.cn',u:'http://www.nhc.gov.cn/'}
+         ]}
+      ]}
+    ],
+    sources:[
+      {t:'国家卫生健康委员会',d:'nhc.gov.cn',u:'http://www.nhc.gov.cn/'},
+      {t:'中国疾病预防控制中心',d:'chinacdc.cn',u:'https://www.chinacdc.cn/'}
+    ],
+    warns:['具体检查项目和叶酸剂量请以就诊医生的判断为准，不同地区免费项目范围不同。','如果规律备孕 1 年（35 岁以上半年）未成功，建议直接看不孕专科，别继续自己试。']
+  },
+
+  kaoyan:{
+    label:'考研',
+    headline:'考研这件事，先定方向再谈努力',
+    groups:[
+      {t:'现在就做',c:'先解决"考什么"',items:[
+        {p:'hi',title:'定院校专业：先看招生目录，再看分数线',
+         why:'考研是"先填志愿再考试"，方向定不下来，后面的复习都是空的。',
+         adv:'到目标院校研究生院官网下载最新《招生专业目录》，确认考试科目、参考书目、是否接受跨考；再看近三年复试线与报录比。',
+         tags:['第一步','决定后面所有事'],
+         cites:[
+           {t:'硕士研究生招生工作管理规定',s:'招生单位应公布招生简章、专业目录及考试科目。',d:'moe.gov.cn',u:'http://www.moe.gov.cn/'},
+           {t:'研招网 · 硕士专业目录',s:'全国硕士研究生招生考试网上报名与专业目录查询官方入口。',d:'yz.chsi.com.cn',u:'https://yz.chsi.com.cn/'}
+         ]},
+        {p:'hi',title:'确认自己是不是"能考"的状态',
+         why:'应届、往届、同等学力、在职的报考条件和所需材料不同，报名时才发现不符合就来不及了。',
+         adv:'逐条对照招生简章的报考条件；往届生注意户籍/社保与报考点要求，异地报考经常卡在这一步。',
+         tags:['资格核查','容易忽略'],
+         cites:[
+           {t:'网上报名注意事项',s:'考生应符合报考条件并按要求选择报考点。',d:'yz.chsi.com.cn',u:'https://yz.chsi.com.cn/'}
+         ]}
+      ]},
+      {t:'1 个月内',c:'把复习变成日程',items:[
+        {p:'md',title:'按考试科目拆出周计划，别按"每天学 8 小时"',
+         why:'时长目标没法检验，科目进度才能。拆到科目和章节，才能看出落后在哪。',
+         adv:'四门课各写一条本周要完成的章节数；每周日花 15 分钟对一次，落后就砍内容而不是熬夜补。',
+         tags:['可执行','每周复盘'],
+         cites:[
+           {t:'备考方法类公开资料',s:'以科目进度为单位规划复习，比以时长为单位更容易执行和检查。',d:'moe.gov.cn',u:'http://www.moe.gov.cn/'}
+         ]}
+      ]},
+      {t:'按考试时间倒推',c:'节点别错过',items:[
+        {p:'hi',title:'记住三个时间点：报名、网上确认、打印准考证',
+         why:'这三个环节过时不补，每年都有人因为错过网上确认而失去考试资格。',
+         adv:'现在就在日历里建三个提醒，并在手机和电脑都设一遍；报名后把报名号截图存好。',
+         tags:['过时不补','设提醒'],
+         cites:[
+           {t:'全国硕士研究生招生考试公告',s:'报名、网上确认、下载准考证均有明确时间窗口。',d:'moe.gov.cn',u:'http://www.moe.gov.cn/'}
+         ]}
+      ]}
+    ],
+    sources:[
+      {t:'教育部',d:'moe.gov.cn',u:'http://www.moe.gov.cn/'},
+      {t:'中国研究生招生信息网',d:'yz.chsi.com.cn',u:'https://yz.chsi.com.cn/'}
+    ],
+    warns:['每年的报考时间、考试科目都可能调整，一律以教育部和研招网当年公告为准。','别用往年学长笔记代替当年专业目录，科目变更很常见。']
+  },
+
+  jiehun:{
+    label:'结婚',
+    headline:'结婚这件事，先办"有法律效力"的那部分',
+    groups:[
+      {t:'现在就做',c:'法律效力优先',items:[
+        {p:'hi',title:'婚姻登记：先查清要带什么，再挑日子',
+         why:'登记是唯一让婚姻产生法律效力的步骤，婚礼只是仪式。材料不齐会白跑一趟。',
+         adv:'到任一方户籍所在地的婚姻登记机关办理；提前在当地民政局官网或政务 App 查所需材料并预约。',
+         tags:['法律效力','可预约'],
+         cites:[
+           {t:'婚姻登记条例',s:'内地居民结婚，男女双方应共同到一方常住户口所在地的婚姻登记机关办理登记。',d:'mca.gov.cn',u:'https://www.mca.gov.cn/'}
+         ]},
+        {p:'md',title:'婚检：不是强制，但建议做',
+         why:'婚检能提前发现传染病、遗传病风险和生殖健康问题，很多地区免费。',
+         adv:'问当地妇幼保健院或社区卫生服务中心「免费婚前医学检查」范围和时间要求。',
+         tags:['自愿','多地免费'],
+         cites:[
+           {t:'婚前保健工作规范',s:'婚前医学检查遵循自愿原则，各地提供免费或补贴服务。',d:'nhc.gov.cn',u:'http://www.nhc.gov.cn/'}
+         ]}
+      ]},
+      {t:'1 个月内',c:'钱和房子这类硬问题',items:[
+        {p:'md',title:'把财产、房贷、债务摊到桌上谈一次',
+         why:'婚后收入默认共同所有，但婚前财产、婚前债务的归属需要提前说清，避免日后争议。',
+         adv:'列一张两人的资产负债清单（房、车、贷、欠款），必要时做婚前财产约定并公证。',
+         tags:['一次性谈清','建议公证'],
+         cites:[
+           {t:'民法典 · 婚姻家庭编',s:'婚前财产、夫妻共同债务的认定有明确规则。',d:'gov.cn',u:'https://www.gov.cn/'}
+         ]}
+      ]},
+      {t:'3 个月内',c:'办事节奏',items:[
+        {p:'lo',title:'倒排婚礼筹备：先定酒店和档期',
+         why:'酒店、摄影、婚庆的档期是刚性约束，其他都可在它之后排。',
+         adv:'先定日期和酒店，再定摄影摄像，最后才谈布置和流程；每定一项就锁合同与付款节点。',
+         tags:['档期优先','按合同走'],
+         cites:[
+           {t:'婚庆服务合同示范文本',s:'签订服务合同应明确服务内容、价款与违约责任。',d:'samr.gov.cn',u:'https://www.samr.gov.cn/'}
+         ]}
+      ]}
+    ],
+    sources:[
+      {t:'民政部',d:'mca.gov.cn',u:'https://www.mca.gov.cn/'},
+      {t:'国家卫生健康委员会',d:'nhc.gov.cn',u:'http://www.nhc.gov.cn/'}
+    ],
+    warns:['各地婚姻登记材料与预约方式不同，务必以当地民政局最新公告为准。','财产约定涉及法律效力，建议咨询执业律师或公证处。']
+  },
+
+  default:{
+    label:'通用',
+    headline:'先说清楚目标，再拆成能动手的事',
+    groups:[
+      {t:'现在就做',c:'把模糊变具体',items:[
+        {p:'hi',title:'把目标写成一句可检验的话',
+         why:'"想变好一点"没法执行，"三个月内做完 X"才能排出下一步。',
+         adv:'套用这个句式：在（多久）内，完成（可验证的结果）。写不出来，说明还缺信息，先去查。',
+         tags:['先想清楚','决定后面所有事'],
+         cites:[
+           {t:'任务拆解方法',s:'目标应具备可验证的完成标准，才便于拆解与检查。',d:'gov.cn',u:'https://www.gov.cn/'}
+         ]},
+        {p:'md',title:'找出这件事里"过时不补"的节点',
+         why:'大部分计划失败不是不够努力，是错过了有截止时间的环节。',
+         adv:'把所有有明确时限的事单列一栏（报名、体检、缴费、提交），其余按优先级排。',
+         tags:['防漏','优先排'],
+         cites:[
+           {t:'办事流程公开信息',s:'行政与考试类事项通常有明确受理期限，逾期不予补办。',d:'gov.cn',u:'https://www.gov.cn/'}
+         ]}
+      ]},
+      {t:'1 个月内',c:'开始动手',items:[
+        {p:'lo',title:'挑一件 25 分钟能做完的先做',
+         why:'先启动比先规划更能减少拖延，尤其是信息不全的时候。',
+         adv:'选一个"查清楚某个要求"的动作，做完再决定下一步，不要一次规划到底。',
+         tags:['易启动','降低门槛'],
+         cites:[
+           {t:'行为启动相关公开资料',s:'降低单次任务门槛有助于启动与坚持。',d:'gov.cn',u:'https://www.gov.cn/'}
+         ]}
+      ]}
+    ],
+    sources:[
+      {t:'中国政府网',d:'gov.cn',u:'https://www.gov.cn/'}
+    ],
+    warns:['具体政策、流程与时限请以官方最新发布为准。']
+  }
+};
+
+/* ---------- 快速标签 ---------- */
+const FILL={
+  beiyun:'最近在考虑备孕，但不知道该提前多久开始准备、要查哪些项目。我今年 30 岁，上班久坐，作息不太规律。',
+  kaoyan:'想考研，但还没定院校和专业，也不知道该从哪一步开始准备。我是在职备考，每天能挤出 2 小时。',
+  jiehun:'准备结婚了，但对流程完全没概念：登记要带什么、要不要婚检、婚礼从哪开始筹备。',
+  huanzhu:'想换工作，但不确定该先改简历还是先看机会。现在这份做了 3 年，想往管理方向走。',
+  tijian:'想认真做一次体检，但不知道按我这个年龄该查哪些项目，也不想被推销一堆用不上的。'
+};
+document.querySelectorAll('#chips .chip').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('#chips .chip').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    $('#situation').value=FILL[b.dataset.k]||'';
+    $('#situation').focus();
+  };
+});
+
+/* ---------- 判断话题 ---------- */
+function detect(text){
+  if(/备孕|要孩子|怀孕|生育|叶酸/.test(text)) return 'beiyun';
+  if(/考研|研究生|读研|考试|备考/.test(text)) return 'kaoyan';
+  if(/结婚|婚礼|领证|婚检|嫁|娶/.test(text)) return 'jiehun';
+  return 'default';
+}
+
+/* ---------- 渲染 ---------- */
+function render(key,userText){
+  const d=DATA[key]||DATA.default;
+  const total=d.groups.reduce((a,g)=>a+g.items.length,0);
+  const srcCount=d.groups.reduce((a,g)=>a+g.items.reduce((b,it)=>b+(it.cites?it.cites.length:0),0),0);
+
+  $('#result').innerHTML=`
+    <div class="rh">
+      <div>
+        <h2>${esc(d.headline)}</h2>
+        <div class="sub">按「${esc(d.label)}」这个情况，共 ${total} 件事，分成 ${d.groups.length} 个阶段</div>
+      </div>
+      <div class="badges">
+        <span class="badge">${total} 件事 · ${srcCount} 条依据</span>
+        <span class="badge demo">示例数据 · 检索接入中</span>
+      </div>
+    </div>
+
+    ${d.groups.map(g=>`
+      <div class="grp">
+        <div class="grp-h">
+          <span class="t">${esc(g.t)}</span>
+          <span class="l"></span>
+          <span class="c">${esc(g.c)}</span>
+        </div>
+        ${g.items.map((it,i)=>`
+          <div class="todo ${it.p||'lo'}">
+            <div class="td-top">
+              <div class="td-n">${String(i+1).padStart(2,'0')}</div>
+              <div class="td-bd">
+                <div class="td-tx">${esc(it.title)}</div>
+                <div class="td-tags">
+                  ${(it.tags||[]).map(t=>`<span class="td-tag ${it.p||'lo'}">${esc(t)}</span>`).join('')}
+                </div>
+                <div class="td-why"><b>为什么现在做：</b>${esc(it.why)}</div>
+                <div class="td-adv"><span class="lb">怎么做</span>${esc(it.adv)}</div>
+                ${(it.cites&&it.cites.length)?`
+                  <div class="cites">
+                    <div class="cites-h">引用依据</div>
+                    ${it.cites.map(c=>`
+                      <div class="cite">
+                        <div class="sq"></div>
+                        <div class="ct">
+                          <a href="${esc(c.u)}" target="_blank" rel="noopener noreferrer">${esc(c.t)}</a>
+                          <span class="sn">${esc(c.s)}</span>
+                        </div>
+                        <div class="src">${esc(c.d)}</div>
+                      </div>`).join('')}
+                  </div>`:''}
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>`).join('')}
+
+    <div class="side">
+      <div class="mini">
+        <h3><span class="i">▤</span>依据来源（${(d.sources||[]).length}）</h3>
+        <ul>
+          ${(d.sources||[]).map(s=>`<li><a href="${esc(s.u)}" target="_blank" rel="noopener noreferrer">${esc(s.t)}</a> <b>${esc(s.d)}</b></li>`).join('')}
+        </ul>
+      </div>
+      <div class="mini warn">
+        <h3><span class="i">!</span>边界提醒</h3>
+        <ul>${(d.warns||[]).map(w=>`<li>${esc(w)}</li>`).join('')}</ul>
+      </div>
+    </div>
+  `;
+  $('#result').classList.add('on');
+  $('#stagePill').className='pill';
+  $('#stageTxt').textContent='已生成 · 示例数据';
+  $('#result').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ---------- 事件 ---------- */
+$('#go').onclick=()=>{
+  const t=$('#situation').value.trim();
+  if(!t){ $('#situation').focus(); return; }
+  render(detect(t),t);
+};
+$('#demo').onclick=()=>{
+  document.querySelectorAll('#chips .chip').forEach(x=>x.classList.remove('on'));
+  const first=document.querySelector('#chips .chip[data-k="beiyun"]');
+  if(first) first.classList.add('on');
+  $('#situation').value=FILL.beiyun;
+  render('beiyun',FILL.beiyun);
+};
+</script>
+
+<!-- ===== 有据门户 · 悬浮返回条 ===== -->
+<style>
+.yj-nav{position:fixed;left:14px;bottom:14px;z-index:9999;display:flex;align-items:center;gap:6px;
+  font-family:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif;font-size:12px;
+  background:rgba(17,24,39,.86);color:#fff;border-radius:99px;padding:7px 8px 7px 12px;
+  box-shadow:0 6px 18px rgba(0,0,0,.18);backdrop-filter:blur(6px);text-decoration:none;
+  transition:opacity .15s,transform .15s}
+.yj-nav:hover{opacity:.92;transform:translateY(-1px)}
+.yj-nav .yj-ico{font-size:13px;line-height:1}
+.yj-nav .yj-txt{white-space:nowrap}
+.yj-nav .yj-sep{opacity:.4;margin:0 2px}
+@media (max-width:480px){.yj-nav{left:8px;bottom:8px;font-size:11px;padding:6px 7px 6px 10px}}
+</style>
+<a class="yj-nav" href="https://youju.robai.dpdns.org/" title="回到有据总入口，看全部产品">
+  <span class="yj-ico">🏠</span><span class="yj-txt">总入口</span><span class="yj-sep">·</span><span class="yj-txt">有据</span>
+</a>
+</body>
+</html>

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>壹人公司 · 一个人就是一家公司</title>
+<style>
+:root{
+  --bg:#0C1512; --bg2:#10201B; --panel:#12261F; --line:#22453A;
+  --fg:#EDE9DC; --dim:#8FA79C; --gold:#C9A227; --gold2:#E3C558; --green:#2E7D5B; --cream:#EFE7D2;
+  --serif:"Songti SC","Noto Serif SC","SimSun",serif;
+  --sans:"PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:"JetBrains Mono",Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--fg);line-height:1.62;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(900px 500px at 80% -10%,rgba(201,162,39,.09),transparent 60%),
+             radial-gradient(700px 500px at 0% 100%,rgba(46,125,91,.12),transparent 60%);}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px 70px;position:relative;z-index:1}
+/* 顶栏 */
+header{display:flex;align-items:center;gap:14px;padding:20px 0 12px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:11px}
+.logo .m{width:38px;height:38px;border:1px solid var(--gold);border-radius:8px;display:grid;place-items:center;font-family:var(--serif);font-size:19px;color:var(--gold);background:rgba(201,162,39,.08)}
+.logo .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.08em}
+.logo .nm span{color:var(--gold)}
+header .sp{flex:1}
+header .tag{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--dim);border:1px solid var(--line);border-radius:99px;padding:5px 12px}
+/* Hero */
+.hero{padding:44px 0 26px;display:grid;grid-template-columns:1.15fr .85fr;gap:30px;align-items:center}
+@media(max-width:860px){.hero{grid-template-columns:1fr}}
+.hero h1{font-family:var(--serif);font-size:clamp(40px,6.4vw,76px);font-weight:700;line-height:1.04;letter-spacing:.02em}
+.hero h1 em{font-style:normal;color:var(--gold)}
+.hero p{margin-top:16px;font-size:14.5px;color:var(--dim);max-width:480px;line-height:1.85}
+.hero p b{color:var(--fg);font-weight:700}
+.hero .seal{justify-self:center;width:158px;height:158px;border:1px solid var(--gold);border-radius:50%;display:grid;place-items:center;text-align:center;background:radial-gradient(circle at 40% 30%,rgba(201,162,39,.16),transparent 70%);position:relative}
+.hero .seal::after{content:"";position:absolute;inset:9px;border:1px dashed rgba(201,162,39,.4);border-radius:50%}
+.hero .seal .t{font-family:var(--serif);font-size:26px;color:var(--gold);line-height:1.2;letter-spacing:.05em}
+.hero .seal .s{font-family:var(--mono);font-size:8px;letter-spacing:.24em;color:var(--dim);margin-top:6px}
+/* 服务目录 */
+.sec{margin-top:8px}
+.sec .h{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.sec .h .t{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--gold)}
+.sec .h .line{flex:1;height:1px;background:var(--line)}
+.svc{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:9px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:14px 15px;cursor:pointer;transition:.16s}
+.card:hover{border-color:rgba(201,162,39,.5);background:#163026}
+.card.on{border-color:var(--gold);background:rgba(201,162,39,.08)}
+.card .i{font-size:19px}
+.card .n{font-size:14px;font-weight:800;margin-top:7px}
+.card .d{font-size:11px;color:var(--dim);margin-top:3px;line-height:1.5}
+.card .p{font-family:var(--mono);font-size:10.5px;color:var(--gold);margin-top:8px}
+/* 工作台 */
+.desk{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px;align-items:start}
+@media(max-width:900px){.desk{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.panel h3{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--gold);display:flex;align-items:center;gap:8px;margin-bottom:13px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.panel h3 .r{margin-left:auto;color:var(--dim);letter-spacing:0;font-family:var(--sans);font-size:10.5px}
+.field{margin-bottom:12px}
+.field:last-child{margin-bottom:0}
+.flabel{font-size:11.5px;color:var(--dim);margin-bottom:5px;display:block}
+textarea,select{width:100%;background:#0C1A15;border:1px solid var(--line);border-radius:8px;padding:9px 11px;color:var(--fg);font-family:var(--sans);font-size:13px;outline:none;transition:.15s}
+textarea{resize:vertical;min-height:92px;line-height:1.65}
+textarea:focus,select:focus{border-color:var(--gold);background:#0E1F19}
+textarea::placeholder{color:#4C665B}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.go{width:100%;margin-top:6px;padding:13px;border:1px solid var(--gold);border-radius:9px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#1A1508;font-size:15px;font-weight:900;cursor:pointer;transition:.15s;font-family:var(--sans)}
+.go:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.go:disabled{opacity:.5;cursor:wait;transform:none}
+/* 输出 */
+.out{min-height:220px}
+.empty{border:1px dashed var(--line);border-radius:11px;padding:46px 20px;text-align:center;color:#4C665B;font-size:12.5px;line-height:1.8}
+.brief{border:1px solid rgba(201,162,39,.35);background:rgba(201,162,39,.06);border-radius:10px;padding:12px 14px;margin-bottom:12px}
+.brief .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--gold)}
+.brief .v{font-size:15px;font-weight:800;margin-top:3px;line-height:1.45}
+.brief .s{font-size:11.5px;color:var(--dim);margin-top:4px}
+.money{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.mb{border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:#0C1A15}
+.mb .k{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--dim)}
+.mb .v{font-size:19px;font-weight:900;color:var(--gold);margin-top:2px}
+.mb .v small{font-size:10.5px;color:var(--dim);font-weight:500}
+.block{border:1px solid var(--line);border-radius:9px;padding:11px 13px;margin-bottom:9px;background:#0C1A15}
+.block .bt{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--dim);margin-bottom:7px}
+.li{display:flex;gap:8px;font-size:12px;line-height:1.7;padding:2px 0;color:#C8D6CE}
+.li .c{flex:none;font-weight:900}
+.li .c.g{color:var(--green)} .li .c.y{color:var(--gold)} .li .c.r{color:#E06A5A}
+.acts{display:flex;gap:8px;margin-top:6px}
+.acts button{flex:1;padding:9px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--fg);font-size:11.5px;font-weight:800;cursor:pointer;transition:.15s;font-family:var(--sans)}
+.acts button:hover{border-color:var(--gold);color:var(--gold)}
+/* 流程 */
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:24px}
+@media(max-width:820px){.flow{grid-template-columns:1fr 1fr}}
+.fs{border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:var(--panel)}
+.fs .n{font-family:var(--mono);font-size:9px;color:var(--gold);letter-spacing:.1em}
+.fs .t{font-size:12.5px;font-weight:800;margin-top:3px}
+.fs .d{font-size:10.5px;color:var(--dim);margin-top:3px;line-height:1.5}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(16px);background:var(--gold);color:#1A1508;padding:10px 20px;border-radius:99px;font-size:12.5px;font-weight:800;opacity:0;pointer-events:none;transition:.25s;z-index:200}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.foot{text-align:center;font-family:var(--mono);font-size:10px;color:#3F5A50;margin-top:36px;line-height:1.9}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo"><div class="m">壹</div><div class="nm">壹人<span>公司</span></div></div>
+    <div class="sp"></div>
+    <div class="tag">SOLO · 需求直通交付</div>
+  </header>
+
+  <section class="hero">
+    <div>
+      <h1>一个人<br><em>就是一家公司</em></h1>
+      <p>客户把需求丢进来，这里把它变成<b>可确认的理解、可勾选的交付清单、可签字的报价</b>。没有销售、没有项目经理、没有排期会——只有一条从"我想要"到"已交付"的直线。</p>
+    </div>
+    <div class="seal"><div><div class="t">壹人<br>公司</div><div class="s">ONE · PERSON</div></div></div>
+  </section>
+
+  <div class="sec">
+    <div class="h"><span class="t">SERVICES · 服务目录</span><span class="line"></span></div>
+    <div class="svc" id="svc"></div>
+  </div>
+
+  <div class="desk">
+    <div class="panel">
+      <h3>客户需求直达<span class="r">输入 → 方案</span></h3>
+      <div class="field">
+        <label class="flabel">要做什么？（说人话就行）</label>
+        <textarea id="req" placeholder="例：我要做一个公司官网，大概 5 个页面，要能放产品介绍和联系方式，最好下周就能上线。"></textarea>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label class="flabel">预算</label>
+          <select id="budget">
+            <option value="1">5 千以内</option>
+            <option value="2" selected>5 千 – 1 万</option>
+            <option value="3">1 万 – 3 万</option>
+            <option value="4">3 万以上</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="flabel">期望时间</label>
+          <select id="deadline">
+            <option value="1">1 周内</option>
+            <option value="2" selected>2–3 周</option>
+            <option value="3">1 个月</option>
+            <option value="4">不着急</option>
+          </select>
+        </div>
+      </div>
+      <button class="go" id="go">生成方案与报价</button>
+    </div>
+
+    <div class="panel out" id="out">
+      <h3>方案预览<span class="r">客户可直接确认</span></h3>
+      <div class="empty" id="empty">左边写下需求，点「生成方案与报价」<br>会得到需求理解、交付清单、报价和风险提示</div>
+    </div>
+  </div>
+
+  <div class="sec" style="margin-top:26px">
+    <div class="h"><span class="t">PROCESS · 交付流程</span><span class="line"></span></div>
+    <div class="flow">
+      <div class="fs"><div class="n">01</div><div class="t">说需求</div><div class="d">一段话，不用写文档</div></div>
+      <div class="fs"><div class="n">02</div><div class="t">看方案</div><div class="d">理解 + 清单 + 报价</div></div>
+      <div class="fs"><div class="n">03</div><div class="t">付定金</div><div class="d">50% 启动，锁排期</div></div>
+      <div class="fs"><div class="n">04</div><div class="t">看进度</div><div class="d">按里程碑交付</div></div>
+      <div class="fs"><div class="n">05</div><div class="t">验收</div><div class="d">成品 + 说明文档</div></div>
+    </div>
+  </div>
+
+  <div class="foot">壹人公司 · 赛道06 OPC · 报价为演示算法，实际以确认为准</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const SERVICES={
+  web:{i:'🌐',n:'网站 / 落地页',d:'品牌站、产品页、活动页',base:3000,per:800,unit:'页'},
+  mini:{i:'📱',n:'微信小程序',d:'工具、商城、预约',base:8000,per:1200,unit:'功能'},
+  ai:{i:'🤖',n:'AI 工具 / Agent',d:'问答、自动化、检索',base:6000,per:1500,unit:'功能'},
+  content:{i:'✍️',n:'内容 / 文案',d:'公众号、脚本、方案',base:1500,per:300,unit:'篇'},
+  design:{i:'🎨',n:'视觉设计',d:'Logo、海报、UI',base:2000,per:600,unit:'稿'},
+  auto:{i:'⚙️',n:'自动化 / 脚本',d:'抓取、流程、定时',base:4000,per:1000,unit:'流程'}
+};
+const KW={
+  web:['官网','网站','落地页','页面','网页','h5'],
+  mini:['小程序','微信','商城','预约','会员'],
+  ai:['ai','智能','agent','问答','检索','搜索','模型','知识库'],
+  content:['文案','公众号','脚本','文章','方案','策划','内容'],
+  design:['设计','logo','海报','ui','视觉','界面'],
+  auto:['自动化','脚本','爬虫','抓取','定时','流程','rpa']
+};
+let CUR='web';
+
+function buildSvc(){
+  $('#svc').innerHTML=Object.entries(SERVICES).map(([k,s])=>`
+    <div class="card ${k===CUR?'on':''}" data-k="${k}">
+      <div class="i">${s.i}</div><div class="n">${s.n}</div>
+      <div class="d">${s.d}</div><div class="p">起价 ¥${s.base.toLocaleString()}</div>
+    </div>`).join('');
+  document.querySelectorAll('.card').forEach(el=>el.onclick=()=>{
+    CUR=el.dataset.k;
+    document.querySelectorAll('.card').forEach(x=>x.classList.toggle('on',x===el));
+    if($('#req').value.trim()) gen();
+  });
+}
+
+function detect(text){
+  const t=text.toLowerCase(); let best=CUR,bs=0;
+  for(const [k,ws] of Object.entries(KW)){
+    let c=0; ws.forEach(w=>{if(t.includes(w))c++;});
+    if(c>bs){bs=c;best=k;}
+  }
+  return best;
+}
+function countOf(text,type){
+  const u=SERVICES[type].unit;
+  let m=text.match(new RegExp('(\\d+)\\s*'+u));
+  if(m) return Math.max(1,Math.min(30,+m[1]));
+  m=text.match(/(\d+)\s*(个|张|项|条|篇|稿)/);
+  if(m) return Math.max(1,Math.min(30,+m[1]));
+  return type==='web'?5:type==='mini'?4:type==='ai'?3:type==='content'?3:type==='design'?3:2;
+}
+function extras(text){
+  const t=text.toLowerCase(),e=[];
+  if(/支付|付款|下单|购买/.test(t))e.push('支付/交易流程');
+  if(/登录|注册|账号|会员/.test(t))e.push('账号与权限');
+  if(/数据|后台|管理|cms/.test(t))e.push('后台/数据管理');
+  if(/ai|智能|问答|检索|搜索|模型/.test(t))e.push('AI 能力接入');
+  if(/多语言|中英|英文/.test(t))e.push('多语言');
+  if(/seo|优化|收录/.test(t))e.push('SEO/收录');
+  if(/部署|上线|服务器|域名/.test(t))e.push('部署上线');
+  return [...new Set(e)];
+}
+function risks(text,type,days){
+  const t=text.toLowerCase(),r=[];
+  if(/下周|明天|马上|尽快|急/.test(t)&&days>7) r.push('时间要求偏紧：正常排期需 '+days+' 天，建议砍范围或加急。');
+  if(/支付|交易/.test(t)) r.push('涉及支付需额外资质与对账测试，周期上浮。');
+  if(/爬|抓取/.test(t)&&type==='auto') r.push('数据来源合法性需客户确认，禁止抓取受保护内容。');
+  if(/ai|模型/.test(t)) r.push('AI 输出存在不确定性，需明确"可接受误差"边界。');
+  if(!r.length) r.push('需求描述基本清晰，按标准排期执行。');
+  return r;
+}
+const money=n=>'¥'+Math.round(n).toLocaleString();
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+function gen(){
+  const text=$('#req').value.trim();
+  if(!text){$('#req').focus();toast('先写一句需求');return;}
+  const type=detect(text), svc=SERVICES[type], cnt=countOf(text,type), ex=extras(text);
+  const bl=+$('#budget').value, dl=+$('#deadline').value;
+
+  let price=svc.base+svc.per*cnt+ex.length*(svc.base*0.18);
+  const cap=[0,5000,10000,30000,999999][bl];
+  let note='';
+  if(price>cap){price=cap*0.92;note='已按预算区间收敛范围。';}
+  const lo=price*0.85, hi=price*1.15;
+
+  let days=Math.max(3,Math.round(3+cnt*1.1+ex.length*2));
+  if(dl===1)days=Math.max(3,Math.round(days*0.55));
+  if(dl===3)days=Math.round(days*1.2);
+  if(dl===4)days=Math.round(days*1.4);
+
+  const rk=risks(text,type,days);
+  const del={
+    web:['页面设计稿 '+cnt+' 页','响应式前端实现','基础 SEO 配置','上线部署与域名绑定','使用说明文档'],
+    mini:['核心功能页 '+cnt+' 个','UI 设计稿','前后端联调','提审与发布协助','操作手册'],
+    ai:['AI 功能 '+cnt+' 项','检索/知识库接入','提示词与评测用例','前端交互界面','调用与计费说明'],
+    content:['内容 '+cnt+' 篇','选题与结构大纲','配图建议','发布格式适配','修改 2 轮'],
+    design:['设计稿 '+cnt+' 稿','风格方向 2 选 1','源文件交付','尺寸适配','修改 2 轮'],
+    auto:['自动化流程 '+cnt+' 条','异常处理与重试','运行日志','部署与定时配置','巡检说明']
+  }[type];
+
+  $('#empty').style.display='none';
+  $('#out').innerHTML=`
+    <h3>方案预览<span class="r">${new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}</span></h3>
+    <div class="brief">
+      <div class="k">需求理解 · ${svc.n}</div>
+      <div class="v">${esc(text.length>44?text.slice(0,44)+'…':text)}</div>
+      <div class="s">识别为「${svc.n}」，约 ${cnt} ${svc.unit}，附加 ${ex.length} 项。${note}</div>
+    </div>
+    <div class="money">
+      <div class="mb"><div class="k">报价区间</div><div class="v">${money(lo)}<small> – ${money(hi)}</small></div></div>
+      <div class="mb"><div class="k">交付周期</div><div class="v">${days}<small> 天</small></div></div>
+    </div>
+    <div class="block"><div class="bt">DELIVERABLES · 交付清单</div>
+      ${del.map(d=>`<div class="li"><span class="c g">✓</span><span>${d}</span></div>`).join('')}
+      ${ex.map(d=>`<div class="li"><span class="c g">✓</span><span>${d}</span></div>`).join('')}
+    </div>
+    <div class="block"><div class="bt">ASSUMPTIONS · 前置假设</div>
+      ${rk.map(r=>`<div class="li"><span class="c ${/禁止|偏紧/.test(r)?'r':'y'}">!</span><span>${r}</span></div>`).join('')}
+      <div class="li"><span class="c y">!</span><span>不含第三方费用（域名、服务器、素材版权）。</span></div>
+      <div class="li"><span class="c y">!</span><span>修改轮次：含 2 轮，超出按工时计。</span></div>
+    </div>
+    <div class="acts"><button onclick="copyPlan()">复制方案</button><button onclick="toast('已标记为客户已确认')">客户确认</button></div>
+  `;
+  window.__p={text,svc,cnt,ex,days,lo,hi,del,rk};
+}
+
+function copyPlan(){
+  const p=window.__p; if(!p)return;
+  const t=['【方案】'+p.svc.n,'需求：'+p.text,'报价：'+money(p.lo)+' – '+money(p.hi),
+    '周期：'+p.days+' 天','','交付清单：',...p.del.map(d=>'  · '+d),...p.ex.map(d=>'  · '+d),
+    '','前置假设：',...p.rk.map(r=>'  · '+r)].join('\n');
+  navigator.clipboard?.writeText(t).then(()=>toast('方案已复制')).catch(()=>toast('复制失败'));
+}
+
+let tm=null;
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tm);tm=setTimeout(()=>t.classList.remove('on'),2200);}
+
+$('#go').onclick=gen;
+$('#req').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey))gen();});
+buildSvc();
+</script>
+
+<!-- ===== 有据门户 · 悬浮返回条 ===== -->
+<style>
+.yj-nav{position:fixed;left:14px;bottom:14px;z-index:9999;display:flex;align-items:center;gap:6px;
+  font-family:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif;font-size:12px;
+  background:rgba(17,24,39,.86);color:#fff;border-radius:99px;padding:7px 8px 7px 12px;
+  box-shadow:0 6px 18px rgba(0,0,0,.18);backdrop-filter:blur(6px);text-decoration:none;
+  transition:opacity .15s,transform .15s}
+.yj-nav:hover{opacity:.92;transform:translateY(-1px)}
+.yj-nav .yj-ico{font-size:13px;line-height:1}
+.yj-nav .yj-txt{white-space:nowrap}
+.yj-nav .yj-sep{opacity:.4;margin:0 2px}
+@media (max-width:480px){.yj-nav{left:8px;bottom:8px;font-size:11px;padding:6px 7px 6px 10px}}
+</style>
+<a class="yj-nav" href="https://youju.robai.dpdns.org/" title="回到有据总入口，看全部产品">
+  <span class="yj-ico">🏠</span><span class="yj-txt">总入口</span><span class="yj-sep">·</span><span class="yj-txt">有据</span>
+</a>
+</body>
+</html>

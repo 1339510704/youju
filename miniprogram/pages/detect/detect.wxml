@@ -1,0 +1,242 @@
+<view class="page detect-page">
+  <view class="bg-layer" style="{{bgStyle}}"></view>
+
+  <view class="page-head">
+    <view class="ph-title">侦探社</view>
+    <view class="d-sub">问一句，找到证据 · 练一双识真的眼</view>
+  </view>
+
+  <view class="d-tabs">
+    <view class="d-tab {{tab==='ask'?'on':''}}" bindtap="setTab" data-t="ask">直接提问</view>
+    <view class="d-tab {{tab==='battle'?'on':''}}" bindtap="setTab" data-t="battle">真假答题</view>
+  </view>
+
+  <!-- ================= 直接提问 ================= -->
+  <block wx:if="{{tab==='ask'}}">
+    <view class="card">
+      <textarea class="d-input" placeholder="想问点什么？比如：空调开 26 度真的更省电吗？"
+                value="{{q}}" bindinput="onQ" maxlength="200" auto-height show-confirm-bar="{{false}}" />
+      <view class="d-row">
+        <view class="d-hint">答案来自元宝搜索，附原文证据</view>
+        <view class="btn btn-primary btn-sm" bindtap="doAsk">{{asking?'搜索中…':'提问'}}</view>
+      </view>
+    </view>
+
+    <view wx:if="{{askErr}}" class="card mt-16 d-err">{{askErr}}</view>
+
+    <block wx:if="{{askResult}}">
+      <block wx:if="{{askResult.empty}}">
+        <view class="empty mt-24">
+          <view class="empty-text">没搜到相关内容，换个说法再问问</view>
+        </view>
+      </block>
+      <block wx:else>
+        <view class="sec">答案</view>
+        <view class="card d-answer-card">
+          <block wx:if="{{askResult.points.length}}">
+            <view wx:for="{{askResult.points}}" wx:key="url" class="d-point">
+              <text class="d-point-dot">·</text>
+              <view class="d-point-body">
+                <view class="d-point-text">{{item.text}}</view>
+                <view class="d-point-src">
+                  <text wx:if="{{item.tierLabel}}" class="tag tag-accent d-tag">{{item.tierLabel}}</text>{{item.site}}
+                </view>
+              </view>
+            </view>
+          </block>
+          <view wx:else class="d-point-text">{{askResult.answer}}</view>
+          <view class="d-from">摘自 {{askResult.count}} 条搜索结果{{askResult.trustedCount?('，其中 '+askResult.trustedCount+' 条来自权威来源'):''}}</view>
+        </view>
+
+        <view class="sec">证据 · {{askResult.sources.length}} 条</view>
+        <view class="list">
+          <view wx:for="{{askResult.sources}}" wx:key="i" class="row row-tap"
+                bindtap="copyUrl" data-url="{{item.url}}">
+            <view class="flex-1">
+              <view class="d-src-title clamp-2">{{item.title || item.url}}</view>
+              <view class="t-2 fz24 d-src-meta">
+                <text wx:if="{{item.tierLabel}}" class="tag tag-accent d-tag">{{item.tierLabel}}</text>{{item.site || '网页'}}{{item.date?(' · '+item.date):''}}
+              </view>
+            </view>
+            <text class="arrow">›</text>
+          </view>
+        </view>
+        <view class="d-note">点任意一条可复制原文链接，粘到浏览器里看全文。</view>
+      </block>
+    </block>
+  </block>
+
+  <!-- ================= 真假答题 ================= -->
+  <block wx:else>
+    <block wx:if="{{!room}}">
+      <!-- 出一个题组 -->
+      <view class="card">
+        <view class="d-create-title">判断真假，考考眼力</view>
+        <view class="d-create-sub">现场用元宝搜索出题：真话照原句，假话改数字或加否定。答完给证据。</view>
+
+        <view class="d-label">选个方向</view>
+        <view class="d-cats">
+          <view wx:for="{{categories}}" wx:key="key" class="d-cat {{catKey===item.key?'on':''}}"
+                bindtap="pickCat" data-key="{{item.key}}">{{item.name}}</view>
+        </view>
+
+        <view class="d-label">或者自己出个主题（可不填）</view>
+        <input class="d-topic-input" placeholder="比如：恐龙 / 三国 / 航天 / 我家娃的十万个为什么"
+               value="{{topic}}" bindinput="onTopic" maxlength="20" confirm-type="done" />
+
+        <view class="d-label">怎么玩</view>
+        <view class="d-modes">
+          <view class="d-mode {{mode==='solo'?'on':''}}" bindtap="setMode" data-m="solo">
+            <view class="d-mode-t">一个人</view>
+            <view class="d-mode-s">自己练，适合孩子和长辈</view>
+          </view>
+          <view class="d-mode {{mode==='duo'?'on':''}}" bindtap="setMode" data-m="duo">
+            <view class="d-mode-t">两个人比</view>
+            <view class="d-mode-s">各选各的，都选完才揭晓</view>
+          </view>
+        </view>
+
+        <view class="d-rounds">
+          <text class="d-rounds-label">题数</text>
+          <view wx:for="{{roundOptions}}" wx:key="*this" class="d-rounds-item {{rounds===item?'on':''}}"
+                bindtap="setRounds" data-n="{{item}}">{{item}}</view>
+        </view>
+
+        <view class="btn btn-primary btn-block" style="margin-top:36rpx" bindtap="createRoom">
+          {{creating?'正在搜题…（约 3～8 秒）':(mode==='solo'?'开始练习':'开一场，喊家人来比')}}
+        </view>
+      </view>
+
+      <view class="card mt-16">
+        <view class="bold fz26">加入家人的一局</view>
+        <view class="d-join-row">
+          <input class="d-code-input" type="number" maxlength="4" placeholder="4 位房间号"
+                 value="{{joinCode}}" bindinput="onJoinCode" />
+          <view class="btn btn-primary btn-sm" bindtap="joinRoom">加入</view>
+        </view>
+        <view class="t-2 fz24 mt-8">房间号由开房的人告诉你（只在这个家里有效）</view>
+      </view>
+
+      <block wx:if="{{rooms.length}}">
+        <view class="sec">这家最近的局</view>
+        <view class="list">
+          <view wx:for="{{rooms}}" wx:key="_id" class="row row-tap" bindtap="enterRoom" data-id="{{item._id}}">
+            <view class="flex-1">
+              <view class="bold fz26">{{item.statusText}} · {{item.modeText}}{{item.code?' · 房间 '+item.code:''}}</view>
+              <view class="t-2 fz24">{{item.ownerName}} 开的{{item.categoryName?(' · '+item.categoryName):''}} · {{item.playerText}} · 第 {{item.qi}}/{{item.rounds}} 题</view>
+            </view>
+            <text class="arrow">›</text>
+          </view>
+        </view>
+      </block>
+    </block>
+
+    <!-- 在房间里 -->
+    <block wx:else>
+      <!-- 双人：等对方进来 -->
+      <block wx:if="{{room.status==='waiting'}}">
+        <view class="card center d-wait">
+          <view class="d-wait-label">房间号</view>
+          <view class="d-wait-code">{{room.code}}</view>
+          <view class="d-wait-tip">把上面这 4 位数字报给家人，他输入就能进来</view>
+          <view class="d-wait-tip">两人都进来后自动开局</view>
+          <view class="d-wait-players">{{room.playerText}}</view>
+        </view>
+        <view class="d-actions">
+          <view class="btn btn-ghost btn-block" bindtap="exitRoom">先退出</view>
+        </view>
+      </block>
+
+      <block wx:else>
+        <!-- 比分 -->
+        <block wx:if="{{room.mode==='duo'}}">
+          <view class="card d-score">
+            <view wx:for="{{room.players}}" wx:key="openid" class="d-player {{item.isMe?'me':''}}">
+              <view class="d-p-name">{{item.name}}</view>
+              <view class="d-p-score">{{item.score}}</view>
+              <view class="d-p-state">{{item.picked? (room.phase==='revealed'?'已答':'已选') : '在等'}}</view>
+            </view>
+            <view class="d-progress">第 {{room.qi+1}} / {{room.rounds}} 题</view>
+          </view>
+        </block>
+        <block wx:else>
+          <view class="card d-solo-bar">
+            <text>第 {{room.qi+1}} / {{room.rounds}} 题</text>
+            <text class="d-solo-score">答对 {{myScore}}</text>
+          </view>
+        </block>
+
+        <!-- 题目 -->
+        <block wx:if="{{room.question}}">
+          <view class="card d-q">
+            <view class="d-q-label">这句话是真的吗？</view>
+            <view class="d-claim">{{room.question.claim}}</view>
+
+            <view class="d-choices">
+              <view class="d-choice real {{choiceCls0}}" bindtap="answer" data-i="0">
+                <text class="d-choice-ic">✓</text><text class="d-choice-t">真的</text>
+              </view>
+              <view class="d-choice fake {{choiceCls1}}" bindtap="answer" data-i="1">
+                <text class="d-choice-ic">✗</text><text class="d-choice-t">假的</text>
+              </view>
+            </view>
+
+            <view wx:if="{{room.phase!=='revealed'}}" class="d-q-tip">
+              {{room.myPick!==null ? (room.mode==='duo' ? '已选好，等对方选完就揭晓…' : '正在揭晓…') : '凭直觉选一个，选完给证据'}}
+            </view>
+
+            <!-- 揭晓 -->
+            <block wx:if="{{room.phase==='revealed'}}">
+              <view class="d-verdict {{verdictOk?'ok':'bad'}}">
+                <text class="d-verdict-main">{{verdictText}}</text>
+                <text class="d-verdict-sub">{{verdictSub}}</text>
+              </view>
+              <view wx:if="{{room.question.origin}}" class="d-origin">
+                <text class="d-origin-label">原句是这样的：</text>
+                <text>{{room.question.origin}}</text>
+              </view>
+            </block>
+          </view>
+
+          <block wx:if="{{room.phase==='revealed'}}">
+            <view class="sec">证据 · 元宝搜索</view>
+            <view wx:if="{{room.question.evidence.length}}" class="list">
+              <view wx:for="{{room.question.evidence}}" wx:key="i" class="row row-tap"
+                    bindtap="copyUrl" data-url="{{item.url}}">
+                <view class="flex-1">
+                  <view class="d-src-title clamp-2">{{item.title || item.url}}</view>
+                  <view class="t-2 fz24 d-src-meta">
+                    <text wx:if="{{item.tierLabel}}" class="tag tag-accent d-tag">{{item.tierLabel}}</text>{{item.site || '网页'}}{{item.date?(' · '+item.date):''}}
+                  </view>
+                </view>
+                <text class="arrow">›</text>
+              </view>
+            </view>
+            <view wx:else class="card t-2 fz24">这题没取到原文证据（搜索没返回），但答案已经算分了。</view>
+          </block>
+
+          <!-- 结束：结果 -->
+          <block wx:if="{{room.status==='done'}}">
+            <view class="card center d-result">
+              <view class="d-result-title">{{resultTitle}}</view>
+              <view class="d-result-sub">{{resultSub}}</view>
+            </view>
+            <view class="d-actions">
+              <view class="btn btn-primary btn-block" bindtap="again">再来一局</view>
+              <view class="btn btn-ghost btn-block" style="margin-top:20rpx" bindtap="exitRoom">退出</view>
+            </view>
+          </block>
+          <block wx:else>
+            <view class="d-actions">
+              <view wx:if="{{room.phase==='revealed'}}" class="btn btn-primary btn-block" bindtap="nextQuestion">
+                {{room.qi+1 >= room.rounds ? '看结果' : '下一题'}}
+              </view>
+              <view wx:elif="{{room.allPicked}}" class="btn btn-primary btn-block" bindtap="nextQuestion">看答案</view>
+              <view wx:else class="btn btn-ghost btn-block" bindtap="exitRoom">我不玩了</view>
+            </view>
+          </block>
+        </block>
+      </block>
+    </block>
+  </block>
+</view>

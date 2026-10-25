@@ -1,0 +1,4 @@
+.lp-h { font-size: 28rpx; font-weight: 600; margin-top: 36rpx; }
+.lp-h:first-child { margin-top: 0; }
+.lp-p { font-size: 26rpx; line-height: 1.8; margin-top: 12rpx; }
+.lp-ind { padding-left: 8rpx; }

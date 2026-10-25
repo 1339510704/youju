@@ -1,0 +1,205 @@
+<view class="page">
+  <view class="bg-layer" style="{{bgStyle}}"></view>
+
+  <view class="page-head">
+    <view class="ph-title">设置</view>
+  </view>
+
+  <!-- 通知 -->
+  <view class="sec">通知</view>
+  <view class="list">
+    <view class="switch-row" style="flex-direction:column;align-items:flex-start;gap:8rpx">
+      <view class="flex-between" style="width:100%">
+        <view class="bold fz26">接收家庭点菜通知</view>
+        <switch checked="{{notifyOn}}" bindchange="onNotifySwitch" color="#E8501F" />
+      </view>
+      <view class="t-3 fz22">开启后有人点菜会尝试微信提醒；需对方点过「允许」才真正收到。</view>
+    </view>
+  </view>
+
+  <!-- 关于 -->
+  <view class="sec">关于</view>
+  <view class="list">
+    <view class="row row-tap" bindtap="goAbout">
+      <view class="ico ico-sage"><image class="ico-img" src="/images/ic/home.png" /></view>
+      <view class="flex-1 ml-16">
+        <view class="bold fz26">关于我</view>
+        <view class="t-2 fz24">任意小程序个性化定制</view>
+      </view>
+      <text class="arrow">›</text>
+    </view>
+    <view class="row row-tap" bindtap="goContact">
+      <view class="ico ico-gold"><image class="ico-img" src="/images/ic/key.png" /></view>
+      <view class="flex-1 ml-16">
+        <view class="bold fz26">联系我</view>
+        <view class="t-2 fz24">微信号 / 二维码</view>
+      </view>
+      <text class="arrow">›</text>
+    </view>
+    <view class="row row-tap" bindtap="goLegal">
+      <view class="flex-1"><view class="bold fz26">隐私政策</view></view>
+      <text class="arrow">›</text>
+    </view>
+    <view class="row row-tap" bindtap="onVersionTap">
+      <view class="flex-1"><view class="bold fz26">版本</view></view>
+      <text class="t-3 fz26">{{version}}</text>
+    </view>
+  </view>
+
+  <!-- 兑换码：只有管理员（连点版本号 5 次 + 输入密钥）才显示整节。
+       之前外层只判断 features.redeemCode，普通用户会看到一个空的「兑换码」标题，很莫名。 -->
+  <block wx:if="{{features.redeemCode && showAdmin && adminAuthed}}">
+    <view class="sec">兑换码</view>
+    <view class="list">
+      <view class="row row-tap" bindtap="openGen">
+        <view class="ico ico-gold"><image class="ico-img" src="/images/ic/key.png" /></view>
+        <view class="flex-1 ml-16">
+          <view class="bold fz26">生成兑换码</view>
+          <view class="t-2 fz24">选兑换内容，设置张数与可用次数</view>
+        </view>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+    <block wx:if="{{codes.length}}">
+      <view class="sec">我发出的码（{{codes.length}}）</view>
+      <view class="code-tabs">
+        <view class="code-tab {{codeTab === 'available' ? 'on' : ''}}" bindtap="setCodeTab" data-t="available">可用 {{availCount}}</view>
+        <view class="code-tab {{codeTab === 'usedup' ? 'on' : ''}}" bindtap="setCodeTab" data-t="usedup">已用完 {{usedUpCount}}</view>
+        <view class="code-tab {{codeTab === 'stopped' ? 'on' : ''}}" bindtap="setCodeTab" data-t="stopped">停用 {{stoppedCount}}</view>
+      </view>
+      <view class="list">
+        <view wx:if="{{!codesView.length}}" class="row center t-2 fz24">这里还没有兑换码</view>
+        <view wx:for="{{codesView}}" wx:key="_id" class="swipe">
+          <view class="swipe-body row row-tap"
+                style="transform:translateX({{_revokeId===item._id?'-172rpx':'0'}})"
+                bindtouchstart="revokeStart" bindtouchmove="revokeMove" bindtouchend="revokeEnd"
+                bindtap="onCodeRowTap" data-id="{{item._id}}">
+            <view class="flex-1">
+              <view class="bold fz26" style="letter-spacing:2rpx">{{item.show}}</view>
+              <view class="t-2 fz24">{{item.valueText}} · 使用 {{item.usesText}}{{item.note ? ' · ' + item.note : ''}}</view>
+            </view>
+            <text class="{{item.status === 'available' ? 'tag tag-accent' : 't-3 fz24'}}">{{item.statusText}}</text>
+          </view>
+          <view wx:if="{{item.status === 'available'}}" class="swipe-act {{_revokeId===item._id?'act-on':''}}" catchtap="revokeCode" data-id="{{item._id}}" data-show="{{item.show}}">作废</view>
+        </view>
+      </view>
+    </block>
+  </block>
+
+  <!-- 数据备份：也在管理员区（连点版本号 5 次 + 密钥）里，只有开发者本人能导出全库 -->
+  <block wx:if="{{showAdmin && adminAuthed}}">
+    <view class="sec">数据备份</view>
+    <view class="list">
+      <view class="row row-tap" bindtap="doBackup">
+        <view class="ico ico-sage"><image class="ico-img" src="/images/ic/key.png" /></view>
+        <view class="flex-1 ml-16">
+          <view class="bold fz26">一键备份全部数据</view>
+          <view class="t-2 fz24">{{lastBackupText || '导出全部数据成一个 JSON 文件，存到云存储'}}</view>
+        </view>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+    <view class="danger-note">建议每月备份一次，并把文件下载到电脑保存：云环境一旦被释放，连云存储里的备份也会一起消失。</view>
+  </block>
+
+  <!-- 账号 -->
+  <view class="sec danger-zone">账号</view>
+  <view class="list">
+    <view class="row row-tap" bindtap="deleteMyData">
+      <view class="flex-1"><view class="bold fz26">删除我的数据</view></view>
+      <text class="arrow">›</text>
+    </view>
+  </view>
+  <view class="danger-note">删除后数据不可恢复，请谨慎操作。</view>
+
+  <!-- 管理员密钥弹层 -->
+  <view wx:if="{{showAdminKeyInput}}" class="mask" bindtap="closeAdminKey">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-head">
+        <view class="sheet-title">管理员验证</view>
+        <view class="sheet-close" bindtap="closeAdminKey">✕</view>
+      </view>
+      <view class="sheet-label">请输入管理员密钥</view>
+      <input class="sheet-input" placeholder="管理员密钥" value="{{adminKeyInput}}" bindinput="onAdminKeyInput" password="{{true}}" />
+      <view class="btn btn-primary btn-lg btn-block mt-20" bindtap="doAdminAuth">验证</view>
+    </view>
+  </view>
+
+  <!-- 生成兑换码弹层 -->
+  <view wx:if="{{showGen}}" class="mask" bindtap="closeGen">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-head">
+        <view class="sheet-title">生成兑换码</view>
+        <view class="sheet-close" bindtap="closeGen">✕</view>
+      </view>
+
+      <view class="sheet-label mt-16">兑换内容 · 会员时长</view>
+      <view class="gen-row">
+        <text class="gen-lbl">时长</text>
+        <view class="chip {{genUnit === 'day' ? 'chip-on' : ''}}" bindtap="setGenUnit" data-u="day">天</view>
+        <view class="chip {{genUnit === 'month' ? 'chip-on' : ''}}" bindtap="setGenUnit" data-u="month">月</view>
+        <input class="sheet-input gen-num" type="number" value="{{genAmount}}" bindinput="onGenAmount" />
+      </view>
+      <view class="gen-row">
+        <text class="gen-lbl">可用次数</text>
+        <input class="sheet-input gen-num" type="number" value="{{genMaxUses}}" bindinput="onGenMaxUses" />
+        <text class="gen-lbl">有效天</text>
+        <input class="sheet-input gen-num" type="number" placeholder="0" value="{{genExpiresDays}}" bindinput="onGenExpiresDays" />
+        <text class="gen-lbl">数量</text>
+        <input class="sheet-input gen-num" type="number" value="{{genCount}}" bindinput="onGenCount" />
+      </view>
+      <view class="t-3 fz22" style="margin-top:6rpx">「有效天」填 0 = 永久有效</view>
+      <input class="sheet-input mt-12" placeholder="自定义码（可选，空格/逗号分隔，4-8位）" value="{{genCustom}}" bindinput="onGenCustom" />
+      <input class="sheet-input mt-12" placeholder="备注（可选）" value="{{genNote}}" bindinput="onGenNote" />
+
+      <view class="btn btn-primary btn-lg btn-block mt-20" bindtap="doGen">{{genBusy ? '生成中…' : '生成'}}</view>
+
+      <block wx:if="{{genList.length}}">
+        <view class="sheet-label mt-24">生成好了（长按单个码即可复制）</view>
+        <view class="gen-codes">
+          <text wx:for="{{genList}}" wx:key="*this" class="gen-code" bindlongpress="copyOne" data-code="{{item}}">{{item}}</text>
+        </view>
+        <view class="btn btn-ghost btn-block mt-16" bindtap="copyCodes">复制全部 {{genList.length}} 个</view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 兑换码使用详情弹层 -->
+  <view wx:if="{{showCodeDetail}}" class="mask" bindtap="closeCodeDetail">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-head">
+        <view class="sheet-title">兑换码详情</view>
+        <view class="sheet-close" bindtap="closeCodeDetail">✕</view>
+      </view>
+      <view class="bold fz26" style="letter-spacing:2rpx">{{codeDetail.show}}</view>
+      <view class="t-2 fz24 mt-8">{{codeDetail.valueText}}</view>
+      <view class="flex-between mt-12">
+        <view class="t-2 fz24">使用次数</view>
+        <view class="bold fz26">{{codeDetail.usesText}}</view>
+      </view>
+      <view class="flex-between mt-8">
+        <view class="t-2 fz24">状态</view>
+        <view class="bold fz26">{{codeDetail.statusText}}</view>
+      </view>
+      <view class="flex-between mt-8">
+        <view class="t-2 fz24">有效期</view>
+        <view class="bold fz26">{{codeDetail.expiresAt}}</view>
+      </view>
+      <view wx:if="{{codeDetail.note}}" class="flex-between mt-8">
+        <view class="t-2 fz24">备注</view>
+        <view class="bold fz26">{{codeDetail.note}}</view>
+      </view>
+
+      <block wx:if="{{codeDetail.uses.length}}">
+        <view class="sheet-label mt-24">使用记录</view>
+        <view class="list">
+          <view wx:for="{{codeDetail.uses}}" wx:key="openid" class="row">
+            <view class="flex-1 fz26">{{item.openid}}</view>
+            <text class="t-2 fz24">{{item.at}}</text>
+          </view>
+        </view>
+      </block>
+    </view>
+  </view>
+
+</view>

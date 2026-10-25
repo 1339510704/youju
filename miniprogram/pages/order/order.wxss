@@ -1,0 +1,55 @@
+/* 家庭点菜页私有样式（公共样式都在 app.wxss） */
+
+/* 数量：跟菜名同一行，弱化处理，避免视觉上"字忽大忽小" */
+.order-qty { font-size: 26rpx; color: var(--text-2); font-weight: 400; margin-left: 10rpx; }
+
+/* 已点菜品的缩略图（和菜单页同一套观感） */
+.order-thumb {
+  width: 96rpx; height: 96rpx; border-radius: 16rpx; overflow: hidden;
+  flex-shrink: 0; background: var(--fill);
+  display: flex; align-items: center; justify-content: center;
+}
+.order-thumb-img { width: 100%; height: 100%; display: block; }
+.order-thumb-ph { width: 100%; height: 100%; opacity: .95; }
+
+/* 状态标签（待接单 / 谁做）放到「XX 点的」这一行：与右侧操作按钮同一水平、垂直对齐，
+   不再和菜名挤在第一行导致标签贴右上角、和按钮上下不齐 */
+.order-meta-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10rpx; margin-top: 8rpx; }
+.order-meta-row .tag { flex-shrink: 0; }
+.order-meta-text { line-height: 1.4; }
+
+/* ---- 顶部头图（家庭背景图，可换）---- */
+.hero {
+  position: relative;
+  /* .page 有 24rpx/40rpx 内边距，负掉让头图贴顶通栏，更像店铺主页 */
+  margin: -24rpx -40rpx 24rpx;
+  padding: 36rpx 40rpx 28rpx;
+  border-radius: 0 0 32rpx 32rpx;
+  overflow: hidden;
+  background-color: #f3e4dc;
+}
+.hero-default { background: linear-gradient(180deg, #ffe7df 0%, #f7e9e2 100%); }
+/* 饭桌顶部背景层：独立一层放在暗色遮罩之下，透明度只作用于图片本身，不影响文案可读性 */
+.hero-bg { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
+/* 压一层暗色，保证图上白字始终看得清 */
+.hero-mask { position: absolute; left: 0; right: 0; top: 0; bottom: 0; background: rgba(34,28,24,.20); }
+.hero-row { position: relative; display: flex; align-items: center; gap: 16rpx; }
+.hero-avatar {
+  width: 88rpx; height: 88rpx; border-radius: 50%; flex-shrink: 0;
+  background: rgba(255,255,255,.94); color: var(--brand-btn);
+  font-size: 36rpx; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.hero-name { font-size: 36rpx; font-weight: 700; color: #fff; letter-spacing: -.4rpx; }
+.hero-sub { font-size: 24rpx; color: rgba(255,255,255,.92); margin-top: 4rpx; }
+.hero-acts { position: relative; display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 26rpx; }
+.hero-act {
+  height: 60rpx; padding: 0 24rpx; border-radius: var(--radius-pill);
+  background: rgba(255,255,255,.94); color: var(--text);
+  font-size: 25rpx; font-weight: 600;
+  display: flex; align-items: center;
+}
+.hero-act:active { opacity: .78; }
+/* 「吃个啥呢」用品牌色填充，和其他三个白底按钮区分开 */
+.hero-act-accent { background: var(--brand-btn); color: #fff; }
+.hero-act-accent:active { opacity: .9; }

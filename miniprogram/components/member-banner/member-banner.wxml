@@ -1,0 +1,9 @@
+<view wx:if="{{!closed}}" class="mbanner">
+  <view class="mb-icon">⚠️</view>
+  <view class="mb-text">
+    <view class="mb-title">会员已到期</view>
+    <view class="mb-sub">功能受限，续费后恢复全部功能</view>
+  </view>
+  <view class="mb-btn" bindtap="goRenew">去续费</view>
+  <view class="mb-close" bindtap="close">×</view>
+</view>

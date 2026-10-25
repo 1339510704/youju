@@ -1,0 +1,24 @@
+# Windows
+[Dd]esktop.ini
+Thumbs.db
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+
+# Node.js
+node_modules/
+
+# 小程序代码上传私钥（切勿提交，泄露等于把账号交出去）
+private.wxa355fe96a761e38a.key
+private.*.key
+
+# 支付云函数真实密钥（仅本地，绝不提交）
+cloudfunctions/pay/config.js
+project.private.config.json
+.merkle-snapshot.json
+

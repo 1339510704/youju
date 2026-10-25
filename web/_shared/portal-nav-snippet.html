@@ -1,0 +1,17 @@
+<!-- ===== 有据门户 · 悬浮返回条（跨产品统一组件，class 前缀 yj- 避免冲突） ===== -->
+<style>
+.yj-nav{position:fixed;left:14px;bottom:14px;z-index:9999;display:flex;align-items:center;gap:6px;
+  font-family:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif;font-size:12px;
+  background:rgba(17,24,39,.86);color:#fff;border-radius:99px;padding:7px 8px 7px 12px;
+  box-shadow:0 6px 18px rgba(0,0,0,.18);backdrop-filter:blur(6px);text-decoration:none;
+  transition:opacity .15s,transform .15s}
+.yj-nav:hover{opacity:.92;transform:translateY(-1px)}
+.yj-nav .yj-ico{font-size:13px;line-height:1}
+.yj-nav .yj-txt{white-space:nowrap}
+.yj-nav .yj-sep{opacity:.4;margin:0 2px}
+@media (max-width:480px){.yj-nav{left:8px;bottom:8px;font-size:11px;padding:6px 7px 6px 10px}}
+</style>
+<a class="yj-nav" href="https://youju.robai.dpdns.org/" title="回到有据总入口，看全部产品">
+  <span class="yj-ico">🏠</span><span class="yj-txt">总入口</span><span class="yj-sep">·</span><span class="yj-txt">有据</span>
+</a>
+<!-- ===== 悬浮返回条结束 ===== -->

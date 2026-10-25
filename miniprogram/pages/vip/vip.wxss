@@ -1,0 +1,33 @@
+/* 小红花页私有样式 */
+/* 等级进度 */
+.lv-box { margin-top: 24rpx; padding-top: 20rpx; border-top: 2rpx solid var(--line); }
+.lv-bar { height: 12rpx; margin-top: 14rpx; border-radius: var(--radius-pill); background: var(--fill); overflow: hidden; }
+.lv-bar-in { height: 100%; border-radius: var(--radius-pill); background: var(--brand-btn); transition: width .28s ease; }
+
+/* 家庭活跃热力图（从 rank 页移来） */
+.heat-card { padding: 24rpx 28rpx 28rpx; }
+.heat-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14rpx; }
+.heat-title { font-size: 28rpx; font-weight: 600; color: var(--text); }
+.heat-sub { font-size: 22rpx; color: var(--text-3); }
+.heat-grid { display: flex; flex-wrap: wrap; gap: 6rpx; }
+/* 格子做成「日历格」：里面显示日号，居中小字 */
+.heat-cell {
+  width: calc((100% - 36rpx) / 7); height: 48rpx; border-radius: 6rpx;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20rpx; color: var(--text-3); line-height: 1;
+}
+.heat-lv0 { background: var(--fill); }
+.heat-lv1 { background: rgba(232,80,31,.22); }
+.heat-lv2 { background: rgba(232,80,31,.45); }
+.heat-lv3 { background: rgba(232,80,31,.7); }
+.heat-lv4 { background: rgba(232,80,31,1); }
+/* 底色越深字越白，否则日号看不清 */
+.heat-lv2, .heat-lv3, .heat-lv4 { color: #fff; font-weight: 600; }
+/* 选中的那天：外圈描边 + 轻微放大，一眼看出在看哪天（空格子也能看出被选中） */
+.heat-cell.heat-on { box-shadow: 0 0 0 4rpx var(--brand-btn); z-index: 1; }
+.heat-cell:active { opacity: .65; }
+.heat-legend { display: flex; align-items: center; gap: 6rpx; margin-top: 10rpx; justify-content: flex-end; }
+.heat-legend-cell { width: 24rpx; height: 24rpx; }
+
+/* 流水行里的「谁」：加粗一点、和后面的动作拉开距离，一眼能扫到人名 */
+.log-who { font-weight: 600; color: var(--text); margin-right: 10rpx; }

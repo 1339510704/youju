@@ -1,0 +1,32 @@
+<view class="page">
+  <view class="bg-layer" style="{{bgStyle}}"></view>
+
+  <view class="page-head">
+    <view class="ph-title">联系我</view>
+    <view class="ph-sub">想定制专属小程序，或只是想聊聊，随时找我</view>
+  </view>
+
+  <view class="card contact-card">
+    <view class="about-bio">{{bio || '这个人很神秘，还没写简介～'}}</view>
+
+    <!-- 微信号（没填就整行不显示） -->
+    <view wx:if="{{wechat}}" class="contact-row">
+      <view class="flex-1">
+        <view class="row-title">微信号</view>
+        <view class="row-desc">{{wechat}}</view>
+      </view>
+      <view class="btn btn-ghost btn-sm" bindtap="copyWechat">复制</view>
+    </view>
+
+    <!-- 二维码 -->
+    <view class="contact-qr-wrap">
+      <block wx:if="{{qr}}">
+        <image src="{{qr}}" class="contact-qr" mode="aspectFit" bindtap="previewQr" show-menu-by-longpress="{{true}}" />
+        <view class="t-3 fz22 mt-8">长按图片可保存 · 点一下看大图</view>
+      </block>
+      <view wx:else class="t-3 fz24">还没放二维码图。把微信二维码图片放到项目里（如 images/contact/qr.png），再到 config.js 的 ABOUT.qr 填路径即可显示。</view>
+    </view>
+  </view>
+
+  <view class="t-3 fz22 mt-16 ml-8">联系方式显示在「我的」页底部，纯展示、不收钱。</view>
+</view>

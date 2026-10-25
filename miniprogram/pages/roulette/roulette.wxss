@@ -1,0 +1,93 @@
+/* 吃个啥呢 · 转盘选菜页私有样式（公共样式在 app.wxss） */
+.mt-32 { margin-top: 32rpx; }
+
+/* ---------- 转盘 ---------- */
+.wheel-wrap {
+  position: relative;
+  width: 560rpx; height: 560rpx;
+  margin: 32rpx auto 8rpx;
+}
+/* 顶部指针：指向转盘 12 点方向 */
+.wheel-pointer {
+  position: absolute; top: -6rpx; left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 18rpx solid transparent;
+  border-right: 18rpx solid transparent;
+  border-top: 30rpx solid var(--brand-btn);
+  z-index: 3;
+}
+.wheel {
+  position: absolute; left: 0; top: 0;
+  width: 560rpx; height: 560rpx;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 12rpx 30rpx rgba(34, 28, 24, .18);
+  border: 8rpx solid #fff;
+  background: #eee;   /* 兜底；实际背景由 wxml 按候选数动态生成 */
+  /* 旋转由「改 transform 角度 + CSS 过渡」驱动：
+     比 wx.createAnimation 稳，且不受默认样式里 transition:none 之类规则干扰。
+     时长必须与 roulette.js 里 4200ms 的收尾定时器一致。 */
+  transition: transform 4.2s cubic-bezier(.15, .9, .2, 1);
+  will-change: transform;
+}
+/* 系统开了「减弱动态效果」时，全局样式会把过渡关掉导致转盘瞬间跳位；
+   这里单独放行转盘，并缩短一点时长，兼顾可看性与无障碍偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .wheel { transition: transform 2.4s ease-out !important; }
+}
+/* 候选菜名：放在每个扇区中间，深色加粗，明显可读 */
+.wheel-label {
+  position: absolute; left: 0; top: 0;
+  width: 100%; height: 50%;
+  transform-origin: bottom center;
+  text-align: center;
+  padding-top: 108rpx;          /* 把文字推到半径中段 = 扇区颜色中间 */
+  box-sizing: border-box;
+  font-size: 24rpx; line-height: 1.15;
+  font-weight: 800;
+  color: #2e2620;               /* 深棕，在浅色扇区上对比明显 */
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1rpx 3rpx rgba(255, 255, 255, .9), 0 -1rpx 2rpx rgba(255, 255, 255, .7);
+}
+/* 中心圆盖，遮住文字根部，写状态字 */
+.wheel-center {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 150rpx; height: 150rpx; border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 4rpx 12rpx rgba(34, 28, 24, .16);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36rpx; font-weight: 800; color: var(--brand-btn);
+  z-index: 2;
+  cursor: pointer;            /* 提示可点击 */
+}
+
+/* ---------- 类型 / 配置 ---------- */
+.cats { display: flex; flex-wrap: wrap; gap: 12rpx; }
+/* 选中的类型：品牌渐变 + 阴影，颜色变化一眼可见 */
+.cats .chip-on {
+  background: linear-gradient(135deg, #ff9166, #ee6a55);
+  color: #fff; font-weight: 700; border-color: transparent;
+  box-shadow: 0 6rpx 16rpx rgba(232, 80, 31, .32);
+  transform: translateY(-1rpx);
+}
+.roulette-cfg { padding: 28rpx 32rpx; }
+.cfg-row { display: flex; align-items: center; justify-content: space-between; }
+.cfg-label { font-size: 28rpx; font-weight: 500; color: var(--text); }
+.cfg-tip { margin-top: 8rpx; }
+.cfg-divider { height: 2rpx; background: var(--line-2); margin: 24rpx 0; }
+.stepper { display: flex; align-items: center; gap: 16rpx; }
+.step-val { min-width: 64rpx; text-align: center; font-size: 38rpx; font-weight: 800; }
+
+/* ---------- 结果行（缩略图复用菜单页样式）---------- */
+.res-row { align-items: center; }
+.res-in { animation: resIn .32s ease both; }
+@keyframes resIn { from { opacity: 0; transform: translateY(10rpx); } to { opacity: 1; transform: translateY(0); } }
+.res-dot { width: 18rpx; height: 18rpx; border-radius: 50%; flex-shrink: 0; margin-left: 12rpx; }
+.dish-thumb { width: 96rpx; height: 96rpx; border-radius: 14rpx; flex-shrink: 0; background: var(--fill); overflow: hidden; }
+.dish-thumb-img { width: 100%; height: 100%; }
+.dish-thumb-ph { width: 100%; height: 100%; }

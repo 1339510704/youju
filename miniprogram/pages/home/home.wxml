@@ -1,0 +1,140 @@
+<view class="page home-page">
+  <member-banner wx:if="{{memberExpired}}" />
+  <view class="bg-layer" style="{{bgStyle}}"></view>
+
+  <!-- 加载中（首次 prepare 还没返回时显示，防止白屏） -->
+  <block wx:if="{{!_ready}}">
+    <!-- 骨架屏：比「加载中…」更快的感觉 -->
+    <view class="home-pad">
+      <view class="sk sk-hello"></view>
+      <view class="sk sk-sec"></view>
+      <view class="sk sk-card"></view>
+      <view class="sk sk-card"></view>
+      <view class="sk sk-card short"></view>
+    </view>
+  </block>
+
+  <!-- 云开发未就绪 -->
+  <block wx:if="{{setup}}">
+    <view class="home-pad">
+      <view class="card mt-24">
+        <view class="flex-c gap-12">
+          <image class="ico-img" src="/images/ic/gear.png" mode="aspectFit" />
+          <view class="flex-1 bold">{{setup.title}}</view>
+        </view>
+        <view class="guide-box mt-16">{{setup.msg}}</view>
+        <button wx:if="{{setup.canInit}}" class="btn btn-primary btn-block mt-20" bindtap="doInitDb">一键修复</button>
+        <button wx:if="{{setup.canRetry}}" class="btn btn-ghost btn-block mt-12" bindtap="doRetry">重试</button>
+      </view>
+    </view>
+  </block>
+
+  <!-- 无空间（保底：即使数据没回来也必须显示，不能白屏） -->
+  <block wx:elif="{{!space || (space === null)}}">
+    <view class="home-pad">
+      <view class="ph-title">空间</view>
+      <view class="list mt-24">
+        <view class="row row-tap" bindtap="goManage">
+          <view class="ico ico-coral"><image class="ico-img" src="/images/ic/home.png" /></view>
+          <view class="flex-1 ml-16">
+            <view class="bold">创建家庭</view>
+          </view>
+          <text class="arrow">›</text>
+        </view>
+        <view class="row row-tap" bindtap="goManage">
+          <view class="ico ico-gray"><image class="ico-img" src="/images/ic/key.png" /></view>
+          <view class="flex-1 ml-16">
+            <view class="bold">用邀请码加入</view>
+          </view>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 正常工作台 -->
+  <block wx:else>
+    <!-- 顶部：暖色品牌行（家 ♥ + 小红花 + 头像）+ 空间切换胶囊一行 -->
+    <view class="home-top">
+      <view class="home-brand" bindtap="onSignIn">
+        <image class="brand-ic" src="/images/ic/home.png" mode="aspectFit" />
+        <text class="brand-name">家</text>
+        <text class="brand-heart">♥</text>
+      </view>
+      <view class="home-top-right">
+        <view class="flower-badge" bindtap="goRank">
+          <image class="flower-ic-sm" src="/images/ic/{{myBadge ? myBadge.icon : 'flower_red'}}.png" /><text>{{myFlowers}}</text><text class="flower-unit">朵</text>
+        </view>
+        <image wx:if="{{me.avatarUrl}}" src="{{me.avatarUrl}}" class="avatar-img avatar-md" mode="aspectFill" bindtap="goMine" />
+        <view wx:else class="avatar avatar-md" bindtap="goMine">{{me.nickName[0]||'我'}}</view>
+      </view>
+    </view>
+    <view class="home-chips">
+      <scroll-view scroll-x class="chips" show-scrollbar="{{false}}">
+        <view wx:for="{{spaces}}" wx:key="_id"
+              class="chip {{item._id===space._id?'chip-on':''}}"
+              bindtap="selectSpace" data-id="{{item._id}}">
+          <image class="ico-inline" src="/images/ic/home.png" />
+          {{item.name}}
+        </view>
+        <view class="chip chip-add" bindtap="goManage">＋</view>
+      </scroll-view>
+    </view>
+
+    <!-- 中部：今天待办 + 热力图，可手工上下滑动 -->
+    <scroll-view scroll-y class="home-body" show-scrollbar="{{false}}">
+      <view class="hello">{{greeting}} · {{dateText}}</view>
+
+      <view class="sec sec-today">
+        <view>今天<text wx:if="{{todoLeft}}" class="home-sec-num"> · {{todoLeft}} 项</text></view>
+        <view class="sec-slogan">一起把家变得更好<text class="slogan-heart"> ♥</text></view>
+      </view>
+
+      <view wx:if="{{todos.length || todoLeft}}" class="list">
+        <view wx:if="{{todos.length===0}}" class="row t-2">都完成啦，今天格外轻松</view>
+        <view wx:for="{{todos}}" wx:key="_id" class="swipe">
+          <view class="swipe-body" style="transform:translateX({{_swipeRightId === item._id ? '172rpx' : (_swipeId === item._id ? '-172rpx' : '0')}});"
+                bindtouchstart="swipeStart" bindtouchmove="swipeMove" bindtouchend="swipeEnd"
+                data-id="{{item._id}}" bindtap="closeSwipe">
+            <view class="row">
+              <view class="circle-hit" catchtap="toggleTodo" data-id="{{item._id}}">
+                <view class="circle {{item.done?'circle-on':''}}"><text wx:if="{{item.done}}" class="tick">✓</text></view>
+              </view>
+              <view class="flex-1 ml-16" catchtap="openTodoDetail" data-id="{{item._id}}">
+                <view class="home-todo-text clamp-2">{{item.content}}</view>
+                <view wx:if="{{item.timeText}}" class="{{item.overdue?'due-over':'due-line'}}">{{item.timeText}}</view>
+              </view>
+            </view>
+          </view>
+          <view class="swipe-act swipe-act-left" catchtap="toggleTodo" data-id="{{item._id}}">完成</view>
+          <view class="swipe-act" catchtap="removeTodo" data-id="{{item._id}}">删除</view>
+        </view>
+        <view wx:if="{{todoLeft>todos.length}}" class="row row-tap t-primary fz26" bindtap="goTodo">
+          查看全部 {{todoLeft}} 项 ›
+        </view>
+      </view>
+
+      <view wx:else class="empty">
+        <image class="empty-img" src="/images/ic/todo.png" />
+        <view class="empty-text">今天没有待办，轻松一下</view>
+      </view>
+
+      <view class="home-foot">
+        <image class="foot-ic" src="/images/ic/flower.png" />
+        <text>家，是幸福的起点</text>
+        <image class="foot-ic" src="/images/ic/heart.png" />
+      </view>
+    </scroll-view>
+
+    <!-- 底部固定四宫格：不随上面滚动，待办再多也压不到它 -->
+    <view class="home-dock">
+      <view wx:for="{{grid}}" wx:key="key" class="dock-cell row-tap" bindtap="goPage" data-page="{{item.page}}">
+        <view class="ico ico-{{item.tone||'coral'}} dock-ico">
+          <image class="ico-img dock-img" src="/images/ic/{{item.icon}}.png" />
+        </view>
+        <view class="dock-name">{{item.name}}</view>
+        <view class="dock-sub">{{item.sub}}</view>
+      </view>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,29 @@
+<view class="page">
+  <view class="bg-layer" style="{{bgStyle}}"></view>
+
+  <view class="page-head">
+    <view class="ph-title">关于我</view>
+  </view>
+
+  <!-- 关于我 -->
+  <view class="sec">关于我</view>
+  <view class="card">
+    <view class="about-bio">{{bio || '这个人很神秘，还没写简介～'}}</view>
+    <view class="about-p">「家·饭桌」帮你和家人一起点菜、接单、攒小红花，把家务变成有商有量的小游戏：谁点的菜谁接单，做完的自动进历史，小红花能换家里的小奖励。</view>
+  </view>
+
+  <!-- 任意小程序个性化定制 -->
+  <view class="sec">任意小程序个性化定制</view>
+  <view class="card">
+    <view class="about-p">不只是这一个工具——如果你也想做一个<text class="t-primary">属于自己/自家/小店</text>的小程序，我可以按你的想法定制：</view>
+    <view class="about-list">
+      <view class="about-li">· 点餐 / 外卖 / 会员积分</view>
+      <view class="about-li">· 预约 / 报名 / 接龙</view>
+      <view class="about-li">· 内部工具 / 数据看板</view>
+      <view class="about-li">· 把现有流程搬上微信，省人力</view>
+    </view>
+    <view class="about-p mt-12">从一句话想法到上线，全程帮你搞定。想聊聊就点下面「联系我」。</view>
+    <view class="btn btn-primary btn-lg btn-block mt-20" bindtap="goContact">联系我</view>
+  </view>
+
+</view>

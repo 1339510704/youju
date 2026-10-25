@@ -1,0 +1,214 @@
+<view class="page">
+  <view class="bg-layer" style="{{bgStyle}}"></view>
+
+  <!-- 云开发未就绪 -->
+  <block wx:if="{{!cloud.ready}}">
+    <view class="card mt-24">
+      <view class="flex-c gap-12">
+        <image class="ico-img" src="/images/ic/gear.png" style="width:40rpx;height:40rpx" />
+        <view class="flex-1 bold">正在准备你的专属空间</view>
+      </view>
+      <view class="guide-box mt-16">{{cloud.msg}}</view>
+      <button wx:if="{{cloud.kind === 'db'}}" class="btn btn-primary btn-block mt-20" bindtap="doInitDb">一键初始化</button>
+      <button wx:if="{{cloud.kind !== 'config'}}" class="btn btn-ghost btn-block mt-12" bindtap="doRetry">重新检测</button>
+    </view>
+  </block>
+
+  <!-- 正常 -->
+  <block wx:else>
+    <!-- 资料卡 -->
+    <view class="card mt-20" bindtap="goProfile">
+      <view class="flex-c gap-20">
+        <image wx:if="{{me.avatarUrl}}" src="{{me.avatarUrl}}" class="avatar-img avatar-lg" mode="aspectFill" />
+        <view wx:else class="avatar avatar-lg">{{meInitial}}</view>
+        <view class="flex-1">
+          <view class="t-title">{{me.nickName || '点这里设置昵称'}}</view>
+          <view class="t-2 fz24 mt-8">{{flowers}} 朵 · {{spaceCount}} 个空间</view>
+        </view>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+
+    <!-- 会员使用期限：免费试用倒计时 + 微信支付 / 兑换码延长 -->
+    <view class="sec">会员</view>
+    <view class="vip-card {{memberExpired ? 'vip-expired' : ''}}">
+      <view class="vip-glow"></view>
+      <view class="vip-top">
+        <view class="flex-1">
+          <view class="vip-title">{{memberExpired ? '会员已到期' : '会员使用中'}}</view>
+          <view class="vip-desc">{{memberExpired ? '功能将受限，续费后恢复' : (memberForever ? '永久有效' : '到期时间 ' + memberDate)}}</view>
+        </view>
+        <view wx:if="{{!memberExpired}}" class="vip-days">
+          <block wx:if="{{memberForever}}">
+            <text class="vip-days-num">永久</text>
+          </block>
+          <block wx:else>
+            <text class="vip-days-num">{{daysLeft}}</text>
+            <text class="vip-days-unit">天</text>
+          </block>
+        </view>
+      </view>
+      <view class="vip-skus">
+        <view wx:for="{{products}}" wx:key="id"
+              class="vip-sku {{selectedProduct === item.id ? 'on' : ''}}"
+              bindtap="selectProduct" data-id="{{item.id}}">
+          <view class="vip-sku-label">{{item.label}}</view>
+          <view class="vip-sku-price">{{item.priceText}}</view>
+        </view>
+      </view>
+      <view class="vip-actions">
+        <view class="vip-buy" bindtap="buyMember">微信支付 · {{selectedPriceText}}</view>
+        <view class="vip-redeem" bindtap="openRedeem">激活兑换码</view>
+      </view>
+      <view wx:if="{{memberSoon}}" class="vip-soon">会员还有 {{daysLeft}} 天到期，记得续费</view>
+      <view class="vip-tip">新用户免费试用 {{trialDays}} 天 · 支持兑换码延期</view>
+      <view class="vip-fix" bindtap="manualReconcile">已付款但没到账？点此补单</view>
+    </view>
+
+    <!-- 我的空间 -->
+    <view class="sec">我的空间</view>
+    <view wx:if="{{spaces.length === 0}}" class="card center">
+      <image class="empty-img" src="/images/ic/home.png" />
+      <view class="t-2 fz24">还没有空间</view>
+    </view>
+
+    <!-- 我的空间：点空间名（✎）可改名；左滑卡片 = 退出（弹窗确认） -->
+    <view wx:for="{{spaces}}" wx:key="_id" class="swipe mt-16">
+      <view class="swipe-body card"
+            style="transform:translateX({{_exitId===item._id?'-172rpx':'0'}})"
+            bindtouchstart="exitStart" bindtouchmove="exitMove" bindtouchend="exitEnd"
+            data-id="{{item._id}}" bindtap="closeExit">
+        <view class="flex-between">
+          <view class="flex-c gap-12">
+            <view class="ico {{item.type==='family'?'ico-coral':'ico-sky'}}">
+              <image class="ico-img" src="/images/ic/{{item.type==='family'?'home':'class'}}.png" />
+            </view>
+            <view>
+              <view class="bold name-tap" catchtap="renameSpace" data-id="{{item._id}}" data-name="{{item.name}}">✎ {{item.name}}</view>
+              <view class="t-2 fz24">{{item.role === 'owner' ? '户主' : (item.role === 'admin' ? '管理员' : '成员')}} · {{item.flowers || 0}} 朵</view>
+            </view>
+          </view>
+          <view wx:if="{{item._id === currentId}}" class="tag tag-accent">当前</view>
+        </view>
+
+        <view class="flex-between mt-16" style="border-top:2rpx solid var(--line);padding-top:16rpx">
+          <text class="t-2 fz24">邀请码</text>
+          <view class="flex-c gap-12">
+            <text class="bold fz26" style="letter-spacing:3rpx">{{item.inviteCode}}</text>
+            <text class="t-primary fz24" catchtap="copyCode" data-code="{{item.inviteCode}}">复制</text>
+          </view>
+        </view>
+
+        <view class="flex gap-12 mt-16">
+          <button wx:if="{{item._id !== currentId}}" class="btn btn-primary btn-sm flex-1" catchtap="enter" data-id="{{item._id}}">进入</button>
+          <button class="btn btn-primary btn-sm flex-1" open-type="share" data-code="{{item.inviteCode}}">邀请</button>
+          <button wx:if="{{item.role === 'owner'}}" class="btn btn-ghost btn-sm flex-1" catchtap="goRankManage" data-id="{{item._id}}">成员</button>
+        </view>
+      </view>
+      <view class="swipe-act {{_exitId===item._id ? 'act-on' : ''}}" catchtap="onSpaceExit" data-id="{{item._id}}" data-name="{{item.name}}">退出</view>
+    </view>
+
+    <!-- 新建 / 加入 -->
+    <view class="flex gap-12 mt-24">
+      <button class="btn btn-primary flex-1" bindtap="openCreate" data-t="family">＋ 创建家庭</button>
+      <button class="btn btn-ghost flex-1" bindtap="openJoin">用邀请码加入</button>
+    </view>
+
+    <!-- 设置 -->
+    <view class="list mt-24">
+      <view class="row row-tap" bindtap="goSettings">
+        <view class="ico ico-gray"><image class="ico-img" src="/images/ic/gear.png" /></view>
+        <view class="flex-1 ml-16">
+          <view class="bold">设置</view>
+        </view>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+
+    <!-- 关于我（引流用，站外纯展示不收钱；config.js 里 ABOUT.bio 留空则整块隐藏） -->
+    <view wx:if="{{about}}" class="card mt-24" bindtap="openAbout">
+      <view class="flex-c gap-12">
+        <view class="ico ico-gray"><image class="ico-img" src="/images/ic/person.png" /></view>
+        <view class="flex-1">
+          <view class="bold">关于我</view>
+          <view class="t-2 fz24 mt-8">{{about.bio}}</view>
+        </view>
+        <text class="arrow">›</text>
+      </view>
+      <view wx:if="{{about.wechat}}" class="flex-between mt-16" style="border-top:2rpx solid var(--line);padding-top:16rpx">
+        <text class="t-2 fz24">微信号 {{about.wechat}}</text>
+        <text class="t-primary fz24" style="padding:20rpx 0 20rpx 32rpx" catchtap="copyWechat">复制</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- 弹层（创建/加入/成员管理）保持不变 -->
+  <view wx:if="{{showCreate}}" class="mask" bindtap="closeCreate">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-head">
+        <view class="sheet-title">创建家庭</view>
+        <view class="sheet-close" bindtap="closeCreate">✕</view>
+      </view>
+      <input class="sheet-input" placeholder="名称，如：张家" value="{{createName}}" bindinput="onName" />
+      <view class="btn btn-primary btn-block mt-20" bindtap="doCreate">创建并进入</view>
+    </view>
+  </view>
+
+  <view wx:if="{{showJoin}}" class="mask" bindtap="closeJoin">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-head">
+        <view class="sheet-title">{{invited ? '有人邀请你加入' : '输入邀请码加入'}}</view>
+        <view class="sheet-close" bindtap="closeJoin">✕</view>
+      </view>
+      <view wx:if="{{invited}}" class="t-2 fz24" style="margin-bottom:12rpx">邀请码已经帮你填好了，点下面的「加入」就行。</view>
+      <input class="sheet-input" placeholder="6 位邀请码（区分大小写）" value="{{joinCode}}" bindinput="onCode" />
+      <view class="btn btn-primary btn-block mt-20" bindtap="doJoin">加入</view>
+    </view>
+  </view>
+
+  <!-- 关于我 → 微信二维码（点「复制」拿微信号） -->
+  <view wx:if="{{showAbout}}" class="mask" bindtap="closeAbout">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-head">
+        <view class="sheet-title">加我微信</view>
+        <view class="sheet-close" bindtap="closeAbout">✕</view>
+      </view>
+      <view class="center" style="padding:24rpx 0">
+        <image wx:if="{{about.qr}}" src="{{about.qr}}" mode="aspectFit"
+               style="width:440rpx;height:440rpx;border-radius:16rpx;background:var(--fill)" />
+        <view wx:else class="t-3 fz24">还没放二维码图片（把图片放到 images/contact/qr.png）</view>
+      </view>
+      <view wx:if="{{about.wechat}}" class="flex-between" style="border-top:2rpx solid var(--line);padding-top:20rpx">
+        <text class="bold fz28">微信号 {{about.wechat}}</text>
+        <text class="t-primary fz24" style="padding:20rpx 0 20rpx 32rpx" bindtap="copyWechat">复制</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 激活兑换码弹层 -->
+  <view wx:if="{{showRedeem}}" class="mask" bindtap="closeRedeem">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-head">
+        <view class="sheet-title">激活兑换码</view>
+        <view class="sheet-close" bindtap="closeRedeem">✕</view>
+      </view>
+      <view class="sheet-label">兑换码（不区分大小写，横线空格可省略）</view>
+      <view class="t-2 fz24" style="margin-top:8rpx">兑换成功后自动延长会员时长</view>
+      <input class="sheet-input mt-12" placeholder="如 A2B3-C4D5-E6F7" value="{{redeemCode}}" bindinput="onRedeemCode" />
+      <view class="btn btn-primary btn-lg btn-block mt-20" bindtap="doRedeem">{{redeeming ? '兑换中…' : '兑换'}}</view>
+    </view>
+  </view>
+
+  <!-- 重命名空间弹层 -->
+  <view wx:if="{{showRename}}" class="mask" bindtap="closeRename">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-head">
+        <view class="sheet-title">修改空间名称</view>
+        <view class="sheet-close" bindtap="closeRename">✕</view>
+      </view>
+      <input class="sheet-input" placeholder="名称，最多 20 字" value="{{renameName}}" maxlength="20" bindinput="onRenameInput" />
+      <view class="btn btn-primary btn-block mt-20" bindtap="doRename">保存</view>
+    </view>
+  </view>
+
+</view>

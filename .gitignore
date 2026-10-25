@@ -1,0 +1,33 @@
+# ---------- 密钥与私有配置（绝对不进仓库） ----------
+# 支付云函数真实密钥（模板见 cloudfunctions/pay/config.example.js）
+cloudfunctions/pay/config.js
+# 小程序代码上传私钥
+private.*.key
+*.key
+# 小程序/IDE 本地私有配置
+project.private.config.json
+.merkle-snapshot.json
+.codeartsdoer/
+
+# ---------- 依赖 ----------
+node_modules/
+.pnpm-store/
+.wrangler/
+.wrangler.toml.bak
+
+# ---------- 环境变量 ----------
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+
+# ---------- 构建产物 ----------
+dist/
+build/
+*.log
+
+# ---------- 系统文件 ----------
+[Dd]esktop.ini
+Thumbs.db
+.DS_Store

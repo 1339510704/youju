@@ -1,0 +1,65 @@
+<view class="page page-bar">
+  <view class="bg-layer" style="{{bgStyle}}"></view>
+
+  <view class="page-head">
+    <view class="ph-title">我的资料</view>
+    <view class="ph-sub">头像、昵称、背景在你的空间里都会显示</view>
+  </view>
+
+  <!-- 头像 + 昵称横排：点头像换头像，点昵称直接改（不写任何操作提示） -->
+  <view class="card mt-20">
+    <view class="flex-c gap-24">
+      <view class="avatar-wrap">
+        <image wx:if="{{avatarUrl}}" src="{{avatarUrl}}" class="avatar-pic" mode="aspectFill" />
+        <view wx:else class="avatar-ph">＋</view>
+        <view class="avatar-cam"><image src="/images/ic/person.png" /></view>
+        <button class="avatar-hit" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar"></button>
+      </view>
+      <view class="flex-1">
+        <input class="nick-input" type="nickname" placeholder="昵称"
+               value="{{nickName}}" bindinput="onNick" bindblur="onNick" />
+        <view wx:if="{{uploading}}" class="t-3 fz22 mt-8">上传中…</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 背景图：详细设置收进二级页（各位置开关 + 透明度） -->
+  <view class="sec">背景图</view>
+  <view class="list">
+    <view class="row row-tap" bindtap="goBgSet">
+      <view class="ico ico-lilac"><image class="ico-img" src="/images/ic/house.png" /></view>
+      <view class="flex-1 ml-16">
+        <view class="bold fz26">背景图设置</view>
+        <view class="t-2 fz24">家 / 饭桌 / 小红花 各位置单独设置</view>
+      </view>
+      <text class="arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 家庭背景图：全家人都能看到，免费试用 3 天 -->
+  <view class="sec">家庭背景图</view>
+  <view class="card">
+    <view class="flex-between">
+      <view class="flex-1">
+        <view class="row-title">全家共用一张背景</view>
+        <view class="row-desc">{{spaceBgText}}</view>
+      </view>
+      <view class="btn btn-ghost btn-sm" bindtap="chooseSpaceBg">{{spaceBg.url && spaceBg.valid ? '换一张' : '上传'}}</view>
+    </view>
+
+    <view wx:if="{{spaceBg.mode === 'member' || spaceBg.mode === 'expired'}}" class="row-desc t-primary mt-12">
+      {{spaceBg.mode === 'member' ? '会员有效期内一直可用' : '会员已到期，续费后自动恢复'}}
+    </view>
+
+    <view wx:if="{{spaceBg.url && spaceBg.valid}}" class="mt-16">
+      <image src="{{spaceBg.url}}" class="bg-preview" mode="aspectFill" />
+      <view class="btn btn-ghost btn-sm mt-12" bindtap="clearSpaceBg">恢复默认背景</view>
+    </view>
+  </view>
+
+  <!-- 底部固定：保存全宽 -->
+  <view class="actionbar">
+    <view class="btn btn-primary btn-lg" style="flex:1" bindtap="save">保存资料</view>
+  </view>
+
+</view>

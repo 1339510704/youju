@@ -1,0 +1,165 @@
+/* 首页 = 仪表盘：顶部一行（空间切换 + 小红花 + 头像），中间待办可滚动，底部固定四宫格 */
+
+.home-page {
+  /* 自定义 tabBar 是页面内的 fixed 元素、不占页面高度，
+     底部「四宫格」会被它盖住 —— 这里把可视高度让出来。
+     ⚠️ tabBar 自身还有 env(safe-area-inset-bottom)（iPhone 底部黑条），
+        只减 128rpx 的话，全面屏上四宫格的文字会被 tabBar 压住看不见。
+        双写兜底：不支持 env() 的设备回落到第一条，不会整条失效。 */
+  /* 全局 .page 有 min-height:100vh，会覆盖下面的 height —— 必须显式清零，
+     否则页面仍是整屏高，四宫格贴底被 tabBar 盖住 */
+  min-height: 0;
+  height: calc(100vh - 122rpx);
+  height: calc(100vh - 122rpx - env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* 非工作台状态（未配置 / 无空间）也走同一条竖向节奏 */
+.home-pad {
+  flex: 1;
+  min-height: 0;
+  padding: 24rpx 32rpx 48rpx;
+  overflow-y: auto;
+}
+
+/* ---------- 顶部：品牌行（家 ♥）+ 空间胶囊行 ---------- */
+.home-top {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx 32rpx 4rpx;
+}
+.home-brand { display: flex; align-items: center; gap: 12rpx; }
+.brand-ic { width: 60rpx; height: 60rpx; }
+.brand-name { font-size: 48rpx; font-weight: 700; letter-spacing: -1rpx; line-height: 1.15; color: var(--text); }
+.brand-heart { color: var(--brand); font-size: 28rpx; align-self: flex-start; margin-top: 2rpx; }
+.home-chips { flex: none; padding: 8rpx 32rpx 4rpx; }
+.home-chips .chips { padding: 4rpx 0; }
+.home-chips .chips::-webkit-scrollbar { display: none; width: 0; height: 0; color: transparent; }
+.home-top-right {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+/* ---------- 中部：待办滚动区 ---------- */
+.home-body {
+  flex: 1;
+  min-height: 0;
+  padding: 8rpx 32rpx 24rpx;
+  box-sizing: border-box;
+}
+.home-sec-num { color: var(--text-3); font-weight: 400; }
+.home-todo-text { font-size: 30rpx; }
+
+/* ---- 暖心细节：问候 / 口号 / 逾期感叹号 / 底部结语 ---- */
+.hello { font-size: 24rpx; color: var(--text-2); padding: 12rpx 4rpx 0; }
+.sec-today { align-items: center; }
+.sec-slogan { font-size: 22rpx; color: var(--brand); opacity: .85; }
+.slogan-heart { font-size: 20rpx; }
+.home-foot {
+  display: flex; align-items: center; justify-content: center; gap: 12rpx;
+  padding: 44rpx 0 20rpx;
+  font-size: 24rpx; color: var(--text-3);
+}
+.foot-ic { width: 28rpx; height: 28rpx; opacity: .65; }
+.flower-unit { font-size: 22rpx; font-weight: 500; opacity: .8; }
+
+/* ---------- 底部：固定四宫格（大按钮感，字体加大）---------- */
+.home-dock {
+  flex: none;
+  display: flex;
+  align-items: stretch;
+  padding: 14rpx 12rpx;
+  background: rgba(255, 255, 255, .97);
+  border-top: 2rpx solid var(--line);
+  box-shadow: var(--sh-up);
+}
+.dock-cell {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  padding: 14rpx 4rpx;
+  border-radius: var(--radius);
+}
+.dock-ico { width: 132rpx; height: 132rpx; border-radius: 32rpx; }
+/* 四宫格图标底色：比全局 tile 色再深一档，整排不发散、彩色图标也更跳 */
+.home-dock .dock-ico.ico-coral { background: #f7b498; }
+.home-dock .dock-ico.ico-gold { background: #f0cf94; }
+.home-dock .dock-ico.ico-sky { background: #a9cdef; }
+.home-dock .dock-ico.ico-sage { background: #aedaa9; }
+.home-dock .dock-ico.ico-lilac { background: #cdbdf0; }
+.dock-img { width: 84rpx; height: 84rpx; }
+.dock-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  letter-spacing: -.2rpx;
+  color: var(--text);
+  line-height: 1.2;
+}
+.dock-sub {
+  font-size: 20rpx; color: var(--text-3); line-height: 1.3;
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ---------- 家庭活跃热力图 ---------- */
+.heat-wrap {
+  padding: 16rpx 0 8rpx;
+  margin-top: 16rpx;
+}
+.heat-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12rpx; }
+.heat-title { font-size: 28rpx; font-weight: 600; color: var(--text); }
+.heat-sub { font-size: 22rpx; color: var(--text-3); }
+.heat-grid { display: flex; flex-wrap: wrap; gap: 6rpx; }
+.heat-cell {
+  width: calc((100% - 36rpx) / 7);
+  height: 44rpx;
+  border-radius: 6rpx;
+}
+.heat-lv0 { background: var(--fill); }
+.heat-lv1 { background: rgba(232,80,31,.22); }
+.heat-lv2 { background: rgba(232,80,31,.45); }
+.heat-lv3 { background: rgba(232,80,31,.7); }
+.heat-lv4 { background: rgba(232,80,31,1); }
+.heat-legend { display: flex; align-items: center; gap: 6rpx; margin-top: 10rpx; justify-content: flex-end; }
+.heat-legend-cell { width: 24rpx; height: 24rpx; }
+
+/* ---------- 顶部空间切换胶囊：升级视觉（选中=品牌渐变，未选=毛玻璃白）---------- */
+.home-chips .chip {
+  display: inline-flex; align-items: center;
+  height: 64rpx; padding: 0 28rpx; margin-right: 12rpx; border-radius: var(--radius-pill);
+  font-size: 27rpx; color: var(--text-2);
+  background: rgba(255, 255, 255, .82); border: 2rpx solid var(--line);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 2rpx 8rpx rgba(34, 28, 24, .04);
+}
+.home-chips .chip-on {
+  background: linear-gradient(135deg, #ff9166, #ee6a55);
+  color: #fff; font-weight: 600; border-color: transparent;
+  box-shadow: 0 6rpx 16rpx rgba(232, 80, 31, .30);
+}
+.home-chips .chip-add {
+  padding: 0 26rpx; color: var(--brand-btn); font-size: 34rpx;
+  background: transparent; border: 2rpx dashed var(--brand-line); box-shadow: none;
+}
+
+/* ---- 首屏骨架：先占位，数据回来直接替换，避免"白屏 + 加载中" ---- */
+.sk { background: rgba(255,255,255,.72); border-radius: var(--radius); margin-bottom: 20rpx; }
+.sk-hello { width: 42%; height: 26rpx; }
+.sk-sec { width: 30%; height: 30rpx; margin: 36rpx 0 20rpx; }
+.sk-card { height: 116rpx; }
+.sk-card.short { width: 72%; }
+
+/* 首页默认背景：未设家庭背景图 / 个人背景时的柔和暖色渐变（inline style 为空才生效） */
+.home-page .bg-layer {
+  background: linear-gradient(180deg, #ffe7df 0%, #fbf2ee 32%, #f5f3f0 78%);
+}

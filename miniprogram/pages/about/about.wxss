@@ -1,0 +1,11 @@
+/* 关于我（二级页）私有样式 */
+.about-bio {
+  font-size: 30rpx; font-weight: 600; color: var(--text); line-height: 1.5;
+}
+.about-p {
+  font-size: 27rpx; color: var(--text-2); line-height: 1.7; margin-top: 12rpx;
+}
+.about-list { margin-top: 12rpx; }
+.about-li {
+  font-size: 27rpx; color: var(--text-2); line-height: 1.9;
+}

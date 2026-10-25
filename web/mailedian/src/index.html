@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>麦乐点 · 麦当劳点餐助手</title>
+<style>
+:root{
+  --cream:#FFF9F0; --card:#FFFFFF; --ink:#241812; --ink2:#6B5A4E;
+  --red:#DA291C; --red2:#F04E3E; --yellow:#FFC72C; --yellow2:#FFE08A;
+  --green:#12A66A; --line:#F0E2D2; --shadow:0 8px 26px rgba(52,32,16,.08);
+  --sans:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif;
+  --round:"Nunito","Quicksand","PingFang SC",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--cream);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(1000px 500px at 15% -10%,#FFE9C9,transparent 60%),
+             radial-gradient(800px 500px at 110% 10%,#FFEFEF,transparent 60%);}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 70px;position:relative;z-index:1}
+/* 顶栏 */
+header{display:flex;align-items:center;gap:12px;padding:16px 0 10px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .m{width:40px;height:40px;border-radius:12px;background:linear-gradient(150deg,var(--yellow),var(--red));display:grid;place-items:center;font-size:20px;box-shadow:0 8px 20px rgba(218,41,28,.25)}
+.logo .nm{font-family:var(--round);font-weight:900;font-size:20px;letter-spacing:-.3px}
+.logo .nm span{color:var(--red)}
+header .sp{flex:1}
+.status{font-size:11.5px;font-weight:700;border-radius:99px;padding:5px 12px;border:1.5px solid var(--line);background:#fff;display:flex;align-items:center;gap:7px;color:var(--ink2)}
+.status .d{width:8px;height:8px;border-radius:50%;background:#C9BCAD}
+.status.ok{color:var(--green);border-color:#BFE8D6}
+.status.ok .d{background:var(--green);box-shadow:0 0 8px rgba(18,166,106,.6)}
+.status.bad{color:var(--red);border-color:#F3C7C2}
+.status.bad .d{background:var(--red)}
+/* 连接横幅 */
+.banner{display:none;margin:6px 0 14px;border:1.5px dashed var(--red);background:#FFF3F1;border-radius:12px;padding:12px 16px;font-size:13px;line-height:1.75}
+.banner.on{display:block}
+.banner b{color:var(--red)}
+.banner code{font-family:Consolas,monospace;background:#2A1A14;color:#FFE08A;padding:3px 8px;border-radius:5px;font-size:12px;display:inline-block;margin:3px 0}
+/* Hero */
+.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:center;padding:18px 0 20px}
+@media(max-width:860px){.hero{grid-template-columns:1fr}}
+.hero h1{font-family:var(--round);font-size:clamp(36px,5.6vw,60px);font-weight:900;line-height:1.02;letter-spacing:-.04em}
+.hero h1 em{font-style:normal;color:var(--red)}
+.hero p{margin-top:10px;font-size:14.5px;color:var(--ink2);max-width:460px}
+.hero .mascot{justify-self:center;width:150px;height:150px;border-radius:32px;background:linear-gradient(150deg,var(--yellow2),var(--yellow));display:grid;place-items:center;font-size:64px;box-shadow:0 20px 44px rgba(218,41,28,.18);transform:rotate(-4deg)}
+/* 步骤条 */
+.steps{display:flex;gap:6px;margin:6px 0 16px;flex-wrap:wrap}
+.st{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800;color:#B6A697;padding:6px 12px;border-radius:99px;background:#fff;border:1.5px solid var(--line)}
+.st .n{width:18px;height:18px;border-radius:50%;background:#EDE0D2;color:#8A7563;display:grid;place-items:center;font-size:10px}
+.st.on{color:var(--red);border-color:#F3C7C2;background:#FFF4F1}
+.st.on .n{background:var(--red);color:#fff}
+.st.done{color:var(--green);border-color:#BFE8D6;background:#F0FBF6}
+.st.done .n{background:var(--green);color:#fff}
+/* 面板 */
+.panel{background:var(--card);border-radius:18px;border:1px solid var(--line);box-shadow:var(--shadow);padding:18px 20px;margin-bottom:14px}
+.panel h2{font-size:14px;font-weight:900;display:flex;align-items:center;gap:9px;margin-bottom:13px}
+.panel h2 .i{color:var(--red)}
+.panel h2 .r{margin-left:auto;font-size:11.5px;font-weight:500;color:var(--ink2)}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:130px}
+.field label{font-size:11px;color:var(--ink2);font-weight:700}
+input,select{border:1.5px solid var(--line);border-radius:10px;padding:9px 11px;font-family:var(--sans);font-size:13.5px;background:#FFFDF9;color:var(--ink);outline:none;transition:.15s;width:100%}
+input:focus,select:focus{border-color:var(--yellow);background:#fff;box-shadow:0 0 0 3px rgba(255,199,44,.22)}
+.btn{padding:10px 20px;border:0;border-radius:10px;background:var(--red);color:#fff;font-size:13.5px;font-weight:900;cursor:pointer;transition:.15s;font-family:var(--sans);box-shadow:0 6px 16px rgba(218,41,28,.24);white-space:nowrap}
+.btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(218,41,28,.3)}
+.btn:disabled{background:#D9CCC0;cursor:wait;transform:none;box-shadow:none}
+.btn.ghost{background:#fff;color:var(--ink2);border:1.5px solid var(--line);box-shadow:none}
+.btn.ghost:hover{border-color:var(--yellow);color:var(--ink);transform:none}
+.btn.yellow{background:var(--yellow);color:#3A2500}
+/* 门店 */
+.stores{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:12px}
+.store{border:1.5px solid var(--line);border-radius:13px;padding:12px 14px;cursor:pointer;transition:.15s;background:#FFFDF9}
+.store:hover{border-color:var(--yellow);background:#FFFBEF}
+.store.on{border-color:var(--red);background:#FFF4F1;box-shadow:0 6px 18px rgba(218,41,28,.1)}
+.store .nm{font-size:14px;font-weight:900;display:flex;align-items:center;gap:7px}
+.store .nm .open{font-size:9.5px;font-weight:700;padding:1px 7px;border-radius:99px;background:#E9F8F1;color:var(--green)}
+.store .nm .close{font-size:9.5px;font-weight:700;padding:1px 7px;border-radius:99px;background:#F5EAEA;color:#B05A52}
+.store .ad{font-size:11.5px;color:var(--ink2);margin-top:4px;line-height:1.5}
+.store .ds{font-size:11px;color:#B6A697;margin-top:4px;font-family:Consolas,monospace}
+/* 菜单 */
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:thin}
+.tab{white-space:nowrap;font-size:12px;font-weight:800;padding:7px 14px;border-radius:99px;background:#FFF7E9;border:1.5px solid var(--line);cursor:pointer;color:var(--ink2);transition:.15s}
+.tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.item{border:1.5px solid var(--line);border-radius:14px;padding:10px;background:#FFFDF9;display:flex;flex-direction:column;transition:.15s}
+.item:hover{border-color:var(--yellow);box-shadow:0 8px 20px rgba(52,32,16,.06)}
+.item img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:#FFF3E0}
+.item .nm{font-size:13px;font-weight:900;margin-top:8px;line-height:1.35;min-height:36px}
+.item .pr{display:flex;align-items:baseline;gap:6px;margin-top:5px}
+.item .cur{font-size:16px;font-weight:900;color:var(--red)}
+.item .ori{font-size:11px;color:#B6A697;text-decoration:line-through}
+.item .tg{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;min-height:18px}
+.item .tg span{font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:99px;background:#FFF1D6;color:#A06A00}
+.item .add{margin-top:8px;padding:7px;border:0;border-radius:9px;background:var(--yellow);color:#3A2500;font-size:12px;font-weight:900;cursor:pointer;font-family:var(--sans)}
+.item .add:hover{filter:brightness(.96)}
+/* 购物车 */
+.cart-line{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.cart-line:last-child{border-bottom:0}
+.cart-line .nm{flex:1;font-size:13px;font-weight:800}
+.cart-line .q{display:flex;align-items:center;gap:0;border:1.5px solid var(--line);border-radius:99px;overflow:hidden}
+.cart-line .q button{width:26px;height:26px;border:0;background:#FFF7E9;color:var(--red);font-weight:900;cursor:pointer}
+.cart-line .q span{min-width:26px;text-align:center;font-size:12px;font-weight:900}
+.cart-line .p{width:64px;text-align:right;font-size:13px;font-weight:900;color:var(--red)}
+.empty{border:1.5px dashed var(--line);border-radius:12px;padding:30px 16px;text-align:center;color:#B6A697;font-size:12.5px}
+/* 结算 */
+.coupons{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.cp{border:1.5px solid var(--line);border-radius:10px;padding:7px 11px;font-size:11.5px;font-weight:800;cursor:pointer;background:#FFFDF9;color:var(--ink2);transition:.15s}
+.cp:hover{border-color:var(--yellow)}
+.cp.on{background:#FFF4D6;border-color:var(--yellow);color:#8A5A00}
+.quote{background:#FFF8EC;border:1px dashed #EBD3A8;border-radius:12px;padding:12px 15px;margin-top:10px}
+.qline{display:flex;justify-content:space-between;font-size:12.5px;padding:2px 0;color:var(--ink2)}
+.qline.total{font-size:16px;font-weight:900;color:var(--ink);padding-top:8px;margin-top:6px;border-top:1.5px solid #EBD3A8}
+.qline.total .v{color:var(--red)}
+.takeways{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.tw{font-size:11.5px;font-weight:800;padding:6px 13px;border-radius:99px;border:1.5px solid var(--line);background:#fff;cursor:pointer;color:var(--ink2)}
+.tw.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+/* 订单 */
+.order{border:1.5px solid var(--line);border-radius:14px;padding:15px 17px;background:#FFFDF9}
+.order .oh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.order .oid{font-family:Consolas,monospace;font-size:12px;color:var(--ink2)}
+.order .badge{font-size:10.5px;font-weight:900;padding:2px 9px;border-radius:99px;background:#FFF1D6;color:#A06A00}
+.order .pick{font-size:26px;font-weight:900;color:var(--red);font-family:Consolas,monospace;letter-spacing:.06em}
+.order .pl{list-style:none;margin-top:8px;display:grid;gap:4px}
+.order .pl li{font-size:12px;color:var(--ink2)}
+.order a.pay{display:inline-block;margin-top:10px;font-size:12px;color:#2B5AA6;word-break:break-all}
+/* 提示 */
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(16px);background:var(--ink);color:#FFF3E0;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:200}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.foot{text-align:center;font-size:11px;color:#B9A794;margin-top:30px;line-height:1.9}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo"><div class="m">🍔</div><div class="nm">麦乐<span>点</span></div></div>
+    <div class="sp"></div>
+    <div class="status" id="status"><span class="d"></span><span id="statusTxt">连接中…</span></div>
+  </header>
+
+  <div class="banner" id="banner">
+    <b>未连接到本机代理。</b> 麦当劳官方 MCP 不允许浏览器直连（CORS 预检返回 403），所以页面通过本机代理访问，<b>Token 留在服务端</b>。<br>
+    在本文件夹运行：<code>py server.py</code><br>
+    然后用 <code>http://127.0.0.1:8789/</code> 打开本页。代理只依赖 Python 标准库，关窗口即停。
+    <div class="row" style="margin-top:10px">
+      <button class="btn" onclick="boot()">重试连接</button>
+    </div>
+  </div>
+
+  <section class="hero">
+    <div>
+      <h1>打开就能点<br><em>菜单是店里的</em></h1>
+      <p>门店、菜单、优惠券、报价全部来自麦当劳 MCP 的实时数据。选门店 → 加购 → 看官方报价 → 下单，一条线走完。</p>
+    </div>
+    <div class="mascot">🍟</div>
+  </section>
+
+  <div class="steps" id="steps">
+    <div class="st on" data-s="1"><span class="n">1</span>选门店</div>
+    <div class="st" data-s="2"><span class="n">2</span>选餐品</div>
+    <div class="st" data-s="3"><span class="n">3</span>结算</div>
+    <div class="st" data-s="4"><span class="n">4</span>下单</div>
+  </div>
+
+  <!-- 1 门店 -->
+  <div class="panel">
+    <h2><span class="i">📍</span>在哪吃<span class="r" id="storeHint">先选一个门店</span></h2>
+    <div class="row">
+      <div class="field" style="max-width:150px">
+        <label>取餐方式</label>
+        <select id="mode">
+          <option value="pickup">到店自取</option>
+          <option value="drive">得来速</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>城市</label>
+        <input id="city" value="北京市">
+      </div>
+      <div class="field">
+        <label>位置关键词</label>
+        <input id="keyword" value="中关村" placeholder="如：中关村">
+      </div>
+      <button class="btn" id="btnStores" style="align-self:flex-end">查门店</button>
+    </div>
+    <div class="stores" id="stores"></div>
+  </div>
+
+  <!-- 2 菜单 -->
+  <div class="panel">
+    <h2><span class="i">🍔</span>菜单<span class="r" id="menuHint">选门店后自动加载</span></h2>
+    <div class="tabs" id="tabs"></div>
+    <div class="items" id="items"><div class="empty">还没有菜单。先在上面选一个门店。</div></div>
+  </div>
+
+  <!-- 3 结算 -->
+  <div class="panel">
+    <h2><span class="i">🛒</span>购物车<span class="r" id="cartHint">0 件</span></h2>
+    <div id="cart"><div class="empty">还没加东西。上面点「加入」。</div></div>
+    <div class="coupons" id="coupons"></div>
+    <div class="quote" id="quote" style="display:none"></div>
+    <div class="takeways" id="takeways"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="btnOrder" disabled>确认下单</button>
+      <button class="btn ghost" id="btnClear">清空</button>
+    </div>
+  </div>
+
+  <!-- 4 订单 -->
+  <div class="panel" id="orderPanel" style="display:none">
+    <h2><span class="i">🧾</span>订单<span class="r" id="orderHint"></span></h2>
+    <div id="order"></div>
+  </div>
+
+  <div class="foot">
+    麦乐点 · 赛道01 用餐 · 底层调用麦当劳官方 MCP（mcp.mcd.cn）<br>
+    本项目为第三方客户端演示，与麦当劳公司无关联
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s=>document.querySelector(s);
+const S = {
+  connected:false,
+  mode:'pickup',
+  store:null,
+  menu:null,
+  tab:0,
+  cart:{},           // code -> {item, qty}
+  coupons:[],
+  coupon:null,
+  quote:null,
+  takeWay:null,
+  order:null
+};
+
+/* ---------- 本机代理 API ---------- */
+async function api(path, opts){
+  const r = await fetch(path, opts);
+  const j = await r.json().catch(()=>null);
+  if(!j) throw new Error('代理返回无法解析');
+  if(!j.ok) throw new Error(j.error || '接口返回失败');
+  return j;
+}
+function qs(o){
+  return Object.entries(o)
+    .filter(([k,v])=>v!==undefined && v!==null && v!=='')
+    .map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
+}
+
+/* ---------- 连接 ---------- */
+async function boot(){
+  setStatus('连接中…','');
+  try{
+    await api('/api/health');
+    S.connected = true;
+    setStatus('麦当劳 MCP 已连接','ok');
+    $('#banner').classList.remove('on');
+  }catch(e){
+    S.connected = false;
+    setStatus('未连接','bad');
+    $('#banner').classList.add('on');
+  }
+}
+function setStatus(t, cls){
+  $('#statusTxt').textContent = t;
+  $('#status').className = 'status ' + (cls||'');
+}
+
+/* ---------- 1 门店 ---------- */
+async function loadStores(){
+  S.mode = $('#mode').value;
+  const city = $('#city').value.trim() || '北京市';
+  const keyword = $('#keyword').value.trim() || '中关村';
+  const beType = S.mode==='drive' ? 5 : 1;
+  $('#btnStores').disabled = true; $('#btnStores').textContent = '查询中…';
+  try{
+    const r = await api('/api/stores?' + qs({city, keyword, beType}));
+    const stores = r.stores || [];
+    S.stores = stores;
+    $('#storeHint').textContent = `找到 ${stores.length} 家`;
+    if(!stores.length){ $('#stores').innerHTML = '<div class="empty">附近没查到门店，换个关键词试试。</div>'; }
+    else{
+      $('#stores').innerHTML = stores.map((st,i)=>`
+        <div class="store" data-i="${i}">
+          <div class="nm">${esc(st.storeName)}
+            <span class="${st.businessStatus?'open':'close'}">${st.businessStatus?'营业中':'休息中'}</span>
+          </div>
+          <div class="ad">${esc(st.address)}</div>
+          <div class="ds">${esc(st.distance||'')} · ${esc(st.businessStartTime||'')}-${esc(st.businessEndTime||'')}</div>
+        </div>`).join('');
+      document.querySelectorAll('.store').forEach(el=>el.onclick=()=>pickStore(+el.dataset.i));
+    }
+  }catch(e){
+    toast('门店查询失败：'+e.message);
+  }
+  $('#btnStores').disabled = false; $('#btnStores').textContent = '查门店';
+}
+
+async function pickStore(i){
+  const st = S.stores[i];
+  S.store = st;
+  document.querySelectorAll('.store').forEach((el,j)=>el.classList.toggle('on', j===i));
+  setStep(2);
+  await loadMenu();
+  await loadCoupons();
+}
+
+/* ---------- 2 菜单 ---------- */
+async function loadMenu(){
+  $('#menuHint').textContent = '加载中…';
+  $('#items').innerHTML = '<div class="empty">正在从门店拉菜单…</div>';
+  try{
+    const orderType = S.mode==='pickup' ? 1 : 2;
+    const beType = S.mode==='drive' ? 5 : 1;
+    const r = await api('/api/menu?' + qs({storeCode:S.store.storeCode, orderType, beType}));
+    S.menu = { categories: r.categories || [], itemCount: r.itemCount || 0 };
+    S.tab = 0;
+    renderTabs();
+    renderItems();
+    $('#menuHint').textContent = `${S.menu.categories.length} 个分类 · ${S.menu.itemCount} 个餐品`;
+  }catch(e){
+    $('#menuHint').textContent = '加载失败';
+    $('#items').innerHTML = '<div class="empty">菜单加载失败：'+esc(e.message)+'</div>';
+  }
+}
+
+function renderTabs(){
+  $('#tabs').innerHTML = (S.menu.categories||[]).map((c,i)=>
+    `<div class="tab ${i===S.tab?'on':''}" data-i="${i}">${esc(c.name)}</div>`).join('');
+  document.querySelectorAll('.tab').forEach(el=>el.onclick=()=>{ S.tab=+el.dataset.i; renderTabs(); renderItems(); });
+}
+
+function renderItems(){
+  const cat = S.menu.categories[S.tab];
+  if(!cat){ $('#items').innerHTML='<div class="empty">没有餐品</div>'; return; }
+  $('#items').innerHTML = cat.items.map(it=>`
+    <div class="item">
+      <img src="${it.image||''}" alt="">
+      <div class="nm">${esc(it.name)}</div>
+      <div class="pr"><span class="cur">¥${it.currentPrice}</span>
+        ${it.originalPrice && it.originalPrice!==it.currentPrice?`<span class="ori">¥${it.originalPrice}</span>`:''}</div>
+      <div class="tg">${(it.tags||[]).map(t=>`<span>${esc(t)}</span>`).join('')}
+        ${it.discountType?`<span>${esc(it.discountType)}</span>`:''}</div>
+      <button class="add" onclick="addItem('${it.code}')">加入</button>
+    </div>`).join('');
+}
+
+/* ---------- 3 购物车与算价 ---------- */
+function findItem(code){
+  if(!S.menu) return null;
+  for(const c of S.menu.categories) for(const it of c.items) if(it.code===code) return it;
+  return null;
+}
+function addItem(code){
+  const it = findItem(code);
+  if(!it) return;
+  if(!S.cart[code]) S.cart[code] = {item:it, qty:0};
+  S.cart[code].qty++;
+  renderCart();
+  setStep(3);
+  refreshQuote();
+}
+function changeQty(code, d){
+  const c = S.cart[code]; if(!c) return;
+  c.qty += d;
+  if(c.qty<=0) delete S.cart[code];
+  renderCart();
+  refreshQuote();
+}
+function clearCart(){
+  S.cart = {}; S.quote = null; S.coupon = null;
+  renderCart(); $('#quote').style.display='none'; $('#takeways').innerHTML='';
+  $('#btnOrder').disabled = true;
+}
+
+function renderCart(){
+  const codes = Object.keys(S.cart);
+  $('#cartHint').textContent = `${codes.reduce((a,c)=>a+S.cart[c].qty,0)} 件`;
+  if(!codes.length){ $('#cart').innerHTML = '<div class="empty">还没加东西。上面点「加入」。</div>'; return; }
+  $('#cart').innerHTML = codes.map(code=>{
+    const c = S.cart[code];
+    const price = (parseFloat(c.item.currentPrice)||0) * c.qty;
+    return `<div class="cart-line">
+      <span class="nm">${esc(c.item.name)}</span>
+      <span class="q"><button onclick="changeQty('${code}',-1)">−</button><span>${c.qty}</span><button onclick="changeQty('${code}',1)">＋</button></span>
+      <span class="p">¥${price.toFixed(1)}</span>
+    </div>`;
+  }).join('');
+}
+
+function buildItems(){
+  const codes = Object.keys(S.cart);
+  return codes.map(code=>{
+    const it = S.cart[code].item;
+    const o = {productCode:code, quantity:S.cart[code].qty};
+    if(S.coupon){
+      const applies = !S.coupon.products || !S.coupon.products.length ||
+                      S.coupon.products.some(p=>p.productCode===code);
+      if(applies){ o.couponId = S.coupon.couponId; o.couponCode = S.coupon.couponCode; }
+    }
+    return o;
+  });
+}
+
+let quoteTimer = null;
+function refreshQuote(){
+  if(!S.store) return;
+  const items = buildItems();
+  if(!items.length){ $('#quote').style.display='none'; $('#btnOrder').disabled=true; return; }
+  clearTimeout(quoteTimer);
+  quoteTimer = setTimeout(async ()=>{
+    try{
+      const orderType = S.mode==='pickup' ? 1 : 2;
+      const beType = S.mode==='drive' ? 5 : 1;
+      const r = await api('/api/quote', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({storeCode:S.store.storeCode, orderType, beType, items})
+      });
+      S.quote = r.quote;
+      renderQuote();
+    }catch(e){ toast('算价失败：'+e.message); }
+  }, 200);
+}
+
+function renderQuote(){
+  const q = S.quote; if(!q) return;
+  const yuan = n=>(n/100).toFixed(2);
+  $('#quote').style.display = 'block';
+  $('#quote').innerHTML = `
+    <div class="qline"><span>商品金额</span><span>¥${yuan(q.productPrice)}</span></div>
+    <div class="qline"><span>配送费</span><span>¥${yuan(q.deliveryPrice)}</span></div>
+    <div class="qline"><span>优惠</span><span style="color:var(--green)">-¥${yuan(q.discount)}</span></div>
+    <div class="qline total"><span>应付</span><span class="v">¥${yuan(q.price)}</span></div>`;
+
+  // 取餐方式
+  const tws = q.takeWayList || [];
+  if(tws.length){
+    if(!S.takeWay) S.takeWay = tws[0].code;
+    $('#takeways').innerHTML = tws.map(t=>
+      `<div class="tw ${S.takeWay===t.code?'on':''}" onclick="pickTakeWay('${t.code}')">${esc(t.title||t.name)}</div>`).join('');
+  }
+  $('#btnOrder').disabled = false;
+}
+
+function pickTakeWay(code){ S.takeWay = code; renderQuote(); }
+
+/* ---------- 优惠券 ---------- */
+async function loadCoupons(){
+  if(!S.store) return;
+  try{
+    const orderType = S.mode==='pickup' ? 1 : 2;
+    const beType = S.mode==='drive' ? 5 : 1;
+    const r = await api('/api/coupons?' + qs({storeCode:S.store.storeCode, orderType, beType}));
+    S.coupons = r.coupons || [];
+    renderCoupons();
+  }catch(e){ S.coupons = []; renderCoupons(); }
+}
+function renderCoupons(){
+  if(!S.coupons.length){ $('#coupons').innerHTML = ''; return; }
+  $('#coupons').innerHTML = S.coupons.map((c,i)=>
+    `<div class="cp ${S.coupon && S.coupon.couponId===c.couponId?'on':''}" data-i="${i}">${esc(c.title)}</div>`).join('');
+  document.querySelectorAll('.cp').forEach(el=>el.onclick=()=>{
+    const c = S.coupons[+el.dataset.i];
+    S.coupon = (S.coupon && S.coupon.couponId===c.couponId) ? null : c;
+    renderCoupons();
+    refreshQuote();
+  });
+}
+
+/* ---------- 4 下单与订单 ---------- */
+async function placeOrder(){
+  if(!S.store || !Object.keys(S.cart).length) return;
+  $('#btnOrder').disabled = true; $('#btnOrder').textContent = '下单中…';
+  try{
+    const orderType = S.mode==='pickup' ? 1 : 2;
+    const beType = S.mode==='drive' ? 5 : 1;
+    const r = await api('/api/order', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        storeCode:S.store.storeCode, orderType, beType,
+        items: buildItems(),
+        takeWayCode: S.takeWay || ''
+      })
+    });
+    S.order = r.order || r;
+    renderOrder();
+    setStep(4);
+    $('#orderPanel').style.display = 'block';
+    $('#orderPanel').scrollIntoView({behavior:'smooth', block:'start'});
+  }catch(e){
+    toast('下单失败：'+e.message);
+  }
+  $('#btnOrder').disabled = false; $('#btnOrder').textContent = '确认下单';
+}
+
+function renderOrder(){
+  const o = S.order; if(!o) return;
+  const yuan = n=> (typeof n==='number' ? (n/100).toFixed(2) : Number(n||0).toFixed(2));
+  $('#orderHint').textContent = o.orderStatus || '';
+  $('#order').innerHTML = `
+    <div class="order">
+      <div class="oh">
+        <span class="badge">${esc(o.orderStatus||'已创建')}</span>
+        <span class="oid">${esc(o.orderId||'')}</span>
+      </div>
+      <div style="font-size:13px;font-weight:800">${esc(o.storeName||'')}</div>
+      <div style="font-size:12px;color:var(--ink2)">${esc(o.storeAddress||'')}</div>
+      ${o.pickupCode?`<div style="margin-top:8px">取餐码 <span class="pick">${esc(o.pickupCode)}</span></div>`:''}
+      <ul class="pl">
+        ${(o.products||[]).map(p=>`<li>${esc(p.productName)} × ${p.quantity} · ¥${esc(p.price)}</li>`).join('')}
+      </ul>
+      <div style="margin-top:8px;font-size:13px">应付 <b style="color:var(--red);font-size:17px">¥${yuan(o.totalAmount)}</b></div>
+      ${o.payH5Url?`<a class="pay" href="${esc(o.payH5Url)}" target="_blank" rel="noopener">${esc(o.payH5Url)}</a>`:''}
+      <div class="row" style="margin-top:12px">
+        <button class="btn ghost" onclick="refreshOrder()">刷新状态</button>
+        <button class="btn ghost" onclick="cancelOrder()">取消订单</button>
+      </div>
+    </div>`;
+}
+
+async function refreshOrder(){
+  if(!S.order) return;
+  try{
+    const r = await api('/api/order?' + qs({orderId:S.order.orderId}));
+    S.order = Object.assign({}, S.order, r.order||r);
+    renderOrder();
+    toast('状态已刷新');
+  }catch(e){ toast('查询失败：'+e.message); }
+}
+async function cancelOrder(){
+  if(!S.order) return;
+  try{
+    await api('/api/cancel', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({orderId:S.order.orderId, cancelReasonCode:1})});
+    S.order.orderStatus = '已取消';
+    renderOrder();
+    toast('订单已取消');
+  }catch(e){ toast('取消失败：'+e.message); }
+}
+
+/* ---------- 工具 ---------- */
+function setStep(n){
+  document.querySelectorAll('.st').forEach(el=>{
+    const s = +el.dataset.s;
+    el.className = 'st' + (s<n?' done':s===n?' on':'');
+  });
+}
+function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+let tm=null;
+function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(tm); tm=setTimeout(()=>t.classList.remove('on'),2400); }
+
+/* ---------- 事件 ---------- */
+$('#btnStores').onclick = loadStores;
+$('#btnOrder').onclick = placeOrder;
+$('#btnClear').onclick = clearCart;
+$('#mode').onchange = ()=>{ S.mode = $('#mode').value; };
+
+/* 启动 */
+(async ()=>{
+  await boot();
+  if(S.connected) { $('#storeHint').textContent = '点「查门店」开始'; }
+})();
+</script>
+
+<!-- ===== 有据门户 · 悬浮返回条 ===== -->
+<style>
+.yj-nav{position:fixed;left:14px;bottom:14px;z-index:9999;display:flex;align-items:center;gap:6px;
+  font-family:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif;font-size:12px;
+  background:rgba(17,24,39,.86);color:#fff;border-radius:99px;padding:7px 8px 7px 12px;
+  box-shadow:0 6px 18px rgba(0,0,0,.18);backdrop-filter:blur(6px);text-decoration:none;
+  transition:opacity .15s,transform .15s}
+.yj-nav:hover{opacity:.92;transform:translateY(-1px)}
+.yj-nav .yj-ico{font-size:13px;line-height:1}
+.yj-nav .yj-txt{white-space:nowrap}
+.yj-nav .yj-sep{opacity:.4;margin:0 2px}
+@media (max-width:480px){.yj-nav{left:8px;bottom:8px;font-size:11px;padding:6px 7px 6px 10px}}
+</style>
+<a class="yj-nav" href="https://youju.robai.dpdns.org/" title="回到有据总入口，看全部产品">
+  <span class="yj-ico">🏠</span><span class="yj-txt">总入口</span><span class="yj-sep">·</span><span class="yj-txt">有据</span>
+</a>
+</body>
+</html>

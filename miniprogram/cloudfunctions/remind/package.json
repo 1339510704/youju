@@ -1,0 +1,9 @@
+{
+  "name": "remind",
+  "version": "1.0.0",
+  "description": "定时提醒：每分钟扫描到期提醒并推送订阅消息",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

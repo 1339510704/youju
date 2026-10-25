@@ -1,0 +1,262 @@
+<view class="page page-bar">
+  <member-banner wx:if="{{memberExpired}}" />
+  <view class="bg-layer" style="{{bgStyle}}"></view>
+
+  <block wx:if="{{!space && !noSpace}}">
+    <view class="empty"><view class="empty-text">加载中…</view></view>
+  </block>
+  <block wx:elif="{{!space}}">
+    <view class="empty"><view class="empty-text">还没有家庭空间，到「家」页创建一个</view></view>
+  </block>
+
+  <block wx:elif="{{space.type !== 'family'}}">
+    <view class="page-head">
+      <view class="ph-title">家庭菜单</view>
+      <view class="ph-sub">这是家庭空间的功能</view>
+    </view>
+    <view class="card mt-24">请到「家」切到家庭空间，再进来管理菜单。</view>
+  </block>
+
+  <block wx:else>
+    <view class="page-head">
+      <view class="ph-title">{{isOrder ? '点菜' : '家庭菜单'}}</view>
+      <view class="ph-sub">{{isOrder ? '点右边的 ＋ 加入，选好点下面「下单」' : (tab==='public' ? '大家公开的好菜，一键加进你家' : '共 ' + dishes.length + ' 道菜 · 点一行可编辑')}}</view>
+    </view>
+
+    <!-- 管理模式下：家庭菜单 / 公共菜单 切换 -->
+    <view wx:if="{{!isOrder}}" class="seg mt-16">
+      <view class="seg-item {{tab==='family' ? 'seg-item-on' : ''}}" bindtap="setTab" data-tab="family">家庭菜单</view>
+      <view class="seg-item {{tab==='public' ? 'seg-item-on' : ''}}" bindtap="setTab" data-tab="public">公共菜单</view>
+    </view>
+
+    <!-- 家庭菜单：分类左右布局（管理 + 点菜模式都用） -->
+    <block wx:if="{{tab==='family'}}">
+      <view class="cat-wrap mt-16">
+        <view class="cat-side">
+          <view wx:for="{{filters}}" wx:key="*this"
+                class="cat-side-i {{item === filter ? 'on' : ''}}"
+                bindtap="setFilter" bindlongpress="onCatLongPress" data-c="{{item}}">{{item}}</view>
+        </view>
+
+        <view class="cat-main">
+          <view wx:if="{{shown.length === 0}}" class="empty">
+            <image class="empty-img" src="/images/ic/menu.png" />
+            <view class="empty-text">{{dishes.length ? '这个分类下还没有菜' : (isOrder ? '菜单还是空的，先去加几道菜' : '还没有菜品，点下面加一道')}}</view>
+          </view>
+
+          <view wx:else class="list">
+            <view wx:for="{{shown}}" wx:key="_id" class="dish-row dish-row-tap"
+                  bindtap="onCardTap" data-id="{{item._id}}">
+              <view class="dish-thumb">
+                <image wx:if="{{item.image}}" class="dish-thumb-img" src="{{item.imgUrl || item.image}}" mode="aspectFill" lazy-load />
+                <image wx:else class="dish-thumb-ph" src="/images/ic/dish_ph.png" />
+              </view>
+
+              <view class="dish-info">
+                <view class="dish-title">{{item.name}}</view>
+                <view class="dish-meta">
+                  <text>{{item.category || '其他'}}</text>
+                  <text class="t-accent">{{item.flowers || 1}}❀</text>
+                </view>
+              </view>
+
+              <!-- 点菜模式：未选显示圆形加号，已选显示 − N ＋ -->
+              <block wx:if="{{isOrder}}">
+                <view wx:if="{{item._qty}}" class="dish-step">
+                  <view class="step-btn" catchtap="decDish" data-id="{{item._id}}">－</view>
+                  <text class="step-val">{{item._qty}}</text>
+                  <view class="step-btn step-btn-solid" catchtap="incDish" data-id="{{item._id}}">＋</view>
+                </view>
+                <view wx:else class="dish-plus" catchtap="incDish" data-id="{{item._id}}">＋</view>
+              </block>
+              <text wx:else class="arrow">›</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <!-- 公共菜单：跨家庭公开菜，一键加进自家 -->
+    <block wx:elif="{{tab==='public'}}">
+      <view class="list mt-16">
+        <view wx:if="{{publicDishes.length === 0}}" class="empty">
+          <image class="empty-img" src="/images/ic/menu.png" />
+          <view class="empty-text">还没有公开的菜，把自家菜单里的菜设为「公开」就会出现在这里</view>
+        </view>
+        <view wx:else>
+          <view wx:for="{{publicDishes}}" wx:key="_id" class="row pub-row">
+            <view class="dish-thumb">
+              <image wx:if="{{item.image}}" class="dish-thumb-img" src="{{item.imgUrl || item.image}}" mode="aspectFill" lazy-load />
+              <image wx:else class="dish-thumb-ph" src="/images/ic/dish_ph.png" />
+            </view>
+            <view class="flex-1 ml-16 pub-body">
+              <view class="bold">{{item.name}}</view>
+              <view class="t-2 fz24">{{item.category || '其他'}} · {{item.flowers || 1}}❀</view>
+              <view wx:if="{{item.creatorName}}" class="pub-creator">by {{item.creatorName}}</view>
+              <view wx:if="{{item.likeCount > 0}}" class="pub-like-count">{{item.likeCount}} 人点赞过</view>
+            </view>
+            <view class="pub-acts">
+              <view class="btn btn-soft btn-sm {{item.hasLiked ? 'liked' : ''}}" catchtap="likeDish" data-id="{{item._id}}">
+                {{item.hasLiked ? '已点赞 ❀' : '点赞 ❀'}}
+              </view>
+              <view wx:if="{{item.mine}}" class="btn btn-ghost btn-sm" catchtap="cancelPublic" data-id="{{item._id}}">取消公开</view>
+              <view wx:else class="btn btn-ghost btn-sm" catchtap="addPublic" data-id="{{item._id}}">添加</view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </block>
+
+  </block>
+
+  <!-- 点菜模式底部条：已点 + 下单（长按随机搭配，点击二次确认） -->
+  <view class="actionbar" wx:if="{{isOrder && space && space.type === 'family'}}">
+    <view class="actionbar-info" bindtap="openCart">
+      <view class="actionbar-num">{{total}}<text class="t-2" style="font-size:26rpx;font-weight:400"> 道已点</text></view>
+      <view class="actionbar-label" wx:if="{{total}}">共 {{totalFlowers}} 朵 · <text class="link" catchtap="openCart">查看明细</text></view>
+      <view class="actionbar-label" wx:else>点右边的 ＋ 加入 · 我还有 {{myFlowers}} 朵</view>
+    </view>
+    <view class="btn btn-primary btn-lg {{total ? '' : 'disabled'}}" bindtap="confirmSubmit" bindlongpress="randomFill">下单</view>
+  </view>
+
+  <!-- 管理模式底部条：家庭菜单加菜 -->
+  <view class="actionbar" wx:elif="{{space && space.type === 'family' && tab==='family'}}">
+    <view class="btn btn-primary btn-lg btn-fill" bindtap="openEdit">＋ 加菜品</view>
+  </view>
+
+  <!-- 编辑 / 新增弹层（仅管理模式）-->
+  <view wx:if="{{showEdit}}" class="mask" bindtap="closeEdit">
+    <view class="sheet dish-sheet" catchtap="noop"
+          bindtouchstart="panStart" bindtouchmove="panMove" bindtouchend="panEnd">
+      <view class="sheet-head">
+        <view class="sheet-title">{{editId ? '编辑菜品' : '加一道菜'}}</view>
+        <view class="sheet-close" bindtap="closeEdit">✕</view>
+      </view>
+
+      <!-- 左边图片；右边最上面是「菜名 + 输入框」，下面接「花费小红花」 -->
+      <view class="dish-edit-hero">
+        <view class="dish-edit-img {{image ? '' : 'dish-edit-img-ph'}}" bindtap="chooseImage">
+          <image wx:if="{{image}}" src="{{image}}" class="dish-edit-thumb" mode="aspectFill" />
+          <block wx:else>
+            <image class="dish-edit-ph" src="/images/ic/dish_ph.png" mode="aspectFill" />
+            <view class="dish-edit-ph-tip">＋ 加图片</view>
+          </block>
+          <view wx:if="{{image}}" class="img-clear" catchtap="clearImage">×</view>
+        </view>
+        <view class="dish-edit-side">
+          <!-- 菜名和输入框同一行（和其它行一致：标签左、控件右） -->
+          <view class="edit-field">
+            <text class="edit-field-label">菜名</text>
+            <input class="sheet-input dish-name-input" placeholder="如：番茄炒蛋" value="{{name}}" bindinput="onName" maxlength="24" confirm-type="done" />
+          </view>
+          <view class="edit-field">
+            <text class="edit-field-label">花费小红花</text>
+            <view class="dish-flower-edit">
+              <view class="step-btn" bindtap="decFlower">－</view>
+              <text class="dish-flower-val">{{flowers}}</text>
+              <view class="step-btn step-btn-solid" bindtap="incFlower">＋</view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 公开：文字简化 + 一句小提示，单独一行 -->
+      <view class="edit-field dish-pub-row">
+        <view class="dish-pub-text">
+          <text class="edit-field-label">公开</text>
+          <text class="t-3 fz22">公共菜单里别人也能看到</text>
+        </view>
+        <switch checked="{{isPublicDish}}" bindchange="onPublic" color="#E8501F" />
+      </view>
+
+      <view class="sheet-label">分类</view>
+      <view class="flex wrap gap-12">
+        <view wx:for="{{cats}}" wx:key="*this"
+              class="chip {{item === category ? 'chip-on' : ''}}"
+              bindtap="pickCat" data-c="{{item}}">{{item}}</view>
+        <view class="chip chip-add" bindtap="addCat">＋</view>
+      </view>
+
+      <view class="sheet-label">备注</view>
+      <!-- auto-height：默认 2 行高度，文字多了自己长高（不再固定一坨把弹层顶出屏幕） -->
+      <textarea class="sheet-textarea" auto-height placeholder="可写：爱人的拿手菜 / 微辣 / 周末限定…（选填）" value="{{notes}}" bindinput="onNotes" maxlength="200" />
+
+      <view class="sheet-foot">
+        <view class="btn btn-primary btn-lg btn-block" bindtap="save">保存</view>
+        <!-- 删除改成文字链接：省一行高度，编辑时「保存 + 删除」一屏能看到，不用下滑 -->
+        <view wx:if="{{editId}}" class="dish-del" bindtap="del">删除这道菜</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 已点明细弹层 -->
+  <view wx:if="{{showCart}}" class="mask" bindtap="closeCart">
+    <view class="sheet" catchtap="noop"
+          bindtouchstart="panStart" bindtouchmove="panMove" bindtouchend="panEnd">
+      <view class="sheet-head">
+        <view class="sheet-title">已点清单</view>
+        <view class="sheet-close" bindtap="closeCart">✕</view>
+      </view>
+      <view wx:if="{{total === 0}}" class="empty"><view class="empty-text">还没点菜</view></view>
+      <view wx:else class="list">
+        <block wx:for="{{shown}}" wx:key="_id">
+          <view wx:if="{{item._qty}}" class="row cart-row">
+            <view class="dish-thumb">
+              <image wx:if="{{item.image}}" class="dish-thumb-img" src="{{item.imgUrl || item.image}}" mode="aspectFill" lazy-load />
+              <image wx:else class="dish-thumb-ph" src="/images/ic/dish_ph.png" />
+            </view>
+            <view class="flex-1 ml-16">
+              <view class="bold">{{item.name}}</view>
+              <view class="t-2 fz24">{{item.flowers || 1}}❀ × {{item._qty}}</view>
+            </view>
+            <view class="dish-step">
+              <view class="step-btn" catchtap="decDish" data-id="{{item._id}}">－</view>
+              <text class="step-val">{{item._qty}}</text>
+              <view class="step-btn step-btn-solid" catchtap="removeFromCart" data-id="{{item._id}}">删</view>
+            </view>
+          </view>
+        </block>
+      </view>
+      <!-- 用餐安排：用餐日期 / 到点提醒 / 提醒谁（下单前选，选填） -->
+      <view wx:if="{{total > 0}}" class="plan">
+        <view class="plan-row">
+          <text class="plan-label">用餐时间</text>
+          <view class="plan-val">
+            <picker mode="date" value="{{mealDate}}" bindchange="onMealDate">
+              <view class="tag">{{mealDateText || '今天'}}</view>
+            </picker>
+            <picker mode="time" value="{{mealTime}}" bindchange="onMealTime">
+              <view class="tag">{{mealTime || '18:00'}}</view>
+            </picker>
+          </view>
+        </view>
+        <view class="plan-row">
+          <text class="plan-label">到点提醒</text>
+          <view class="plan-val">
+            <picker mode="date" value="{{remDate || mealDate}}" bindchange="onRemDate">
+              <view class="tag {{remDate ? 'tag-accent' : 'tag-gray'}}">{{remDate || '不提醒'}}</view>
+            </picker>
+            <picker wx:if="{{remDate}}" mode="time" value="{{remTime}}" bindchange="onRemTime">
+              <view class="tag tag-accent">{{remTime}}</view>
+            </picker>
+            <text wx:if="{{remDate}}" class="plan-clear" bindtap="clearRemind">清除</text>
+          </view>
+        </view>
+        <view wx:if="{{remDate}}" class="plan-row">
+          <text class="plan-label">提醒谁</text>
+          <picker mode="selector" range="{{toOptions}}" value="{{toIdx}}" bindchange="onTo">
+            <view class="tag">{{toOptions[toIdx]}}</view>
+          </picker>
+        </view>
+        <view class="plan-tip">{{remDate ? '到点会给「' + toOptions[toIdx] + '」发微信提醒，并生成一条待办' : '点「不提醒」那个日期可加一条到点提醒'}}</view>
+      </view>
+
+      <view class="flex gap-12 mt-16">
+        <view class="btn btn-ghost flex-1" bindtap="clearCart">清空</view>
+        <view class="btn btn-ghost flex-1" bindtap="closeCart">继续点菜</view>
+      </view>
+      <view class="btn btn-primary btn-lg btn-block" style="margin-top:32rpx" bindtap="submit">下单 · 共 {{totalFlowers}} 朵</view>
+    </view>
+  </view>
+
+</view>

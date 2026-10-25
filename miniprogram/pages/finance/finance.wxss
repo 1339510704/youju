@@ -1,0 +1,36 @@
+/* 记账理财页私有样式（其余复用全局设计系统） */
+
+/* 本月概览：三列 + 分隔线 */
+.fin-overview { display: flex; align-items: center; padding: 32rpx 12rpx; }
+.fin-ov-cell { flex: 1; text-align: center; }
+.fin-ov-label { font-size: 24rpx; color: var(--text-2); }
+.fin-ov-num { font-size: 40rpx; font-weight: 800; letter-spacing: -.6rpx; margin-top: 8rpx; line-height: 1.1; }
+.fin-ov-sep { width: 2rpx; height: 56rpx; background: var(--line); }
+
+/* 分组与明细行 */
+.fin-group { margin-top: 8rpx; }
+.fin-group-head { display: flex; align-items: baseline; justify-content: space-between; padding: 20rpx 6rpx 12rpx; }
+.fin-group-month { font-size: 28rpx; font-weight: 700; color: var(--text); }
+.fin-group-sum { font-size: 22rpx; color: var(--text-3); }
+.fin-row { padding: 26rpx 32rpx; }
+.fin-dot { width: 16rpx; height: 16rpx; border-radius: 50%; flex-shrink: 0; margin-top: 14rpx; }
+.fin-amt { font-size: 32rpx; font-weight: 700; flex-shrink: 0; margin-left: 16rpx; }
+
+/* 记一笔弹层：大金额 + 分类胶囊 */
+.fin-amt-input { display: flex; align-items: center; gap: 12rpx; margin-top: 20rpx;
+  background: var(--fill); border-radius: var(--radius); padding: 20rpx 28rpx; }
+.fin-amt-sym { font-size: 40rpx; font-weight: 700; color: var(--text-2); }
+.fin-amt-field { flex: 1; font-size: 52rpx; font-weight: 800; color: var(--text); min-width: 0; }
+.fin-cats { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 20rpx; }
+.fin-cat { height: 64rpx; padding: 0 24rpx; display: inline-flex; align-items: center;
+  border-radius: var(--radius-pill); background: var(--fill); color: var(--text-2);
+  font-size: 26rpx; border: 2rpx solid transparent; }
+.fin-cat.on { background: var(--brand-soft); color: var(--brand-deep); border-color: var(--brand-line); font-weight: 600; }
+
+/* 累计结余：眼睛开关（点击隐藏 / 显示金额） */
+.fin-ov-balance { position: relative; }
+.eye { display: inline-block; margin-top: 10rpx; font-size: 38rpx; line-height: 1; opacity: .65; }
+
+/* 理财目标：加内边距，避免文字 / 数据贴卡片边；标题与百分比紧凑靠左同行 */
+.plan-row { padding: 26rpx 32rpx; }
+.plan-pct { font-size: 24rpx; color: var(--text-2); font-weight: 600; margin-left: 12rpx; }

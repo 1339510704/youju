@@ -1,0 +1,4 @@
+/* 历史订单页：主体样式走 app.wxss 设计系统，这里只留本页微调 */
+.hist-time{font-size:24rpx;color:var(--text-3);flex-shrink:0}
+/* order-qty 在 order.wxss 里定义，页面样式不跨页，这里补一份 */
+.order-qty{font-size:26rpx;color:var(--text-2);font-weight:400;margin-left:10rpx}

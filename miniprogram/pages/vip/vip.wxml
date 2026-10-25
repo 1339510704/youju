@@ -1,0 +1,162 @@
+<!-- page-bar：底部 tabBar 会盖住内容，这里多留出它的高度，否则记录翻不到底 -->
+<view class="page page-bar">
+  <member-banner wx:if="{{memberExpired}}" />
+  <view class="bg-layer" style="{{bgStyle}}"></view>
+
+  <block wx:if="{{!space && loading}}">
+    <view class="empty"><view class="empty-text">加载中…</view></view>
+  </block>
+  <block wx:elif="{{!space}}">
+    <view class="empty">
+      <view class="empty-text">还没有家庭空间</view>
+      <view class="t-3 fz24 mt-8">回到「家」页创建或加入一个家庭</view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <!-- 页头 -->
+    <view class="page-head">
+      <view class="flex-between">
+        <view class="flex-1">
+          <view class="ph-title">小红花</view>
+          <view class="ph-sub">家里的积分，接单做事都能攒</view>
+        </view>
+        <view class="flower-badge" bindtap="goRank">
+          <image class="flower-ic-sm" src="/images/ic/{{badge ? badge.icon : 'flower_red'}}.png" /><text>{{flowers}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 余额卡：等级图标 + 余额。点图标改下面那句文案（彩蛋，无提示），点数字/文案区看排行 -->
+    <view class="card">
+      <view class="flex-c gap-20">
+        <image class="flower-ic-lg" src="/images/ic/{{badge ? badge.icon : 'flower_red'}}.png" catchtap="editRankLabel" />
+        <view class="flex-1" bindtap="goRank">
+          <view class="flex-c gap-8">
+            <text class="flower-num t-display">{{flowers}}</text>
+            <text class="t-2 fz24">朵小红花</text>
+          </view>
+          <view class="t-2 fz24 mt-4">{{rankLabel}} ›</view>
+        </view>
+      </view>
+
+    </view>
+
+    <!-- 家庭活跃热力图：点格子看当天记录，再点一次取消 -->
+    <view class="sec">家庭活跃</view>
+    <view class="card heat-card">
+      <view class="heat-head">
+        <text class="heat-title">最近 5 周互动</text>
+        <text class="heat-sub">{{heatSel ? ('已选 ' + heatSelText) : '点亮越多越热闹 · 点格子看当天'}}</text>
+      </view>
+      <view class="heat-grid">
+        <view wx:for="{{heatCells}}" wx:key="key"
+              class="heat-cell heat-lv{{item.lv}} {{heatSel === item.key ? 'heat-on' : ''}}"
+              bindtap="tapHeat" data-k="{{item.key}}">{{item.day}}</view>
+      </view>
+      <view class="heat-legend">
+        <text class="t-3 fz20">少</text>
+        <view class="heat-cell heat-lv1 heat-legend-cell"></view>
+        <view class="heat-cell heat-lv2 heat-legend-cell"></view>
+        <view class="heat-cell heat-lv3 heat-legend-cell"></view>
+        <view class="heat-cell heat-lv4 heat-legend-cell"></view>
+        <text class="t-3 fz20">多</text>
+      </view>
+    </view>
+
+    <!-- 家里能换什么 -->
+    <view class="sec">
+      <text>家里能换什么</text>
+      <text wx:if="{{isAdmin}}" class="link" bindtap="openAdd">＋ 添加奖励</text>
+    </view>
+
+    <block wx:if="{{rewards.length}}">
+      <view class="list">
+        <!-- 左滑露出「删除」；非管理员整页禁用左滑 -->
+        <view wx:for="{{rewards}}" wx:key="_id" class="swipe">
+          <view class="swipe-body" style="transform:translateX({{_swipeId === item._id ? '-172rpx' : '0'}});"
+                bindtouchstart="swipeStart" bindtouchmove="swipeMove" bindtouchend="swipeEnd"
+                data-id="{{item._id}}" bindtap="closeSwipe">
+            <view class="row">
+              <view class="flex-1">
+                <view class="bold">{{item.name}}</view>
+                <view class="t-2 fz24">{{item.cost}} 朵小红花</view>
+              </view>
+              <view wx:if="{{flowers >= item.cost}}" class="btn btn-primary btn-sm" catchtap="redeemReward" data-id="{{item._id}}">兑换</view>
+              <view wx:else class="btn btn-ghost btn-sm" catchtap="redeemReward" data-id="{{item._id}}">还差 {{item.cost - flowers}} 朵</view>
+            </view>
+          </view>
+          <view wx:if="{{isAdmin}}" class="swipe-act" catchtap="delReward" data-id="{{item._id}}">删除</view>
+        </view>
+      </view>
+    </block>
+    <block wx:else>
+      <view class="card t-2">还没有兑换奖励，让管理员在「＋ 添加奖励」里加点。</view>
+    </block>
+
+    <!-- 记录：待兑现置顶，下面是小红花明细（默认只给最近一周，翻到底点「显示更多」） -->
+    <block wx:if="{{orders.length || logs.length || hasLogs || heatSel}}">
+      <view class="sec" id="logSec">
+        <text>{{heatSel ? ('记录 · ' + heatSelText) : '全家记录 · 谁做了什么'}}</text>
+        <text wx:if="{{heatSel}}" class="link" bindtap="clearHeatSel">看全部</text>
+      </view>
+      <view class="list">
+        <view wx:for="{{orders}}" wx:key="_id" class="row">
+          <view class="flex-1">
+            <view class="bold">{{item.nickName || '家人'}} 兑了 {{item.name}}</view>
+            <view class="t-2 fz24">{{item.cost}} 朵 · 待家人兑现</view>
+          </view>
+          <text class="t-primary fz24" catchtap="finishOrder" data-id="{{item._id}}">已兑现</text>
+        </view>
+        <view wx:for="{{logs}}" wx:key="_id" class="row">
+          <view class="flex-1">
+            <!-- 「谁 做了什么」：操作人放前面（自己显示「我」） -->
+            <view><text class="log-who">{{item.who}}</text>{{item.label}}</view>
+            <view class="t-2 fz24">{{item.when}}</view>
+          </view>
+          <text class="{{item.delta > 0 ? 'flower-num' : 't-danger'}}">{{item.delta > 0 ? '+' : ''}}{{item.delta}}</text>
+        </view>
+        <view wx:if="{{!logs.length && !orders.length}}" class="row t-2">今天还没有新记录</view>
+        <view wx:if="{{showMoreBtn}}" class="row row-tap t-primary fz26" bindtap="showMoreLogs">
+          {{loadingMore ? '加载中…' : '显示更多'}} ›
+        </view>
+      </view>
+      <!-- 提示必须和按钮同一套条件：否则会出现「叫你点显示更多，按钮却没渲染」 -->
+      <view wx:if="{{showMoreBtn && !showAll}}" class="t-2 fz24 mt-8">{{heatSel ? '这天更早的记录，可点「显示更多」继续往前拉' : '只显示今天，点「显示更多」每次多看 2 天'}}</view>
+      <!-- 滚动锚点：点显示更多后滚到这里，新揭开的记录和按钮都进视野 -->
+      <view id="logBottom"></view>
+    </block>
+
+  </block>
+
+
+  <!-- 添加奖励弹层 -->
+  <view wx:if="{{showAdd}}" class="mask" bindtap="closeAdd">
+    <!-- sheet-tab：底部 tabBar 会盖住弹层，多留出它的高度，否则「保存」被挡住 -->
+    <view class="sheet sheet-tab" catchtap="noop"
+          bindtouchstart="panStart" bindtouchmove="panMove" bindtouchend="panEnd">
+      <view class="sheet-head">
+        <view class="sheet-title">添加奖励</view>
+        <view class="sheet-close" bindtap="closeAdd">✕</view>
+      </view>
+
+      <view class="sheet-label" style="margin-top:8rpx">奖励名称</view>
+      <input class="sheet-input" placeholder="如：周末多玩 30 分钟" value="{{rwName}}" bindinput="onRwName" maxlength="20" confirm-type="done" />
+
+      <view class="field">
+        <text class="field-label">要多少朵小红花</text>
+        <input class="sheet-input" style="width:240rpx" type="number" value="{{rwCost}}" bindinput="onRwCost" maxlength="5" />
+      </view>
+
+      <block wx:if="{{defaults.length}}">
+        <view class="sheet-label">快速选（常用奖励，点了直接填上）</view>
+        <view class="flex-c gap-12 wrap">
+          <view wx:for="{{defaults}}" wx:key="name" class="chip" bindtap="useDefault" data-i="{{index}}">{{item.name}} · {{item.cost}}</view>
+        </view>
+      </block>
+
+      <view class="btn btn-primary btn-lg btn-block" style="margin-top:40rpx" bindtap="saveReward">保存</view>
+    </view>
+  </view>
+
+</view>

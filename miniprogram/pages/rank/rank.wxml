@@ -1,0 +1,51 @@
+<view class="page">
+  <view class="bg-layer" style="{{bgStyle}}"></view>
+
+  <view class="page-head">
+    <view class="ph-title">小红花</view>
+    <view class="ph-sub">{{space ? space.name : ''}} · {{list.length}} 位成员</view>
+  </view>
+
+  <!-- 我的概览 -->
+  <view class="card mt-20 rank-hero">
+    <view class="rank-hero-main">
+      <view class="t-2 fz24">我的排名</view>
+      <view class="rank-hero-no">第 {{myIndex >= 0 ? myIndex + 1 : '—'}} 名</view>
+      <view class="t-2 fz24 mt-8">累计赚得 <text class="rank-hero-earn">{{myEarned}}</text> 朵</view>
+    </view>
+    <view class="rank-hero-side">
+      <image class="flower-ic-lg" src="/images/ic/{{myBadge ? myBadge.icon : 'flower_red'}}.png" />
+      <view class="flower-num rank-hero-num">{{myFlowers}}</view>
+      <view class="t-2 fz22">当前余额</view>
+    </view>
+  </view>
+
+  <!-- 记录 -->
+  <view class="sec">排行榜</view>
+  <view wx:if="{{canManage}}" class="t-3 fz22 mt-8">户主 / 管理员可在这里升管理或移除成员</view>
+  <view class="list">
+    <view wx:if="{{list.length === 0}}" class="row t-2">还没有成员</view>
+    <view wx:for="{{list}}" wx:key="openid" class="row">
+      <text class="rank-no {{item.no === 1 ? 'no1' : (item.no === 2 ? 'no2' : (item.no === 3 ? 'no3' : ''))}}">{{item.no}}</text>
+      <image wx:if="{{item.avatarUrl}}" src="{{item.avatarUrl}}" class="avatar-img avatar-sm" mode="aspectFill" />
+      <view wx:else class="avatar avatar-sm">{{item.initial}}</view>
+      <view class="flex-1 ml-16">
+        <view class="bold">{{item.nickName}}{{item.isMe ? '（我）' : ''}}</view>
+        <view class="rank-sub">
+          <view class="lv-chip"><image class="flower-ic-sm" src="/images/ic/{{item.badge ? item.badge.icon : 'flower_red'}}.png" /><text>{{item.badge ? item.badge.name : '小红花'}}</text></view>
+          <text class="t-2 fz24">{{item.roleName}}</text>
+        </view>
+      </view>
+      <view class="rank-right">
+        <text class="flower-num">{{item.flowers}}</text>
+        <view wx:if="{{canManage && item.role !== 'owner' && !item.isMe}}" class="rank-ops">
+          <text class="rank-op" catchtap="mToggleRole" data-openid="{{item.openid}}" data-role="{{item.role}}">{{item.role === 'admin' ? '降成员' : '升管理'}}</text>
+          <text class="rank-op rank-op-danger" catchtap="mKick" data-openid="{{item.openid}}">移除</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <button class="btn btn-ghost btn-block mt-24" bindtap="goVip">用小红花兑换奖励</button>
+
+</view>

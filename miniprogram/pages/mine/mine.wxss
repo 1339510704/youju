@@ -1,0 +1,63 @@
+/* 我的空间页样式（公共样式在 app.wxss） */
+
+/* 可点击改名的空间名（前面 ✎ 提示可编辑） */
+.name-tap { display: inline-block; }
+/* 滑动容器按卡片圆角裁切，避免红色动作层从圆角缝隙透出 */
+.swipe { border-radius: var(--radius-lg); }
+/* 「退出」动作层（.swipe-act 默认就是红色）：未滑动时完全透明，
+   彻底杜绝"没滑就看见红底"；左滑展开后（.act-on）才显示 */
+.swipe-act { opacity: 0; transition: opacity .15s ease; }
+.swipe-act.act-on { opacity: 1; }
+
+/* ---------- 会员卡：深色渐变 + 金色点缀，剩余天数做大 ---------- */
+.vip-card {
+  position: relative;
+  border-radius: var(--radius-lg);
+  padding: 36rpx 32rpx 28rpx;
+  color: #fff;
+  background: linear-gradient(135deg, #ff9166 0%, #ee6a55 55%, #d94f43 100%);
+  box-shadow: 0 12rpx 28rpx rgba(232, 80, 31, .28);
+  overflow: hidden;
+}
+/* 右上角高光，让卡片有"质感"而不是一块纯色 */
+.vip-glow {
+  position: absolute; right: -60rpx; top: -80rpx;
+  width: 280rpx; height: 280rpx; border-radius: 50%;
+  background: rgba(255, 255, 255, .14);
+  pointer-events: none;
+}
+.vip-card.vip-expired { background: linear-gradient(135deg, #a8a29c, #8a8480); box-shadow: 0 12rpx 28rpx rgba(34, 28, 24, .18); }
+.vip-top { position: relative; display: flex; align-items: flex-start; justify-content: space-between; }
+.vip-title { font-size: 34rpx; font-weight: 700; letter-spacing: -.3rpx; }
+.vip-desc { font-size: 23rpx; opacity: .85; margin-top: 8rpx; }
+.vip-days { display: flex; align-items: baseline; gap: 4rpx; flex-shrink: 0; margin-left: 16rpx; }
+.vip-days-num { font-size: 72rpx; font-weight: 800; line-height: 1; letter-spacing: -2rpx; }
+.vip-days-unit { font-size: 24rpx; opacity: .85; }
+.vip-actions { position: relative; display: flex; gap: 16rpx; margin-top: 28rpx; }
+.vip-buy {
+  flex: 1; height: 80rpx; border-radius: var(--radius-pill);
+  display: flex; align-items: center; justify-content: center;
+  background: #fff; color: var(--brand-btn);
+  font-size: 28rpx; font-weight: 700;
+  box-shadow: 0 6rpx 16rpx rgba(34, 28, 24, .12);
+}
+.vip-buy:active { opacity: .88; }
+.vip-redeem {
+  flex: 1; height: 80rpx; border-radius: var(--radius-pill);
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255, 255, 255, .16);
+  border: 2rpx solid rgba(255, 255, 255, .55);
+  color: #fff; font-size: 26rpx; font-weight: 500;
+}
+.vip-redeem:active { background: rgba(255, 255, 255, .28); }
+.vip-tip { position: relative; font-size: 21rpx; opacity: .78; margin-top: 18rpx; text-align: center; }
+.vip-fix { position: relative; font-size: 22rpx; opacity: .9; margin-top: 10rpx; text-align: center; text-decoration: underline; }
+/* 即将到期提醒 */
+.vip-soon { position: relative; margin-top: 16rpx; text-align: center; font-size: 24rpx; font-weight: 600; color: #ffd9a8; }
+
+/* 多档会员选择 */
+.vip-skus { display: flex; gap: 12rpx; margin-top: 20rpx; }
+.vip-sku { flex: 1; border: 1rpx solid rgba(255, 255, 255, .3); border-radius: 14rpx; padding: 14rpx 4rpx; text-align: center; }
+.vip-sku.on { border-color: #fff; background: rgba(255, 255, 255, .2); }
+.vip-sku-label { color: #fff; font-size: 26rpx; font-weight: 600; }
+.vip-sku-price { color: rgba(255, 255, 255, .88); font-size: 21rpx; margin-top: 6rpx; }

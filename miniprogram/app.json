@@ -1,0 +1,60 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/order/order",
+    "pages/menu/menu",
+    "pages/roulette/roulette",
+    "pages/history/history",
+    "pages/todo/todo",
+    "pages/detect/detect",
+    "pages/festival/festival",
+    "pages/finance/finance",
+    "pages/rank/rank",
+    "pages/profile/profile",
+    "pages/vip/vip",
+    "pages/legal/legal",
+    "pages/settings/settings",
+    "pages/mine/mine",
+    "pages/bg-set/bg-set",
+    "pages/about/about",
+    "pages/contact/contact"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#F6F5F3",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "",
+    "backgroundColor": "#F6F5F3",
+    "backgroundTextStyle": "dark",
+    "enablePullDownRefresh": false
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#9c9188",
+    "selectedColor": "#E8501F",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/order/order",
+        "text": "饭桌",
+        "iconPath": "images/ic/order.png",
+        "selectedIconPath": "images/ic/order_on.png"
+      },
+      {
+        "pagePath": "pages/vip/vip",
+        "text": "红花",
+        "iconPath": "images/ic/flower.png",
+        "selectedIconPath": "images/ic/flower_red.png"
+      },
+      {
+        "pagePath": "pages/home/home",
+        "text": "家",
+        "iconPath": "images/ic/home.png",
+        "selectedIconPath": "images/ic/home_on.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents",
+  "sitemapLocation": "sitemap.json"
+}

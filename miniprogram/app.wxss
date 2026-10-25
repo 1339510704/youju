@@ -1,0 +1,496 @@
+/* ============================================================
+   全局设计系统 v4 · 极简平面化（美团/支付宝风格）
+   ------------------------------------------------------------
+   核心原则：
+     1. 卡片 = 白底 + 发丝线，阴影只给浮层
+     2. 按钮实心品牌色，不渐变、不描边（主操作一眼可见）
+     3. 图标用统一线性图标集（images/ic/），不用 emoji
+     4. 文字只留必要信息，不写"说明"和"提示"
+     5. 间距 8rpx 节奏，字阶下限 22rpx
+     6. 敏感操作降级 + 二次确认
+   ============================================================ */
+
+page {
+  --brand: #ee6a55;
+  --brand-deep: #d9503f;
+  --brand-btn: #c8442f;
+  --brand-soft: #fff1ed;
+  --brand-line: #ffd8cf;
+  --gold: #e0921f;
+  --gold-soft: #fdf4e3;
+  --sage: #5f9e4b;
+  --sage-soft: #eef6e9;
+  --bg: #f5f3f0;
+  --card: #ffffff;
+  --text: #221c18;
+  --text-2: #6b6157;
+  --text-3: #9c938a;
+  --line: #ede8e2;
+  --line-2: #ddd5cc;
+  --fill: #f4f1ed;
+  --primary: #ee6a55;
+  --danger: #d93b30;
+  --danger-soft: #fdecea;
+  --success: #4e9e3f;
+  --success-soft: #eef6e9;
+  --warning: #d98207;
+  --warning-soft: #fdf4e3;
+
+  --radius-s: 10rpx; --radius: 16rpx;
+  --radius-l: 24rpx; --radius-lg: 24rpx;
+  --radius-xl: 32rpx; --radius-pill: 999rpx;
+
+  --sh-1: 0 2rpx 8rpx rgba(34,28,24,.04);
+  --sh-2: 0 10rpx 30rpx rgba(34,28,24,.10);
+  --sh-up: 0 -6rpx 24rpx rgba(34,28,24,.07);
+
+  background: var(--bg); color: var(--text);
+  font-family: -apple-system,"PingFang SC","Helvetica Neue",Helvetica,sans-serif;
+  font-size: 28rpx; line-height: 1.55; -webkit-font-smoothing: antialiased;
+}
+
+view,text,scroll-view,button,input,textarea,image{box-sizing:border-box}
+
+/* ---- 布局 ---- */
+/* .page 建立自己的层叠上下文：这样 .bg-layer 的 z-index:-1 才落在「页面底色之上、内容之下」。
+   不加的话，负 z-index 会被根节点 page 的底色盖住 → 背景图/背景色看不到。 */
+.page{min-height:100vh;padding:24rpx 40rpx 48rpx;overflow-x:hidden;position:relative;z-index:1}
+/* 底部固定条实测 144rpx（.actionbar）/ 116rpx（.actionbar-sm）。
+   同一选择器写两遍：后面那条带 env() 的若不被支持会被整条丢弃，自动回落到前一条，
+   绝不会出现"整条 padding 失效 → 内容钻到固定条底下看不见"。 */
+.page-bar{padding-bottom:190rpx;padding-bottom:calc(190rpx + env(safe-area-inset-bottom))}
+.flex{display:flex}.flex-c{display:flex;align-items:center}
+.flex-between{display:flex;align-items:center;justify-content:space-between}
+.flex-col{display:flex;flex-direction:column}
+.flex-1{flex:1;min-width:0}.wrap{flex-wrap:wrap}
+.center{text-align:center}
+.gap-4{gap:4rpx}.gap-8{gap:8rpx}.gap-12{gap:12rpx}
+.gap-16{gap:16rpx}.gap-20{gap:20rpx}.gap-24{gap:24rpx}
+.mt-4{margin-top:4rpx}.mt-8{margin-top:8rpx}.mt-12{margin-top:12rpx}
+.mt-16{margin-top:16rpx}.mt-20{margin-top:20rpx}.mt-24{margin-top:24rpx}
+.mt-32{margin-top:32rpx}.mb-4{margin-bottom:4rpx}.mb-8{margin-bottom:8rpx}
+.mb-12{margin-bottom:12rpx}.mb-16{margin-bottom:16rpx}
+.mb-24{margin-bottom:24rpx}.ml-8{margin-left:8rpx}
+.ml-12{margin-left:12rpx}.ml-16{margin-left:16rpx}
+.mr-8{margin-right:8rpx}.mr-12{margin-right:12rpx}
+
+/* ---- 字阶（下限22rpx）---- */
+.t-display{font-size:52rpx;font-weight:700;letter-spacing:-1rpx;line-height:1.25}
+.t-title{font-size:36rpx;font-weight:600;letter-spacing:-.4rpx}
+.t-sub{font-size:26rpx;color:var(--text-2)}
+.t-2{color:var(--text-2)}.t-3{color:var(--text-3)}
+.muted{color:var(--text-2);font-size:26rpx}
+.t-primary,.t-accent,.t-brand{color:var(--brand-btn)}
+.t-danger{color:var(--danger)}.t-success{color:var(--success)}
+.bold{font-weight:600}
+.fz20{font-size:24rpx}.fz22{font-size:24rpx}
+.fz24{font-size:26rpx}.fz26{font-size:28rpx}
+.fz32{font-size:32rpx}
+.ellipsis{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* 最多两行后省略：长待办别被砍成一行看不全 */
+.clamp-2{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.strike{text-decoration:line-through}
+.chev{color:var(--chev);font-size:32rpx;font-weight:300;line-height:1}
+
+/* ---- 页头 / 小节标题 ---- */
+.page-head{padding:20rpx 4rpx 8rpx}
+.ph-title{font-size:38rpx;font-weight:700;letter-spacing:-1rpx;line-height:1.2}
+.ph-sub{font-size:26rpx;color:var(--text-2);margin-top:6rpx;line-height:1.5}
+.sec{
+  display:flex;align-items:baseline;justify-content:space-between;
+  font-size:26rpx;color:var(--text-2);font-weight:500;
+  margin:40rpx 0 16rpx;padding-left:4rpx
+}
+.sec:first-child{margin-top:24rpx}
+
+/* ---- 卡片 / 列表（白底+发丝线）---- */
+.card{background:var(--card);border-radius:var(--radius-lg);border:2rpx solid var(--line);padding:32rpx}
+.card-soft{background:var(--fill);border-radius:var(--radius);padding:24rpx}
+.list{background:var(--card);border-radius:var(--radius-lg);border:2rpx solid var(--line);overflow:hidden}
+.list .row+.row,.list .order-item+.order-item,.list .reward-row+.reward-row,
+.list .switch-row+.switch-row{border-top:2rpx solid var(--line)}
+.row{display:flex;align-items:center;padding:30rpx 32rpx}
+.row-tap:active{background:#faf8f5}
+.row-title{font-size:30rpx;font-weight:500}
+.row-desc{font-size:26rpx;color:var(--text-2);margin-top:4rpx}
+
+/* ---- 图标 tile（彩色底 + 线性图标图片）---- */
+.ico{
+  width:80rpx;height:80rpx;border-radius:22rpx;background:var(--brand-soft);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  overflow:hidden
+}
+.ico-img{width:44rpx;height:44rpx;display:block}
+.ico-in{background:var(--success-soft);color:var(--success);font-size:28rpx;font-weight:600}
+.ico-out{background:var(--danger-soft);color:var(--danger);font-size:28rpx;font-weight:600}
+.ico-coral{background:var(--brand-soft)}.ico-gold{background:#fdf4e3;color:var(--gold)}
+.ico-sky{background:#eaf2fb}.ico-sage{background:#eef6e9}
+.ico-lilac{background:#f3eefc}.ico-gray{background:var(--fill)}
+
+.arrow{color:var(--chev);font-size:30rpx;line-height:1;margin-left:8rpx}
+/* 文字行内小图标（替代散落的内联尺寸） */
+.ico-inline{width:28rpx;height:28rpx;vertical-align:-4rpx;margin-right:8rpx}
+
+/* ---- 按钮：实心品牌色，四级尺寸 ---- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  height:88rpx;padding:0 40rpx;margin:0;border-radius:var(--radius-pill);
+  font-size:30rpx;font-weight:500;background:var(--fill);color:var(--text);
+  border:none;line-height:1
+}
+.btn-lg{height:96rpx;padding:0 48rpx;font-size:32rpx;font-weight:600}
+.btn-sm{height:72rpx;padding:0 28rpx;font-size:26rpx}
+.btn-xs{height:64rpx;padding:0 22rpx;font-size:24rpx}
+
+/* ★ 主按钮：实心品牌色（美团/支付宝下单按钮风格） */
+.btn-primary{background:var(--brand-btn);color:#fff}
+.btn-primary:active{opacity:.85}
+.btn-ghost{background:#fff;color:var(--text);border:2rpx solid var(--line-2)}
+.btn-ghost:active{background:var(--fill)}
+.btn-soft{background:var(--brand-soft);color:var(--brand-deep)}
+.btn-danger{background:#fff;color:var(--danger);border:2rpx solid var(--danger)}
+.btn-danger:active{background:var(--danger-soft)}
+.btn-block{width:100%;max-width:100%;box-sizing:border-box}
+/* 底部条里的主操作：占满剩余宽度（大厂做法：主按钮永远最宽最显眼） */
+.btn-fill{flex:1;min-width:0}
+/* 微信 button 组件自带默认宽度，inline-flex 下不肯撑满；强制 flex 全宽 */
+button.btn-block{display:flex;width:100%;flex:none}
+.btn[disabled],.btn.disabled{opacity:.45}
+.btn-row{display:flex;gap:20rpx}.btn-row .btn{flex:1}
+button::after{border:none}
+
+/* ---- 标签 ---- */
+.tag{
+  display:inline-flex;align-items:center;height:56rpx;padding:0 20rpx;border-radius:8rpx;
+  font-size:29rpx;font-weight:500;background:var(--fill);color:var(--text-2)
+}
+.tag-success{background:var(--success-soft);color:var(--success)}
+.tag-warning{background:var(--warning-soft);color:var(--warning)}
+.tag-accent{background:var(--brand-soft);color:var(--brand-deep)}
+.tag-danger{background:var(--danger-soft);color:var(--danger)}.tag-gray{background:var(--fill);color:var(--text-2)}
+/* 「已开启」这类状态胶囊：做得比普通 tag 大一点，替代原来的按钮 */
+.sub-on{height:56rpx;padding:0 20rpx;font-size:26rpx;font-weight:600}
+
+/* ---- 勾选圆圈 ---- */
+.circle{width:56rpx;height:56rpx;border-radius:50%;border:3rpx solid #ddd2c6;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.circle-on{background:var(--brand-btn);border-color:var(--brand-btn)}
+.tick{color:#fff;font-size:24rpx;line-height:1}
+/* 勾选圆圈的外层热区：让「点 O 才完成」更好点中，避免误触整行 */
+.circle-hit{flex-shrink:0;padding:14rpx;display:flex;align-items:center;justify-content:center}
+.circle-hover{transform:scale(.86);background:rgba(0,0,0,.05);border-radius:50%}
+
+/* ---- 头像 / 方图 ---- */
+.avatar{width:64rpx;height:64rpx;border-radius:50%;background:linear-gradient(135deg,#ffc0a8,#ff6b3d);color:#fff;font-size:24rpx;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+.avatar-img{width:64rpx;height:64rpx;border-radius:50%;background:var(--fill);flex-shrink:0;display:block}
+.avatar-sm{width:52rpx;height:52rpx;font-size:22rpx}
+.avatar-md{width:88rpx;height:88rpx;font-size:30rpx}
+.avatar-lg{width:128rpx;height:128rpx;font-size:44rpx}
+.pic{width:156rpx;height:156rpx;border-radius:var(--radius);background:var(--fill);display:block;flex-shrink:0}
+.pic-lg{width:100%;height:260rpx;border-radius:var(--radius)}
+
+/* ---- 步进器 ---- */
+.step-btn{width:64rpx;height:64rpx;border-radius:50%;background:#fff;color:var(--brand-btn);border:2rpx solid var(--brand-line);font-size:32rpx;font-weight:500;line-height:64rpx;text-align:center;flex-shrink:0}
+.step-btn:active{background:var(--brand-soft)}
+.step-btn-solid{background:var(--brand);color:#fff;border-color:var(--brand)}
+.step-btn-solid:active{background:var(--brand-deep)}
+.step-val{min-width:64rpx;text-align:center;font-size:30rpx;font-weight:600}
+
+/* ---- 胶囊 / 分段 / tab / 链接 ---- */
+.chips{white-space:nowrap;padding:4rpx 0;width:100%}
+.chips::-webkit-scrollbar{display:none;width:0;height:0;color:transparent}
+.chip{
+  display:inline-flex;align-items:center;vertical-align:middle;
+  height:68rpx;padding:0 30rpx;margin-right:12rpx;border-radius:var(--radius-pill);
+  font-size:27rpx;background:#fff;color:var(--text-2);border:2rpx solid var(--line)
+}
+.chip-on{background:var(--brand-btn);color:#fff;font-weight:600;border-color:var(--brand-btn)}
+.chip-add{padding:0 24rpx;color:var(--text-3);font-size:32rpx;border-style:dashed}
+.seg{display:flex;background:var(--fill);border-radius:var(--radius-pill);padding:5rpx}
+.seg-item{flex:1;text-align:center;height:68rpx;line-height:68rpx;border-radius:var(--radius-pill);font-size:27rpx;color:var(--text-2)}
+.seg-item-on{background:#fff;color:var(--text);font-weight:600;box-shadow:var(--sh-1)}
+.tabs{display:flex;gap:40rpx;padding:4rpx 4rpx 0}
+.tab-item{font-size:30rpx;color:var(--text-3);padding-bottom:14rpx;position:relative}
+.tab-item.on{color:var(--text);font-weight:600}
+.tab-item.on::after{content:'';position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:44rpx;height:6rpx;border-radius:6rpx;background:var(--brand)}
+.link{color:var(--brand-btn);font-size:26rpx;font-weight:500;padding:14rpx 10rpx;margin:-14rpx -10rpx;display:inline-block;flex-shrink:0}
+.link:active{opacity:.5}
+
+/* ---- 空状态 ---- */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60rpx 0;color:var(--text-3)}
+.empty .empty-text{font-size:26rpx}
+
+/* ---- 表单 ---- */
+.input{width:100%;height:92rpx;padding:0 28rpx;background:var(--fill);border-radius:var(--radius);font-size:30rpx;border:2rpx solid transparent}
+.input:focus{background:#fff;border-color:var(--brand-line)}
+.textarea{width:100%;min-height:190rpx;padding:24rpx 28rpx;background:var(--fill);border-radius:var(--radius);font-size:30rpx;line-height:1.6}
+.field{display:flex;align-items:center;justify-content:space-between;padding:24rpx 0}
+.field-label{font-size:30rpx;color:var(--text-2)}
+
+/* ---- 浮层 ---- */
+.mask{position:fixed;inset:0;background:rgba(34,28,24,.45);z-index:1000;display:flex;align-items:flex-end}
+.sheet{width:100%;background:#fff;border-radius:var(--radius-xl) var(--radius-xl) 0 0;padding:44rpx 40rpx;padding-bottom:calc(44rpx + env(safe-area-inset-bottom));box-shadow:var(--sh-2);max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sheet-title{font-size:36rpx;font-weight:700;margin-bottom:24rpx;letter-spacing:-.4rpx}
+.sheet-handle{width:72rpx;height:8rpx;border-radius:8rpx;background:var(--line-2);margin:-16rpx auto 24rpx}
+.sheet-actions{display:flex;gap:20rpx;margin-top:32rpx}
+.sheet-actions .btn{flex:1}
+/* 底部 Tab 页面上的弹层：tabBar 会盖在弹层之上，这里多留出它的高度（120rpx + 安全区），
+   否则「保存」这类底部按钮会被 tabBar 挡住（小红花页的「添加奖励」就是这个情况） */
+.sheet-tab{padding-bottom:170rpx;padding-bottom:calc(170rpx + env(safe-area-inset-bottom))}
+
+/* ---- 底部固定操作条 ---- */
+.actionbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:60;
+  display:flex;align-items:center;gap:24rpx;
+  padding:24rpx 40rpx;
+  padding-bottom:calc(24rpx + env(safe-area-inset-bottom));
+  background:#fff;border-top:2rpx solid var(--line);box-shadow:var(--sh-up)
+}
+.actionbar-info{flex:1;min-width:0}
+.actionbar-num{font-size:38rpx;font-weight:700;color:var(--brand);letter-spacing:-.6rpx;line-height:1.15}
+.actionbar-label{font-size:24rpx;color:var(--text-2);margin-top:2rpx}
+.actionbar .btn{flex-shrink:0}
+
+/* ---- 左滑删除（微信/美团标准：行往左滑露出红色删除，比「···」直观）---- */
+.swipe{position:relative;overflow:hidden}
+.swipe-body{position:relative;z-index:2;background:var(--card);transition:transform .22s cubic-bezier(.25,.8,.25,1)}
+.swipe-act{position:absolute;top:0;right:0;bottom:0;width:172rpx;z-index:1;display:flex;align-items:center;justify-content:center;background:var(--danger);color:#fff;font-size:28rpx;font-weight:600}
+/* 右滑露出的「完成」（绿色），在行左侧 */
+.swipe-act-left{position:absolute;top:0;left:0;bottom:0;width:172rpx;z-index:1;display:flex;align-items:center;justify-content:center;background:#3aa757;color:#fff;font-size:28rpx;font-weight:600}
+/* 行被 .swipe 包起来后 .row+.row 不再相邻，分隔线补在 .swipe 上 */
+.list .swipe+.swipe{border-top:2rpx solid var(--line)}
+
+/* ---- 左右分类（美团点菜式：左分类栏 + 右菜品列表）---- */
+.cat-wrap{display:flex;align-items:flex-start}
+.cat-side{width:148rpx;flex-shrink:0;background:var(--fill);border-radius:var(--radius);overflow:hidden}
+.cat-side-i{height:96rpx;display:flex;align-items:center;justify-content:center;font-size:26rpx;color:var(--text-2);position:relative}
+.cat-side-i.on{background:var(--card);color:var(--text);font-weight:600}
+.cat-side-i.on::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:6rpx;height:34rpx;background:var(--brand-btn);border-radius:0 6rpx 6rpx 0}
+.cat-main{flex:1;min-width:0;padding-left:20rpx}
+
+/* ---- 危险区 ---- */
+.danger-zone{margin-top:48rpx}
+.danger-note{font-size:24rpx;color:var(--text-3);padding:0 8rpx 16rpx;line-height:1.6}
+
+/* ---- 进度条 / 数据卡 / 网格 ---- */
+.bar{height:12rpx;border-radius:var(--radius-pill);background:#f0eae3;overflow:hidden}
+.bar-fill{height:100%;border-radius:var(--radius-pill);background:var(--brand-btn)}
+.stat{background:var(--card);border-radius:var(--radius);padding:26rpx 22rpx;border:2rpx solid var(--line)}
+.stat-num{font-size:44rpx;font-weight:700;letter-spacing:-.8rpx;line-height:1.15}
+.stat-label{font-size:24rpx;color:var(--text-2);margin-top:4rpx}
+.grid{display:flex;flex-wrap:wrap;gap:20rpx}
+.grid-2>view{width:calc(50% - 10rpx)}.grid-3>view{width:calc(33.33% - 14rpx)}
+.grid-2>.grid-full,.grid-3>.grid-full{width:100%}
+
+/* ---- 提示条 ---- */
+.notice{display:flex;align-items:flex-start;gap:12rpx;background:var(--warning-soft);border-radius:var(--radius);padding:24rpx 26rpx;font-size:25rpx;line-height:1.6;color:#8a5a10}
+.notice-info{background:#eef4ff;color:#2b5aa8}
+.notice-brand{background:var(--brand-soft);color:var(--brand-deep)}
+.notice-sage{background:var(--success-soft);color:#3f7a32}
+
+/* ---- 开关行 ---- */
+.switch-row{display:flex;align-items:center;justify-content:space-between;padding:28rpx 32rpx}
+.switch-row+.switch-row{border-top:2rpx solid var(--line)}
+
+/* ---- 截止日期 ---- */
+.due-line{display:inline-block;margin-top:8rpx;font-size:24rpx;color:var(--text-2)}
+.due-over{display:inline-block;margin-top:8rpx;font-size:23rpx;font-weight:500;color:var(--danger);background:var(--danger-soft);border-radius:6rpx;padding:2rpx 12rpx}
+
+/* ---- 点菜（美团式）---- */
+.order-item{padding:28rpx 32rpx}
+.order-name{display:flex;align-items:center;flex-wrap:wrap;font-size:30rpx;font-weight:500}
+.order-meta{font-size:26rpx;color:var(--text-2);margin-top:6rpx}
+.order-done .order-name{color:var(--text-3);text-decoration:line-through}
+.dish-chip-ph{width:200rpx;height:200rpx;border-radius:var(--radius-lg);background:var(--fill);display:flex;align-items:center;justify-content:center}
+.dish-chip-name{font-size:26rpx;margin-top:12rpx;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.list-del{font-size:25rpx;color:var(--text-3);padding:30rpx 22rpx;margin:-30rpx -22rpx;flex-shrink:0}
+.list-del:active{color:var(--danger)}
+
+/* ---- 图片网格 ---- */
+.img-grid{display:flex;flex-wrap:wrap;gap:16rpx}
+.img-grid>view{width:calc(33.33% - 11rpx)}
+.img-cell{width:100%;height:210rpx;border-radius:var(--radius);background:var(--fill);display:block}
+
+/* ---- 排行榜 ---- */
+.rank-no{width:56rpx;text-align:center;flex-shrink:0;font-size:28rpx;font-weight:700;color:var(--text-3)}
+.rank-no.no1{color:#d9a326}.rank-no.no2{color:var(--text-3)}.rank-no.no3{color:#c98142}
+
+/* ---- 小红花 / 兑换 ---- */
+.flower-badge{display:inline-flex;align-items:center;gap:8rpx;height:52rpx;padding:0 20rpx;border-radius:var(--radius-pill);background:var(--brand-soft);color:var(--brand-deep);font-size:26rpx;font-weight:600}
+/* 真·小红花图标（实心花，替代纯色圆点） */
+.flower-ic{width:30rpx;height:30rpx;flex-shrink:0;display:block}
+.flower-ic-sm{width:24rpx;height:24rpx;flex-shrink:0;display:block}
+.flower-ic-lg{width:76rpx;height:76rpx;flex-shrink:0;display:block}
+.flower-num{color:var(--brand-btn);font-weight:700}
+.flower-tip{font-size:23rpx;color:#9c6353}
+.reward{display:flex;align-items:center;background:var(--card);border-radius:var(--radius);padding:28rpx;border:2rpx solid var(--line)}
+.reward-row{display:flex;align-items:center;padding:28rpx 32rpx}
+.reward-cost{display:inline-flex;align-items:center;gap:6rpx;height:44rpx;padding:0 16rpx;border-radius:var(--radius-pill);background:var(--brand-soft);color:var(--brand-deep);font-size:24rpx;font-weight:600;flex-shrink:0}
+
+/* ---- AI 对话 ---- */
+.bubble{max-width:78%;padding:22rpx 26rpx;border-radius:22rpx;font-size:28rpx;line-height:1.6;word-break:break-word}
+.bubble-ai{background:#fff;border-bottom-left-radius:8rpx;border:2rpx solid var(--line)}
+.bubble-me{background:var(--brand-btn);color:#fff;border-bottom-right-radius:8rpx}
+.msg-row{display:flex;margin-bottom:20rpx}.msg-left{justify-content:flex-start}.msg-right{justify-content:flex-end}
+
+/* ---- 背景层 ---- */
+.bg-layer{position:fixed;left:0;top:0;right:0;bottom:0;z-index:-1}
+
+/* ---- 自检 ---- */
+.diag-row{display:flex;align-items:center;padding:24rpx 0}
+.diag-row+.diag-row{border-top:2rpx solid var(--line)}
+.diag-dot{flex-shrink:0;width:40rpx;height:40rpx;border-radius:50%;font-size:23rpx;font-weight:700;color:#fff;text-align:center;line-height:40rpx}
+.diag-dot.ok{background:var(--success)}.diag-dot.bad{background:var(--warning)}
+
+/* ---- 引导卡片 ---- */
+.guide-box{font-size:26rpx;line-height:1.7;color:var(--text-2);background:var(--fill);border-radius:var(--radius);padding:22rpx 24rpx;word-break:all}
+.guide-step{display:flex;align-items:flex-start;font-size:26rpx;line-height:1.6;color:var(--text-2);padding:12rpx 0}
+.guide-idx{flex-shrink:0;width:38rpx;height:38rpx;margin-right:14rpx;border-radius:50%;background:var(--brand-btn);color:#fff;font-size:23rpx;font-weight:700;text-align:center;line-height:38rpx}
+
+/* ============================================================
+   v5 增补 —— 美团式菜品行 / 方图缩略 / 轻量底部条 / 空状态
+   ============================================================ */
+
+/* ---- 美团式菜品行：左方图 + 中间信息 + 右侧圆形加号 ---- */
+.dish-row{display:flex;align-items:center;gap:22rpx;padding:24rpx 28rpx}
+.dish-row+.dish-row{border-top:2rpx solid var(--line)}
+.dish-row-tap:active{background:#faf8f5}
+.dish-thumb{
+  width:128rpx;height:128rpx;border-radius:20rpx;background:var(--fill);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden
+}
+.dish-thumb-img{width:128rpx;height:128rpx;display:block}
+/* 没上传图片时的占位图：铺满缩略框（占位图本身是彩色小图标，不再做小尺寸淡显） */
+.dish-thumb-ph{width:100%;height:100%;opacity:.95}
+.dish-info{flex:1;min-width:0}
+.dish-title{font-size:31rpx;font-weight:600;letter-spacing:-.2rpx;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dish-meta{display:flex;align-items:center;flex-wrap:wrap;gap:10rpx;font-size:24rpx;color:var(--text-2);margin-top:10rpx}
+.dish-plus{
+  width:76rpx;height:76rpx;border-radius:50%;flex-shrink:0;
+  background:var(--brand-btn);color:#fff;font-size:46rpx;font-weight:300;
+  line-height:72rpx;text-align:center;box-shadow:0 4rpx 14rpx rgba(232,80,31,.32)
+}
+.dish-plus:active{transform:scale(.9);background:var(--brand-deep)}
+.dish-plus-sm{width:62rpx;height:62rpx;line-height:58rpx;font-size:38rpx}
+
+/* ---- 通用方图缩略（列表行左图 / 商品图，比 avatar 更合适）---- */
+.row-thumb{width:96rpx;height:96rpx;border-radius:16rpx;background:var(--fill);flex-shrink:0;display:block}
+.row-thumb-lg{width:132rpx;height:132rpx;border-radius:20rpx;background:var(--fill);flex-shrink:0;display:block}
+
+/* ---- 轻量底部条：比 actionbar 更矮，适合 tab 页（压在 tabBar 之上）---- */
+.actionbar-sm{
+  position:fixed;left:0;right:0;bottom:0;z-index:60;
+  display:flex;align-items:center;gap:20rpx;
+  padding:16rpx 32rpx;
+  padding-bottom:calc(16rpx + env(safe-area-inset-bottom));
+  background:rgba(255,255,255,.97);border-top:2rpx solid var(--line);box-shadow:var(--sh-up)
+}
+.actionbar-sm .btn-lg{height:84rpx}
+/* 自定义 tabBar 启用后，贴底操作条要上移，否则会被 tabBar 盖住（仅 tab 页加 .actionbar-tab） */
+.actionbar-tab{bottom:122rpx}
+
+/* ---- 数量步进器（行内小号）---- */
+.qty{display:inline-flex;align-items:center;gap:14rpx}
+.qty-num{min-width:52rpx;text-align:center;font-size:28rpx;font-weight:600}
+
+/* ---- 空状态：支持配图 ---- */
+.empty-img{width:96rpx;height:96rpx;opacity:.28;margin-bottom:16rpx;display:block}
+
+/* ============================================================
+   v6 增补 —— 菜品卡片网格 / 弹层规范 / 头像编辑 / 安全删除
+   ============================================================ */
+
+/* ---- 弹层（sheet）规范：标题+关闭 / 大输入 / 居中步进器 / 全宽主按钮 ---- */
+.sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8rpx}
+.sheet-head .sheet-title{margin-bottom:0}
+.sheet-close{
+  width:88rpx;height:88rpx;margin:-28rpx -24rpx -28rpx 0;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-3);font-size:34rpx;line-height:1
+}
+.sheet-close:active{color:var(--text)}
+.sheet-label{font-size:28rpx;color:var(--text-2);margin:32rpx 0 16rpx}
+.sheet-input{
+  width:100%;height:116rpx;padding:0 32rpx;background:var(--fill);
+  border-radius:var(--radius);font-size:34rpx;border:2rpx solid transparent
+}
+.sheet-input:focus{background:#fff;border-color:var(--brand-line)}
+.sheet-step{display:flex;align-items:center;justify-content:center;gap:40rpx;padding:8rpx 0 4rpx}
+.sheet-step .step-btn{width:88rpx;height:88rpx;line-height:84rpx;font-size:40rpx}
+.sheet-step .step-val{font-size:36rpx;min-width:80rpx}
+.sheet-foot{margin-top:32rpx}
+
+/* ---- 头像编辑：视觉与热区分离，彻底消除微信 button 默认描边 ---- */
+.avatar-wrap{position:relative;width:160rpx;height:160rpx;flex-shrink:0}
+.avatar-pic{width:160rpx;height:160rpx;border-radius:50%;display:block;background:var(--fill)}
+.avatar-ph{
+  width:160rpx;height:160rpx;border-radius:50%;
+  background:linear-gradient(135deg,#ffc0a8,#ff6b3d);color:#fff;
+  font-size:56rpx;display:flex;align-items:center;justify-content:center
+}
+.avatar-cam{
+  position:absolute;right:0;bottom:0;width:56rpx;height:56rpx;border-radius:50%;
+  background:#fff;border:2rpx solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2rpx 8rpx rgba(34,28,24,.10)
+}
+.avatar-cam image{width:30rpx;height:30rpx;opacity:.75}
+.avatar-hit{
+  position:absolute;left:0;top:0;width:160rpx;height:160rpx;
+  padding:0;margin:0;background:transparent;border:none;border-radius:50%;opacity:0
+}
+.avatar-hit::after{border:none}
+
+/* ---- 数量步进器：视觉 64rpx，热区撑到 88rpx（触控下限）---- */
+.step-btn{position:relative}
+.step-btn::after{
+  content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:88rpx;height:88rpx
+}
+
+/* ---- 行内小按钮：视觉 72rpx，热区撑到 88rpx ---- */
+.btn-sm{position:relative}
+.btn-sm::after{
+  content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:100%;height:88rpx
+}
+
+/* ============================================================
+   v7 增补 —— 横滑菜品卡 / 点菜选购（美团式购物车）
+   ============================================================ */
+
+/* ---- 横滑菜品卡：图在上、名字在下，一行滑动（常吃菜单）---- */
+.dish-scroller{white-space:nowrap;width:100%;padding:8rpx 0 12rpx}
+.dish-scroller::-webkit-scrollbar{display:none;width:0;height:0}
+.dish-hcard{display:inline-block;width:210rpx;margin-right:20rpx;vertical-align:top}
+.dish-hcard:last-child{margin-right:0}
+.dish-hcard:active{opacity:.65}
+.dish-hpic{position:relative;width:210rpx;height:210rpx;border-radius:var(--radius-lg);overflow:hidden;background:var(--fill)}
+.dish-hpic-img{width:210rpx;height:210rpx;display:block}
+.dish-hpic-ph{width:210rpx;height:210rpx;background:var(--fill);display:flex;align-items:center;justify-content:center}
+.dish-hpic-ph image{width:64rpx;height:64rpx;opacity:.28}
+.dish-hadd{
+  position:absolute;right:8rpx;bottom:8rpx;width:60rpx;height:60rpx;border-radius:50%;
+  background:var(--brand-btn);color:#fff;font-size:38rpx;font-weight:300;
+  line-height:58rpx;text-align:center;box-shadow:0 4rpx 12rpx rgba(232,80,31,.3)
+}
+.dish-hname{font-size:28rpx;font-weight:500;margin-top:14rpx;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dish-hcat{font-size:24rpx;color:var(--text-3);margin-top:2rpx;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ---- 菜品行里的数量步进（点菜模式）：静态排在行尾 ---- */
+.dish-step{
+  display:flex;align-items:center;gap:10rpx;flex-shrink:0;
+  height:64rpx;padding:0 8rpx;border-radius:var(--radius-pill);background:var(--fill)
+}
+.dish-step .step-btn{width:56rpx;height:56rpx;line-height:52rpx;font-size:34rpx;border:none;background:#fff}
+.dish-step .step-btn-solid{background:var(--brand-btn);color:#fff;border-color:var(--brand-btn)}
+.dish-step .step-val{min-width:40rpx;text-align:center;font-size:28rpx;font-weight:600;color:var(--text)}
+
+/* ---- 无障碍：尊重「减弱动态效果」系统设置（WXSS 不支持 * 通配符，逐元素列出） ---- */
+@media (prefers-reduced-motion: reduce){
+  view,text,button,input,textarea,image,scroll-view,navigator,
+  .btn,.btn-primary,.btn-ghost,.dish-plus,.dish-row,.link,.circle,.chip,
+  .avatar,.avatar-hit,.pic,.chev,.sheet-close,.step-btn,
+  .dish-hcard,.dish-step,.swipe-body{
+    transition:none!important;animation:none!important
+  }
+}

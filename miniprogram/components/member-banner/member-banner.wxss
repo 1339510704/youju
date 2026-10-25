@@ -1,0 +1,28 @@
+.mbanner {
+  display: flex;
+  align-items: center;
+  padding: 14rpx 20rpx;
+  background: #FFF4EE;
+  border-bottom: 2rpx solid #F6D9C9;
+}
+.mb-icon { font-size: 30rpx; margin-right: 12rpx; line-height: 1; }
+.mb-text { flex: 1; min-width: 0; }
+.mb-title { font-size: 26rpx; color: #E8501F; font-weight: 600; }
+.mb-sub { font-size: 22rpx; color: #B5642F; margin-top: 2rpx; }
+.mb-btn {
+  flex: none;
+  background: #E8501F;
+  color: #fff;
+  font-size: 24rpx;
+  padding: 10rpx 22rpx;
+  border-radius: 999rpx;
+  line-height: 1.2;
+}
+.mb-close {
+  flex: none;
+  margin-left: 14rpx;
+  color: #B5642F;
+  font-size: 40rpx;
+  line-height: 1;
+  padding: 0 6rpx;
+}

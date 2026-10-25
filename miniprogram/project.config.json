@@ -1,0 +1,55 @@
+{
+  "miniprogramRoot": "./",
+  "cloudfunctionRoot": "cloudfunctions/",
+  "appid": "wxa355fe96a761e38a",
+  "projectname": "home-space-mp",
+  "description": "家庭点单 / 待办 / 节日 / 提醒 / 理财 / 班级论坛 一体化小程序",
+  "setting": {
+    "urlCheck": false,
+    "es6": false,
+    "enhance": false,
+    "postcss": true,
+    "minified": true,
+    "newFeature": true,
+    "bigPackageSizeSupport": true,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": false,
+    "condition": false,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
+  },
+  "compileType": "miniprogram",
+  "libVersion": "3.17.2",
+  "condition": {},
+  "simulatorPluginLibVersion": {},
+  "packOptions": {
+    "ignore": [
+      { "type": "file", "value": "README.md" },
+      { "type": "file", "value": "OVERVIEW.md" },
+      { "type": "suffix", "value": ".md" },
+      { "type": "suffix", "value": ".py" },
+      { "type": "suffix", "value": "_preview_qr.jpg" },
+      { "type": "suffix", "value": ".log" },
+      { "type": "file", "value": "_icons_preview.png" },
+      { "type": "prefix", "value": "_" },
+      { "type": "file", "value": "private.wxa355fe96a761e38a.key" },
+      { "type": "prefix", "value": "private." },
+      { "type": "folder", "value": "node_modules" },
+      { "type": "file", "value": "package.json" },
+      { "type": "file", "value": "package-lock.json" }
+    ],
+    "include": []
+  },
+  "editorSetting": {}
+}

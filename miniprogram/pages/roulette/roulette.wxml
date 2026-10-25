@@ -1,0 +1,86 @@
+<view class="page">
+  <member-banner wx:if="{{memberExpired}}" />
+  <view class="bg-layer" style="{{bgStyle}}"></view>
+
+  <view class="ph">
+    <view class="ph-title">吃个啥呢</view>
+    <view class="ph-sub">选好类型，转盘帮你定今晚的菜</view>
+  </view>
+
+  <!-- 转盘：高速旋转 2.5 秒，停下看下方结果 -->
+  <view class="wheel-wrap">
+    <view class="wheel-pointer"></view>
+    <view class="wheel" style="background: {{wheelBg || '#eee'}}; transform: rotate({{wheelDeg}}deg);">
+      <block wx:if="{{wheelLabels.length && wheelLabels.length <= 30}}">
+        <view wx:for="{{wheelLabels}}" wx:key="index"
+              class="wheel-label"
+              style="transform: rotate({{index * 360 / wheelLabels.length + 180 / wheelLabels.length}}deg)">
+          {{item}}
+        </view>
+      </block>
+    </view>
+    <!-- 中心按钮放在转盘外面，转起来时文字不会跟着转 -->
+    <view class="wheel-center" bindtap="start">{{spinning ? '转…' : (pool.length ? (results.length ? '好嘞' : 'GO') : '加菜')}}</view>
+  </view>
+
+  <!-- 类型选择：默认全选；点掉/点上的都用橙色底 + ✓ 标出来。
+       注意：模板里不能用 indexOf（WXML 不支持方法调用，写了不报错但永远不生效），
+       所以「是否选中」在 JS 里算好放在 catsView 里。 -->
+  <view class="sec">选类型（默认全选，点掉就排除）</view>
+  <view class="cats">
+    <view wx:for="{{catsView}}" wx:key="name"
+          class="chip {{item.on ? 'chip-on' : ''}}"
+          bindtap="toggleCat" data-c="{{item.name}}">{{item.name}}</view>
+  </view>
+
+  <!-- 配置卡片：候选数 + 选中数 -->
+  <view class="card mt-20 roulette-cfg">
+    <view class="cfg-row">
+      <view class="cfg-label">候选菜数量<text class="t-2 fz22">（转盘上的候选）</text></view>
+      <view class="stepper">
+        <view class="step-btn" bindtap="decCand">－</view>
+        <text class="step-val">{{candCount}}</text>
+        <view class="step-btn step-btn-solid" bindtap="incCand">＋</view>
+      </view>
+    </view>
+    <view wx:if="{{candActual && candActual !== candCount}}" class="cfg-tip t-2 fz22">实际候选 {{candActual}} 道（菜单不够时按现有菜显示）</view>
+
+    <view class="cfg-divider"></view>
+
+    <view class="cfg-row">
+      <view class="cfg-label">每次选几道<text class="t-2 fz22">（分次随机记录）</text></view>
+      <view class="stepper">
+        <view class="step-btn" bindtap="decPick">－</view>
+        <text class="step-val">{{pickCount}}</text>
+        <view class="step-btn step-btn-solid" bindtap="incPick">＋</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 开始转盘（与配置拉开间距） -->
+  <view class="btn btn-primary btn-lg btn-block mt-32 {{spinning ? 'disabled' : ''}}" bindtap="start">
+    {{spinning ? '转盘转动中…' : '开始转盘'}}
+  </view>
+
+  <!-- 结果（逐次累积记录） -->
+  <view wx:if="{{results.length}}" class="sec mt-32">已选出 {{results.length}} 道（逐次记录）</view>
+  <view wx:if="{{results.length}}" class="list">
+    <view wx:for="{{results}}" wx:key="_rid" class="row res-row res-in">
+      <view class="dish-thumb">
+        <image wx:if="{{item.image}}" class="dish-thumb-img" src="{{item.imgUrl || item.image}}" mode="aspectFill" lazy-load />
+        <image wx:else class="dish-thumb-ph" src="/images/ic/dish_ph.png" />
+      </view>
+      <view class="flex-1 ml-16">
+        <view class="bold">{{item.name}}</view>
+        <view class="t-2 fz24">{{item.category || '其他'}} · {{item.flowers || 1}}❀</view>
+      </view>
+      <view class="res-dot" style="background:{{item._color}}"></view>
+    </view>
+  </view>
+  <view wx:if="{{results.length}}" class="flex gap-12 mt-16">
+    <view class="btn btn-ghost flex-1" bindtap="clearResults">清空重来</view>
+    <view class="btn btn-primary flex-1" bindtap="confirmOrder">全单确认下单</view>
+  </view>
+
+  <view wx:if="{{noSpace || notFamily}}" class="card mt-24">请到「家」切到家庭空间，再进来玩转盘。</view>
+</view>

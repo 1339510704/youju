@@ -1,0 +1,36 @@
+/* 日常待办 —— 勾选圆圈与其余样式统一走全局设计系统 */
+
+.todo-stat { display: flex; align-items: center; padding: 28rpx 12rpx; }
+.todo-stat-cell { flex: 1; text-align: center; }
+.todo-stat-num { font-size: 44rpx; font-weight: 800; letter-spacing: -.6rpx; color: var(--text); line-height: 1.1; }
+.todo-stat-cell + .todo-stat-cell { border-left: 2rpx solid var(--line); }
+
+/* 删除后的「撤销」浮条：误删还能滑回来 */
+.undo-bar {
+  position: fixed; left: 24rpx; right: 24rpx; bottom: 48rpx;
+  background: rgba(28, 28, 30, .92); color: #fff;
+  border-radius: 20rpx; padding: 22rpx 24rpx;
+  display: flex; align-items: center; justify-content: space-between;
+  z-index: 50; box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, .25);
+}
+.undo-text { font-size: 26rpx; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.undo-btn {
+  margin-left: 20rpx; color: #ffcf8a; font-weight: 600; font-size: 28rpx;
+  padding: 8rpx 20rpx; background: rgba(255, 255, 255, .12); border-radius: 14rpx;
+}
+
+/* 日期 + 时间：一行两个选择器 */
+.rem-dt { display: flex; align-items: center; gap: 16rpx; margin-top: 8rpx; }
+.rem-dt picker { flex: 1; }
+.rem-dt .tag { display: block; text-align: center; height: 84rpx; line-height: 84rpx; font-size: 32rpx; }
+
+/* 提醒对象：指定成员的多选胶囊 */
+.mem-pick { display: flex; flex-wrap: wrap; gap: 12rpx; padding: 4rpx 0 12rpx; }
+
+/* 测试推送入口（排查用，不显眼） */
+.todo-test { text-align: center; margin-top: 16rpx; text-decoration: underline; }
+
+/* ---- 列表字号加大：待办内容 + 提醒/截止时间 ---- */
+.todo-text { font-size: 34rpx; line-height: 1.45; }
+.due-line { font-size: 28rpx; }                       /* 提醒时间 / 截止时间 */
+.due-over { font-size: 27rpx; padding: 4rpx 14rpx; }  /* 已逾期标记 */

@@ -1,0 +1,35 @@
+/* 设置页：无额外私有样式，全部继承 app.wxss */
+/* 兑换码明文列表 */
+.gen-codes {
+  display: flex; flex-direction: column; gap: 10rpx;
+  margin-top: 12rpx; padding: 20rpx 24rpx;
+  background: var(--fill); border-radius: var(--radius);
+}
+.gen-code {
+  font-size: 28rpx; letter-spacing: 2rpx; color: var(--text);
+  font-family: Menlo, Consolas, monospace;
+}
+
+/* 生成弹层：把字段压成一行，缩短整体高度 */
+.gen-row { display: flex; align-items: center; gap: 12rpx; margin-top: 16rpx; }
+.gen-lbl { font-size: 26rpx; color: var(--text-2); flex-shrink: 0; }
+.gen-num { width: 110rpx; flex: none; text-align: center; }
+
+/* 兑换码：左右三段式 tab */
+.code-tabs {
+  display: flex; background: var(--fill);
+  border-radius: var(--radius); padding: 6rpx; margin-top: 12rpx;
+}
+.code-tab {
+  flex: 1; text-align: center; padding: 14rpx 0;
+  font-size: 26rpx; color: var(--text-2); border-radius: 12rpx;
+}
+.code-tab.on {
+  background: var(--card); color: var(--text); font-weight: 600;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, .06);
+}
+
+/* 左滑「作废」：未滑动时红色层完全透明，左滑展开（act-on）才显示 */
+.swipe { border-radius: var(--radius); }
+.swipe-act { opacity: 0; transition: opacity .15s ease; }
+.swipe-act.act-on { opacity: 1; }

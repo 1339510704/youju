@@ -1,0 +1,9 @@
+{
+  "name": "flower",
+  "version": "1.0.0",
+  "description": "小红花与会员中枢",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "content",
+  "version": "1.0.0",
+  "description": "通用内容 CRUD 与班级互动",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

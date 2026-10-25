@@ -1,0 +1,36 @@
+/* 节日页样式复用全局 */
+
+/* 「已 N 天」+「还有 N 天」：同样重要 → 同一行、同字号，仅用颜色区分 */
+.days-line { display: flex; align-items: baseline; margin-top: 10rpx; }
+.days-line text { margin-right: 36rpx; font-size: 30rpx; font-weight: 600; }
+.days-since { color: var(--success); }   /* 已过/累计：绿色 */
+.days-soon  { color: var(--primary); }   /* 倒计时：橙色 */
+.days-warn  { color: var(--warning); }   /* 就是今天：警示橙 */
+.days-mute  { color: var(--text-3); }    /* 无数据：灰 */
+
+/* 公历/农历/内容 + 倒数：能一行就一行，放不下时"天数标签"整体换到下一行，
+   日期和农历永远完整显示（之前用单行省略，标签一多农历就被截成"农历…"） */
+.fest-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6rpx 14rpx; margin-top: 6rpx; }
+.fest-meta { flex: 0 1 auto; min-width: 0; font-size: 28rpx; }
+.fest-note { color: var(--text); }   /* 节日内容：比日期更深的颜色，一眼区分 */
+.fest-line .days-since, .fest-line .days-soon,
+.fest-line .days-warn, .fest-line .days-mute {
+  flex-shrink: 0; font-size: 31rpx; font-weight: 600;
+}
+
+/* ---- 新增/编辑弹层：公历农历切换 + 日期 一行 ---- */
+.fest-row { display: flex; align-items: flex-end; gap: 16rpx; margin-top: 16rpx; }
+.fest-cell { display: flex; flex-direction: column; gap: 8rpx; }
+.fest-type {
+  display: flex; background: var(--fill); border-radius: var(--radius);
+  padding: 6rpx; flex-shrink: 0;
+}
+.fest-type-i { padding: 16rpx 22rpx; font-size: 27rpx; color: var(--text-2); border-radius: 12rpx; }
+.fest-type-i.on {
+  background: var(--card); color: var(--text); font-weight: 600;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, .06);
+}
+.fest-date { flex: 1; min-width: 0; }
+/* 日期输入框放大一些，好点、好看 */
+.fest-date .tag { display: block; text-align: center; height: 88rpx; line-height: 88rpx; font-size: 34rpx; }
+.fest-hint { font-size: 26rpx; color: var(--text-2); margin-top: 10rpx; }

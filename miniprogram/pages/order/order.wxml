@@ -1,0 +1,84 @@
+<view class="page page-bar">
+  <member-banner wx:if="{{memberExpired}}" />
+  <view class="bg-layer" style="{{bgStyle}}"></view>
+
+  <block wx:if="{{!space}}">
+    <view class="empty"><view class="empty-text">加载中…</view></view>
+  </block>
+
+  <block wx:elif="{{space.type !== 'family'}}">
+    <view class="page-head">
+      <view class="ph-title">今晚饭桌</view>
+    </view>
+    <view class="card mt-24">请到「家」切到家庭空间，再进来点菜。</view>
+  </block>
+
+  <block wx:else>
+    <!-- 顶部头图：家庭背景图，点「换背景」可换（常吃已去掉，入口上移到这里） -->
+    <view class="hero {{heroStyle ? '' : 'hero-default'}}">
+      <view class="hero-bg" style="{{heroStyle}}"></view>
+      <view class="hero-mask"></view>
+
+      <view class="hero-row">
+        <view class="hero-avatar">{{spaceInitial}}</view>
+        <view class="flex-1">
+          <view class="hero-name">{{space.name}}</view>
+          <view class="hero-sub">{{left}} 道待做 · 做完自动进历史</view>
+        </view>
+        <view class="flower-badge" bindtap="goRank">
+          <image class="flower-ic-sm" src="/images/ic/flower_red.png" /><text>{{myFlowers}}</text>
+        </view>
+      </view>
+
+      <!-- 历史订单 = 订单，管理菜单 = 菜单；两入口 + 换背景 一并上移到头图内 -->
+      <view class="hero-acts">
+        <view class="hero-act" bindtap="goHistory">历史订单</view>
+        <view class="hero-act" bindtap="goMenu">管理菜单</view>
+        <view class="hero-act" bindtap="chooseBg">{{uploading ? '上传中…' : '换背景'}}</view>
+        <view class="hero-act hero-act-accent" bindtap="goRoulette">吃个啥呢</view>
+      </view>
+    </view>
+
+    <!-- 点菜清单：只放没做完的，做完的自动进历史订单 -->
+    <view class="sec">点菜清单</view>
+
+    <view class="list">
+      <view wx:if="{{todo.length === 0}}" class="row">还没有人点菜，点下面「点菜」</view>
+
+      <!-- 左滑露出「删除」；点其它任意一行会自动收起 -->
+      <view wx:for="{{todo}}" wx:key="_id" class="swipe">
+        <view class="swipe-body" style="transform:translateX({{_swipeId === item._id ? '-172rpx' : '0'}});"
+              bindtouchstart="swipeStart" bindtouchmove="swipeMove" bindtouchend="swipeEnd"
+              data-id="{{item._id}}" bindtap="closeSwipe">
+          <view class="order-item">
+            <view class="flex-c">
+              <!-- 菜品图：没上传图片时用统一占位图 -->
+              <view class="order-thumb">
+                <image wx:if="{{item.image}}" class="order-thumb-img" src="{{item.imgUrl || item.image}}" mode="aspectFill" lazy-load />
+                <image wx:else class="order-thumb-ph" src="/images/ic/dish_ph.png" />
+              </view>
+              <view class="flex-1 ml-16">
+                <view class="order-name">{{item.name}}<text wx:if="{{item.qty > 1}}" class="order-qty">×{{item.qty}}</text></view>
+                <view class="order-meta order-meta-row">
+                  <text wx:if="{{item.status === 'pending'}}" class="tag tag-warning">待接单</text>
+                  <text wx:else class="tag tag-success">{{item.takerLabel}}做</text>
+                  <text class="order-meta-text">{{item.byName || '家人'}} 点的<text wx:if="{{item.mealDateText}}"> · 用餐 {{item.mealDateText}}{{item.mealTime ? ' ' + item.mealTime : ''}}</text><text wx:if="{{item.status === 'taken'}}"> · {{item.takerLabel}}接了</text></text>
+                </view>
+              </view>
+
+              <view wx:if="{{item.status === 'pending'}}" class="btn btn-primary btn-sm" catchtap="take" data-id="{{item._id}}">我来接单</view>
+              <view wx:else class="btn btn-ghost btn-sm" catchtap="finish" data-id="{{item._id}}">完成</view>
+            </view>
+          </view>
+        </view>
+        <view class="swipe-act" catchtap="remove" data-id="{{item._id}}">删除</view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 底部操作条（轻量，压在 tabBar 之上）-->
+  <view class="actionbar-sm actionbar-tab" wx:if="{{space && space.type === 'family'}}">
+    <view class="btn btn-primary btn-lg btn-fill" bindtap="goOrder">点菜</view>
+  </view>
+
+</view>

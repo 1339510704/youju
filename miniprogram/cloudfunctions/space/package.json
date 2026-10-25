@@ -1,0 +1,9 @@
+{
+  "name": "space",
+  "version": "1.0.0",
+  "description": "空间生命周期与成员管理",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>《出处》 · 三分钟短片</title>
+<style>
+:root{
+  --bg:#08090C; --panel:#101216; --line:#23262E;
+  --fg:#EDE8DE; --dim:#8A8778; --gold:#D4A746; --warm:#F0C674; --cyan:#4FD1C5; --red:#B3403A;
+  --serif:"Songti SC","Noto Serif SC","SimSun",serif;
+  --sans:"PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:"JetBrains Mono",Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--fg);line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:0 22px 60px}
+/* 顶栏 */
+header{display:flex;align-items:center;gap:14px;padding:18px 0 12px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.logo{font-family:var(--serif);font-size:20px;font-weight:700;letter-spacing:.1em}
+.logo span{color:var(--gold)}
+header .sp{flex:1}
+header .meta{font-family:var(--mono);font-size:10.5px;color:var(--dim);letter-spacing:.08em}
+/* 标题 */
+.title{padding:34px 0 18px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.title h1{font-family:var(--serif);font-size:clamp(46px,8vw,92px);font-weight:700;line-height:.95;letter-spacing:.04em}
+.title h1 em{font-style:normal;color:var(--gold)}
+.title p{font-size:13px;color:var(--dim);max-width:420px;margin-top:10px;line-height:1.8}
+.title .spec{font-family:var(--mono);font-size:11px;color:var(--dim);text-align:right;line-height:1.9}
+/* 16:9 舞台 */
+.stage{position:relative;width:100%;aspect-ratio:16/9;background:#000;border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.7)}
+.scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:6% 9%;text-align:center;transition:background .7s}
+.scene .inner{max-width:700px}
+.scene .kick{font-family:var(--mono);font-size:10.5px;letter-spacing:.26em;color:var(--gold);opacity:.8;margin-bottom:12px}
+.scene .line{font-family:var(--serif);font-size:clamp(17px,2.5vw,29px);font-weight:700;line-height:1.55;letter-spacing:.01em;text-shadow:0 2px 30px rgba(0,0,0,.8)}
+.scene .line em{font-style:normal;color:var(--warm)}
+.scene .vis{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--dim);opacity:.55;margin-top:18px}
+.scene .sub{position:absolute;left:7%;right:7%;bottom:7.5%;font-size:clamp(12px,1.5vw,16px);font-weight:600;line-height:1.5;color:#F4F0E6;background:rgba(0,0,0,.5);padding:8px 14px;border-radius:4px;border-left:2px solid var(--gold);text-align:left}
+/* 控制 */
+.ctrl{display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap}
+.pb{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--fg);font-size:15px;cursor:pointer;display:grid;place-items:center;transition:.15s}
+.pb:hover{border-color:var(--gold);color:var(--gold)}
+.pb.main{width:52px;height:52px;background:var(--gold);border-color:var(--gold);color:#1A1408;font-weight:700}
+.pb.main:hover{filter:brightness(1.08)}
+.bar{flex:1;min-width:160px;height:4px;background:#1A1D24;border-radius:99px;position:relative;cursor:pointer}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--gold);width:0;border-radius:99px}
+.tc{font-family:var(--mono);font-size:11.5px;color:var(--dim);white-space:nowrap}
+.sel{font-family:var(--mono);font-size:11px;background:transparent;color:var(--fg);border:1px solid var(--line);border-radius:5px;padding:5px 8px;cursor:pointer}
+/* 分镜表 */
+.sec{margin-top:30px}
+.sec .h{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--dim);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.sec .h::after{content:"";flex:1;height:1px;background:var(--line)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:9px}
+.shot{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--panel);cursor:pointer;transition:.15s}
+.shot:hover{border-color:#3A3F4A;background:#14171C}
+.shot.act{border-color:var(--gold);background:rgba(212,167,70,.08)}
+.shot .t{font-family:var(--mono);font-size:9.5px;color:var(--dim);display:flex;justify-content:space-between}
+.shot .n{font-family:var(--serif);font-size:12.5px;font-weight:700;margin-top:4px;line-height:1.45}
+.shot .d{font-size:11px;color:var(--dim);margin-top:3px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* 说明 */
+.notes{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:30px}
+@media(max-width:760px){.notes{grid-template-columns:1fr}}
+.note{border:1px solid var(--line);border-radius:10px;padding:16px 18px;background:var(--panel)}
+.note h3{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--gold);margin-bottom:9px}
+.note p{font-size:12.5px;color:#B8B3A6;line-height:1.85}
+.note b{color:var(--fg)}
+.note code{font-family:var(--mono);font-size:11px;background:#1A1D24;padding:1px 5px;border-radius:3px}
+.foot{text-align:center;font-size:11px;color:#4A4A44;margin-top:34px;font-family:var(--mono);line-height:1.9}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo">《<span>出处</span>》</div>
+    <div class="sp"></div>
+    <div class="meta">16:9 · 03:00 · 18 SHOTS · 1080p</div>
+  </header>
+
+  <div class="title">
+    <div>
+      <h1>把<em>出处</em><br>查清楚</h1>
+      <p>一条深夜转发的消息，一次没有把握的辟谣，一个普通人把「再来一条转发」改成了「先查一下」的三分钟。</p>
+    </div>
+    <div class="spec">
+      REALITY · DRAMA<br>
+      可播放分镜 · 点击跳转<br>
+      剧本见同目录 md
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="scene" id="scene">
+      <div class="inner">
+        <div class="kick" id="kick">SHOT 01 · 00:00</div>
+        <div class="line" id="line">黑场。手机在桌上震动。</div>
+        <div class="vis" id="vis">视觉：全黑，只有屏幕边缘微光</div>
+      </div>
+      <div class="sub" id="sub">（震动声 ×3）</div>
+    </div>
+  </div>
+
+  <div class="ctrl">
+    <button class="pb main" id="play">▶</button>
+    <button class="pb" id="restart">↺</button>
+    <div class="bar" id="bar"><i id="fill"></i></div>
+    <span class="tc" id="tc">00:00 / 03:00</span>
+    <select class="sel" id="spd">
+      <option value="0.5">0.5×</option>
+      <option value="1" selected>1×</option>
+      <option value="2">2×</option>
+      <option value="4">4×</option>
+    </select>
+  </div>
+
+  <div class="sec">
+    <div class="h">STORYBOARD · 分镜表</div>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="notes">
+    <div class="note">
+      <h3>创作说明</h3>
+      <p>全片不出现 AI 拟人形象，只出现<b>屏幕、手指、脸</b>。把"查证"拍成动作片：删掉一个"已转"、点开一个空白主页、把三张来源并排放在屏幕上。片尾那句「这条，我没查到可靠来源」是全片唯一的高光。</p>
+    </div>
+    <div class="note">
+      <h3>制作路径</h3>
+      <p>分镜按 <code>16:9 冷蓝夜景 + 屏幕光 + 胶片颗粒</code> 提示词生成静帧，再图生视频、配音、配乐、剪辑。完整剧本、镜头参数、音画方案见《剧本与创作说明书.md》。</p>
+    </div>
+  </div>
+
+  <div class="foot">有据 · 赛道04 短剧 · 《出处》 · 分镜播放在此，成片按说明书渲染</div>
+</div>
+
+<script>
+const SHOTS=[
+  {t:0,d:8,k:'SHOT 01 · 00:00',l:'黑场。手机在桌上震动。',s:'（震动声 ×3）',v:'视觉：全黑，只有屏幕边缘微光',bg:'#000',fg:'#EDE8DE'},
+  {t:8,d:10,k:'SHOT 02 · 00:08',l:'屏幕亮起：家族群，一条 60 秒语音。',s:'表哥：赶紧转！那边地震了，官方还瞒着！',v:'微距：手指按下播放键',bg:'#0E141C',fg:'#EDE8DE'},
+  {t:18,d:10,k:'SHOT 03 · 00:18',l:'主角坐在床沿，脸被屏幕照成冷蓝色。',s:'（呼吸声，窗外车流）',v:'中景：侧脸，屏幕光只照亮半张脸',bg:'#101A2E',fg:'#DCE6F5'},
+  {t:28,d:10,k:'SHOT 04 · 00:28',l:'群里消息一条接一条往上滚。',s:'有人发了"现场视频"，画面抖动、看不清。',v:'俯拍：手机屏幕，消息瀑布流',bg:'#0C1422',fg:'#EDE8DE'},
+  {t:38,d:10,k:'SHOT 05 · 00:38',l:'主角的拇指停在"转发"按钮上。',s:'（心跳声，渐强）',v:'大特写：拇指悬停，屏幕反光',bg:'#121A28',fg:'#EDE8DE'},
+  {t:48,d:10,k:'SHOT 06 · 00:48',l:'他删掉了输入框里那句"已转"。',s:'（删字音效，一下，两下）',v:'特写：光标退格，一个字一个字消失',bg:'#0E141C',fg:'#EDE8DE'},
+  {t:58,d:10,k:'SHOT 07 · 00:58',l:'他打开了搜索框。',s:'主角（低声）：先查一下。',v:'屏幕：输入"某地 地震 官方通报"',bg:'#0B1220',fg:'#4FD1C5'},
+  {t:68,d:12,k:'SHOT 08 · 01:08',l:'搜索结果一条条落下：官方、媒体、自媒体。',s:'（键盘敲击声变成密集雨点声）',v:'动态：结果卡片层层堆叠，标签分级',bg:'#0A1524',fg:'#EDE8DE'},
+  {t:80,d:10,k:'SHOT 09 · 01:20',l:'官方通报：无震情。',s:'主角（念）：截至发稿，未监测到相关地震。',v:'特写：官方页面，红头文件质感',bg:'#0C1A16',fg:'#B8E5C9'},
+  {t:90,d:10,k:'SHOT 10 · 01:30',l:'但群里那条"官方瞒着"的语音，还在转。',s:'（语音条被再次点开）',v:'分屏：左边官方通报，右边群消息',bg:'#121A28',fg:'#EDE8DE'},
+  {t:100,d:11,k:'SHOT 11 · 01:40',l:'他点开那条"现场视频"的原始发布者。',s:'账号注册 3 天，0 条历史内容。',v:'特写：账号主页，空白得像一张白纸',bg:'#0E141C',fg:'#EDE8DE'},
+  {t:111,d:11,k:'SHOT 12 · 01:51',l:'他把三条来源并排放在屏幕上。',s:'官方说没有；自媒体说瞒着；一条说"说不准"。',v:'俯拍：三张卡片并排，呈堂证物',bg:'#0B1220',fg:'#EDE8DE'},
+  {t:122,d:11,k:'SHOT 13 · 02:02',l:'他逐个点开，核对原文，手指在屏幕上划线。',s:'（笔尖划纸声，替代点击声）',v:'特写：高亮笔划过关键句',bg:'#101A2E',fg:'#F0C674'},
+  {t:133,d:11,k:'SHOT 14 · 02:13',l:'群里有人问：到底是不是真的？',s:'（消息提示音，一声）',v:'中景：手机屏亮，映出他沉默的脸',bg:'#121A28',fg:'#EDE8DE'},
+  {t:144,d:12,k:'SHOT 15 · 02:24',l:'他打下一行字，停住，又补上一句。',s:'主角：这条我没有查到可靠来源，先别转。',v:'特写：输入框，光标闪烁',bg:'#0C1422',fg:'#4FD1C5'},
+  {t:156,d:10,k:'SHOT 16 · 02:36',l:'发送。群里安静了整整五秒。',s:'（完全的静音，只有电流底噪）',v:'俯拍：消息发出，群聊静止',bg:'#080A10',fg:'#EDE8DE'},
+  {t:166,d:8,k:'SHOT 17 · 02:46',l:'一条回复弹出来：谢谢，我也差点转了。',s:'（轻的一声提示音）',v:'特写：屏幕上的这一行字',bg:'#0E1A18',fg:'#B8E5C9'},
+  {t:174,d:6,k:'SHOT 18 · 02:54',l:'他关掉屏幕。窗外，天快亮了。',s:'（字幕）出处，比结论更重要。',v:'远景：剪影与窗外鱼肚白',bg:'#1A2436',fg:'#F0C674'}
+];
+const TOTAL=180;
+let cur=0, playing=false, raf=null, last=0;
+const $=s=>document.querySelector(s);
+const f=s=>{s=Math.max(0,Math.min(TOTAL,Math.round(s)));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');};
+
+function at(t){let i=0;for(let j=0;j<SHOTS.length;j++){if(t>=SHOTS[j].t)i=j;else break;}return i;}
+function show(i){
+  const s=SHOTS[i], sc=$('#scene');
+  sc.style.background=s.bg; sc.style.color=s.fg;
+  $('#kick').textContent=s.k; $('#line').textContent=s.l; $('#vis').textContent=s.v; $('#sub').textContent=s.s;
+  document.querySelectorAll('.shot').forEach((el,j)=>el.classList.toggle('act',j===i));
+}
+function time(){ $('#tc').textContent=f(cur)+' / '+f(TOTAL); $('#fill').style.width=(cur/TOTAL*100)+'%'; }
+function tick(now){
+  if(!playing) return;
+  const dt=(now-last)/1000; last=now;
+  cur += dt*(parseFloat($('#spd').value)||1);
+  if(cur>=TOTAL){cur=TOTAL;stop();}
+  show(at(cur)); time();
+  if(playing) raf=requestAnimationFrame(tick);
+}
+function play(){ if(cur>=TOTAL)cur=0; playing=true; last=performance.now(); $('#play').textContent='❚❚'; raf=requestAnimationFrame(tick); }
+function stop(){ playing=false; $('#play').textContent='▶'; if(raf)cancelAnimationFrame(raf); }
+
+function grid(){
+  $('#grid').innerHTML=SHOTS.map((s,i)=>`<div class="shot" data-i="${i}">
+    <div class="t"><span>${String(i+1).padStart(2,'0')}</span><span>${f(s.t)}</span></div>
+    <div class="n">${s.l.length>16?s.l.slice(0,16)+'…':s.l}</div>
+    <div class="d">${s.s}</div>
+  </div>`).join('');
+  document.querySelectorAll('.shot').forEach(el=>el.onclick=()=>{
+    cur=SHOTS[+el.dataset.i].t; show(+el.dataset.i); time();
+  });
+}
+
+$('#play').onclick=()=>playing?stop():play();
+$('#restart').onclick=()=>{cur=0;show(0);time();};
+$('#bar').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();cur=(e.clientX-r.left)/r.width*TOTAL;show(at(cur));time();};
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space'){e.preventDefault();playing?stop():play();}
+  if(e.key==='ArrowRight'){cur=Math.min(TOTAL,cur+5);show(at(cur));time();}
+  if(e.key==='ArrowLeft'){cur=Math.max(0,cur-5);show(at(cur));time();}
+});
+
+grid(); show(0); time();
+</script>
+
+<!-- ===== 有据门户 · 悬浮返回条 ===== -->
+<style>
+.yj-nav{position:fixed;left:14px;bottom:14px;z-index:9999;display:flex;align-items:center;gap:6px;
+  font-family:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif;font-size:12px;
+  background:rgba(17,24,39,.86);color:#fff;border-radius:99px;padding:7px 8px 7px 12px;
+  box-shadow:0 6px 18px rgba(0,0,0,.18);backdrop-filter:blur(6px);text-decoration:none;
+  transition:opacity .15s,transform .15s}
+.yj-nav:hover{opacity:.92;transform:translateY(-1px)}
+.yj-nav .yj-ico{font-size:13px;line-height:1}
+.yj-nav .yj-txt{white-space:nowrap}
+.yj-nav .yj-sep{opacity:.4;margin:0 2px}
+@media (max-width:480px){.yj-nav{left:8px;bottom:8px;font-size:11px;padding:6px 7px 6px 10px}}
+</style>
+<a class="yj-nav" href="https://youju.robai.dpdns.org/" title="回到有据总入口，看全部产品">
+  <span class="yj-ico">🏠</span><span class="yj-txt">总入口</span><span class="yj-sep">·</span><span class="yj-txt">有据</span>
+</a>
+</body>
+</html>

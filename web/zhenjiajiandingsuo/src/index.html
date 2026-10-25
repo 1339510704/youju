@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>真假鉴定所 · 60 秒一局</title>
+<style>
+:root, [data-theme="dark"]{
+  --bg:#0E0A1A; --bg2:#171029; --panel:#1E1536; --line:#33265A;
+  --fg:#F4EEFF; --dim:#A794D6; --violet:#8B5CF6; --violet2:#B388FF;
+  --yellow:#FFD23F; --pink:#FF5CA8; --green:#3BE38A; --red:#FF5C5C; --cyan:#4FE0E0;
+  --accentGlow:rgba(139,92,246,.45);
+}
+[data-theme="light"]{
+  --bg:#F6F4FB; --bg2:#EDE9F7; --panel:#FFFFFF; --line:#D9D2EC;
+  --fg:#231A3B; --dim:#6B5E8C; --violet:#6D3FD1; --violet2:#8B5CF6;
+  --yellow:#C7960B; --pink:#D63384; --green:#1E9E63; --red:#D63333; --cyan:#0E8FA6;
+  --accentGlow:rgba(109,63,209,.22);
+}
+:root{
+  --arcade:"Press Start 2P","Courier New",monospace;
+  --mono:"JetBrains Mono",Consolas,monospace;
+  --sans:"PingFang SC","Microsoft YaHei",sans-serif;
+}
+body{transition:background .25s,color .25s}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--fg);line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(800px 500px at 20% 0%,var(--accentGlow),transparent 60%),
+             radial-gradient(700px 400px at 90% 100%,rgba(255,92,168,.18),transparent 60%);}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.18;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.5) 0 1px,transparent 1px 3px);}
+.wrap{max-width:860px;margin:0 auto;padding:0 20px 70px;position:relative;z-index:2}
+/* HUD */
+.hud{display:flex;align-items:center;gap:12px;padding:16px 0 10px;flex-wrap:wrap}
+.logo{font-family:var(--arcade);font-size:13px;letter-spacing:.08em;color:var(--yellow);text-shadow:0 0 12px rgba(255,210,63,.6);line-height:1.5}
+.hud .sp{flex:1}
+.hbox{font-family:var(--mono);font-size:11px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 10px;color:var(--dim)}
+.hbox b{color:var(--yellow);font-size:14px}
+.hbox.hot{border-color:var(--pink);background:rgba(255,92,168,.14)}
+.hbox.hot b{color:var(--pink)}
+.theme-pick{display:flex;gap:6px;align-items:center;padding:4px 6px;background:var(--panel);border:1px solid var(--line);border-radius:99px}
+.th-dot{width:16px;height:16px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;transition:.15s}
+.th-dot:hover{transform:scale(1.15)}
+.th-dot.on{border-color:var(--fg);box-shadow:0 0 0 2px var(--panel)}
+/* 开始 */
+.start{text-align:center;padding:34px 0}
+.start h1{font-family:var(--arcade);font-size:clamp(22px,5vw,40px);line-height:1.35;color:var(--fg);text-shadow:0 0 24px var(--accentGlow)}
+.start h1 span{color:var(--yellow);text-shadow:0 0 24px rgba(255,210,63,.7)}
+.start .sub{font-size:13.5px;color:var(--dim);margin-top:16px;max-width:520px;margin-left:auto;margin-right:auto;line-height:1.85}
+.start .rules{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:24px auto 0;max-width:660px;text-align:left}
+@media(max-width:640px){.start .rules{grid-template-columns:1fr}}
+.rule{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.rule .n{font-family:var(--arcade);font-size:8px;color:var(--violet2);letter-spacing:.1em}
+.rule .t{font-size:13.5px;font-weight:800;margin-top:6px}
+.rule .d{font-size:11px;color:var(--dim);margin-top:3px;line-height:1.55}
+.btn{margin-top:26px;padding:15px 38px;border:0;border-radius:12px;background:linear-gradient(135deg,var(--violet2),var(--violet));color:#fff;font-family:var(--sans);font-size:17px;font-weight:900;cursor:pointer;box-shadow:0 12px 30px var(--accentGlow);transition:.15s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 18px 40px var(--accentGlow)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:.5;cursor:wait;transform:none}
+/* 游戏 */
+.game{display:none}
+.game.on{display:block}
+.prog{display:flex;gap:4px;margin-bottom:16px}
+.prog i{flex:1;height:6px;border-radius:99px;background:#2A1F48;overflow:hidden}
+.prog i.done{background:var(--green)}
+.prog i.now{background:var(--yellow);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+.case{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 20px;position:relative;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.35)}
+.case::before{content:"CASE FILE";position:absolute;top:10px;right:-6px;font-family:var(--arcade);font-size:8px;color:#0E0A1A;background:var(--yellow);padding:4px 16px 4px 10px;transform:rotate(3deg)}
+.case .no{font-family:var(--mono);font-size:10px;color:var(--violet2);letter-spacing:.14em}
+.case .tx{font-size:clamp(17px,2.6vw,23px);font-weight:800;line-height:1.45;margin-top:8px}
+.case .meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.case .meta span{font-family:var(--mono);font-size:10px;color:var(--dim);border:1px solid var(--line);border-radius:99px;padding:2px 9px}
+/* 证据 */
+.evhead{display:flex;align-items:center;gap:10px;margin:16px 0 9px;flex-wrap:wrap}
+.evhead .t{font-family:var(--arcade);font-size:8px;color:var(--violet2);letter-spacing:.1em}
+.evhead .h{font-size:11px;color:var(--dim)}
+.evhead .sp{flex:1}
+.sbtn{padding:8px 16px;border:1px solid var(--violet);border-radius:8px;background:transparent;color:var(--violet2);font-size:12px;font-weight:800;cursor:pointer;transition:.15s;font-family:var(--sans)}
+.sbtn:hover{background:var(--accentGlow);background:color-mix(in srgb, var(--violet) 16%, transparent)}
+.sbtn:disabled{opacity:.4;cursor:default}
+.evs{display:grid;gap:8px}
+.ev{display:none;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:10px 13px}
+.ev.show{display:block;animation:pop .28s ease}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.ev .top{display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap}
+.tier{font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;color:#0E0A1A}
+.tier.official{background:var(--green)} .tier.academic{background:var(--cyan)}
+.tier.media{background:#C9D6E8} .tier.vertical{background:#9AE6B4}
+.tier.selfmedia{background:var(--yellow)} .tier.marketing{background:var(--pink)}
+.ev .site{font-family:var(--mono);font-size:10px;color:var(--dim)}
+.ev .site a{color:var(--dim);text-decoration:none;border-bottom:1px dashed var(--line)}
+.ev .site a:hover{color:var(--fg);border-color:var(--fg)}
+.ev .tx{font-size:12.5px;line-height:1.7;color:#CFC4E8}
+.ev .tx mark{background:var(--yellow);color:#201400;border-radius:3px;padding:0 3px;font-weight:700}
+.ev .hl-row{display:flex;justify-content:flex-end;margin-top:6px}
+.hlbtn{font-family:var(--mono);font-size:9.5px;padding:3px 10px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--dim);cursor:pointer;transition:.15s}
+.hlbtn:hover{border-color:var(--violet2);color:var(--violet2)}
+.hlbtn.on{border-color:var(--yellow);color:var(--yellow)}
+/* 输入：待鉴定的说法 + 证据条数 */
+.claimbox{margin-top:24px;max-width:560px;margin-left:auto;margin-right:auto;text-align:left}
+.claimbox textarea{width:100%;min-height:64px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--fg);font-family:var(--sans);font-size:14px;padding:12px 14px;resize:vertical;line-height:1.6}
+.claimbox textarea:focus{outline:none;border-color:var(--violet2)}
+.claimbox textarea::placeholder{color:var(--dim)}
+.examples{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.ex-chip{font-size:11px;padding:5px 11px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--dim);cursor:pointer;transition:.15s}
+.ex-chip:hover{border-color:var(--violet2);color:var(--violet2)}
+.cntpick{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+.cntpick .lbl{font-size:11.5px;color:var(--dim)}
+.cnt-opt{font-family:var(--mono);font-size:12px;padding:5px 13px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--dim);cursor:pointer;transition:.15s}
+.cnt-opt.on{background:var(--violet);border-color:var(--violet);color:#fff}
+.err{font-size:12px;color:var(--red);margin-top:8px;min-height:16px}
+/* 搜索态 */
+.searching{text-align:center;padding:40px 0;color:var(--dim);font-size:13px}
+.searching .dots{display:inline-block;animation:pulse 1s infinite}
+/* 立场参考条 */
+.stance-meter{margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 15px}
+.stance-meter .lbl{font-size:11px;color:var(--dim);margin-bottom:7px}
+.stance-bar{height:10px;border-radius:99px;background:linear-gradient(90deg,var(--red),var(--line) 50%,var(--green));position:relative;overflow:hidden}
+.stance-bar .mk{position:absolute;top:-3px;width:3px;height:16px;background:var(--fg);border-radius:2px;box-shadow:0 0 6px rgba(0,0,0,.5)}
+.stance-txt{font-size:11.5px;color:var(--dim);margin-top:7px;line-height:1.7}
+/* 判定 */
+.judge{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:18px}
+@media(max-width:560px){.judge{grid-template-columns:1fr}}
+.jb{padding:14px 8px;border-radius:12px;border:2px solid var(--line);background:var(--panel);color:var(--fg);font-family:var(--sans);font-size:16px;font-weight:900;cursor:pointer;transition:.15s}
+.jb .s{display:block;font-family:var(--mono);font-size:9px;font-weight:400;color:var(--dim);margin-top:3px}
+.jb:hover:not(:disabled){transform:translateY(-2px)}
+.jb[data-v="真"]:hover:not(:disabled){border-color:var(--green);box-shadow:0 8px 22px rgba(59,227,138,.22)}
+.jb[data-v="假"]:hover:not(:disabled){border-color:var(--red);box-shadow:0 8px 22px rgba(255,92,92,.22)}
+.jb[data-v="说不准"]:hover:not(:disabled){border-color:var(--yellow);box-shadow:0 8px 22px rgba(255,210,63,.22)}
+.jb:disabled{opacity:.42;cursor:default}
+/* 结果 */
+.res{display:none;margin-top:16px;border-radius:14px;padding:15px 17px;border:1px solid var(--line)}
+.res.on{display:block;animation:pop .25s ease}
+.res.ok{background:rgba(59,227,138,.1);border-color:rgba(59,227,138,.4)}
+.res.no{background:rgba(255,92,92,.1);border-color:rgba(255,92,92,.4)}
+.res.mid{background:rgba(255,210,63,.09);border-color:rgba(255,210,63,.4)}
+.res .rh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:7px}
+.res .tag{font-family:var(--arcade);font-size:8px;padding:4px 9px;border-radius:5px;color:#0E0A1A}
+.res.ok .tag{background:var(--green)} .res.no .tag{background:var(--red)} .res.mid .tag{background:var(--yellow)}
+.res .pts{margin-left:auto;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--yellow)}
+.res .expl{font-size:12.5px;line-height:1.8;color:#D6CCF0}
+.res .expl b{color:var(--yellow)}
+.next{width:100%;margin-top:12px;padding:12px;border-radius:10px;border:0;background:var(--violet);color:#fff;font-size:14.5px;font-weight:900;cursor:pointer;font-family:var(--sans)}
+.next:hover{filter:brightness(1.1)}
+/* 结算 */
+.end{display:none;text-align:center;padding:30px 0}
+.end.on{display:block}
+.end h2{font-family:var(--arcade);font-size:clamp(26px,6vw,44px);color:var(--yellow);text-shadow:0 0 28px rgba(255,210,63,.7)}
+.end .rank{margin-top:14px;font-size:17px;font-weight:900;color:var(--violet2)}
+.end .sc{display:inline-flex;gap:14px;margin-top:18px;flex-wrap:wrap;justify-content:center}
+.end .sc div{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:10px 18px}
+.end .sc .k{font-family:var(--mono);font-size:9.5px;color:var(--dim)}
+.end .sc .v{font-size:22px;font-weight:900;color:var(--fg)}
+.end .vd{margin:18px auto 0;max-width:480px;font-size:12.5px;color:var(--dim);line-height:1.8}
+.foot{text-align:center;font-family:var(--mono);font-size:10px;color:#4A3D6E;margin-top:30px;line-height:1.9}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hud">
+    <div class="logo">真假<br>鉴定所</div>
+    <div class="sp"></div>
+    <div class="theme-pick" id="themePick" title="换个主题色">
+      <button data-th="dark" class="th-dot" style="background:#0E0A1A;border:1px solid #33265A" aria-label="黑"></button>
+      <button data-th="light" class="th-dot" style="background:#F6F4FB;border:1px solid #D9D2EC" aria-label="白"></button>
+    </div>
+    <div class="hbox">SCORE <b id="hs">0</b></div>
+    <div class="hbox" id="hstreak">COMBO <b id="hc">0</b></div>
+  </div>
+
+  <div class="start" id="start">
+    <h1>这条消息<br><span>靠谱吗</span></h1>
+    <div class="sub">写一句你想验证的说法，系统会用真实搜索去召回证据——不是预设题库，查到什么就是什么。选「真 / 假 / 说不准」，说"不知道"不扣分，瞎判才扣。</div>
+    <div class="rules">
+      <div class="rule"><div class="n">RULE 01</div><div class="t">真实检索</div><div class="d">每一条证据都来自真实搜索，带真链接，可以点进去看原文。</div></div>
+      <div class="rule"><div class="n">RULE 02</div><div class="t">敢说不准</div><div class="d">证据不足或自相矛盾时，选「说不准」是正确操作。</div></div>
+      <div class="rule"><div class="n">RULE 03</div><div class="t">连击加成</div><div class="d">连续判对倍率叠加，判错清零但不结束。</div></div>
+    </div>
+
+    <div class="claimbox">
+      <textarea id="claimInput" placeholder="输入一句想验证的说法，例如：每天走一万步是健康的最低标准" maxlength="120"></textarea>
+      <div class="examples" id="examples">
+        <button class="ex-chip" data-c="每天喝8杯水对身体有好处">每天喝8杯水对身体有好处</button>
+        <button class="ex-chip" data-c="熬夜会让人变笨">熬夜会让人变笨</button>
+        <button class="ex-chip" data-c="每天走一万步是健康的最低标准">每天走一万步是健康的最低标准</button>
+        <button class="ex-chip" data-c="手机充电一整夜会严重损伤电池">手机充电一整夜会严重损伤电池</button>
+      </div>
+      <div class="cntpick">
+        <span class="lbl">召回证据条数</span>
+        <button class="cnt-opt" data-n="6">6 条</button>
+        <button class="cnt-opt on" data-n="10">10 条</button>
+        <button class="cnt-opt" data-n="20">20 条</button>
+      </div>
+      <div class="err" id="startErr"></div>
+    </div>
+
+    <button class="btn" id="startBtn">开始鉴定</button>
+  </div>
+
+  <div class="game" id="game">
+    <div class="prog" id="prog"></div>
+    <div class="case">
+      <div class="no">CASE <span id="cno">01</span> · 待鉴定</div>
+      <div class="tx" id="ctx"></div>
+      <div class="meta"><span id="ctype">用户输入</span><span>证据来源：真实检索</span></div>
+    </div>
+
+    <div class="evhead">
+      <span class="t">EVIDENCE</span>
+      <span class="h" id="ehint">检索中…</span>
+      <span class="sp"></span>
+      <button class="sbtn" id="sbtn" style="display:none">换一批证据</button>
+    </div>
+    <div class="evs" id="evs"></div>
+
+    <div class="judge" id="judge">
+      <button class="jb" data-v="真">真<span class="s">有可靠来源</span></button>
+      <button class="jb" data-v="假">假<span class="s">来源相矛盾</span></button>
+      <button class="jb" data-v="说不准">说不准<span class="s">证据不足</span></button>
+    </div>
+
+    <div class="res" id="res">
+      <div class="rh"><span class="tag" id="rtag">判定</span><span id="rtitle"></span><span class="pts" id="rpts"></span></div>
+      <div class="stance-meter" id="stanceMeter" style="display:none">
+        <div class="lbl">证据整体倾向（参考，不是标准答案）</div>
+        <div class="stance-bar"><div class="mk" id="stanceMk" style="left:50%"></div></div>
+        <div class="stance-txt" id="stanceTxt"></div>
+      </div>
+      <div class="expl" id="rexpl"></div>
+      <button class="next" id="next">再验一条</button>
+      <button class="sbtn" id="endBtn" style="width:100%;margin-top:8px">结束本局，看结算</button>
+    </div>
+  </div>
+
+  <div class="end" id="end">
+    <h2 id="escore">0</h2>
+    <div class="rank" id="erank"></div>
+    <div class="sc">
+      <div><div class="k">判对</div><div class="v" id="eright">0</div></div>
+      <div><div class="k">判错</div><div class="v" id="ewrong">0</div></div>
+      <div><div class="k">最高连击</div><div class="v" id="ebest">0</div></div>
+    </div>
+    <div class="vd" id="evd"></div>
+    <button class="btn" id="again" style="margin-top:20px;font-size:15px;padding:12px 28px">再来一局</button>
+  </div>
+
+  <div class="foot">真假鉴定所 · 赛道05 游戏 · 每条证据来自真实检索，没有预设题库</div>
+</div>
+
+<script>
+const API = location.origin;
+const $=s=>document.querySelector(s);
+const TNAME={official:'官方',academic:'学术',media:'主流',vertical:'垂直',selfmedia:'自媒体',marketing:'营销'};
+const HI_TIERS=['official','academic','media'];
+const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+const S={round:0,score:0,streak:0,best:0,right:0,wrong:0,answered:false,
+  claim:'',cnt:10,items:[],judged:null,avgStance:null};
+
+/* ---- 主题色 ---- */
+function applyTheme(name){
+  document.documentElement.setAttribute('data-theme', name);
+  document.querySelectorAll('.th-dot').forEach(b => b.classList.toggle('on', b.dataset.th === name));
+  try{ localStorage.setItem('zjjds-theme', name); }catch(e){}
+}
+(function initTheme(){
+  let saved = 'dark';
+  try{ saved = localStorage.getItem('zjjds-theme') || 'dark'; }catch(e){}
+  // 旧版本存过紫/红/青/橙，统一归到黑/白两档，避免读到不存在的主题名
+  if(!['dark','light'].includes(saved)) saved = 'dark';
+  applyTheme(saved);
+  document.querySelectorAll('.th-dot').forEach(b => { b.onclick = () => applyTheme(b.dataset.th); });
+})();
+
+/* ---- 开始界面：示例 + 证据条数 ---- */
+document.querySelectorAll('.ex-chip').forEach(b=>{
+  b.onclick=()=>{ $('#claimInput').value=b.dataset.c; $('#claimInput').focus(); };
+});
+document.querySelectorAll('.cnt-opt').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('.cnt-opt').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); S.cnt=parseInt(b.dataset.n,10);
+  };
+});
+
+async function start(){
+  const claim=$('#claimInput').value.trim();
+  if(!claim){ $('#startErr').textContent='先写一句你想验证的说法'; return; }
+  if(claim.length<4){ $('#startErr').textContent='说法有点太短，写详细一点'; return; }
+  $('#startErr').textContent='';
+  S.claim=claim; S.round=0;S.score=0;S.streak=0;S.best=0;S.right=0;S.wrong=0;
+  $('#start').style.display='none'; $('#end').classList.remove('on'); $('#game').classList.add('on');
+  await runRound(claim);
+}
+
+async function runRound(claim){
+  S.answered=false; S.items=[]; S.judged=null; S.avgStance=null;
+  S.round++;
+  $('#cno').textContent=String(S.round).padStart(2,'0');
+  $('#ctx').textContent=claim;
+  $('#prog').innerHTML=`<i class="now"></i>`;
+  $('#res').classList.remove('on');
+  $('#stanceMeter').style.display='none';
+  $('#sbtn').style.display='none';
+  document.querySelectorAll('.jb').forEach(b=>b.disabled=true);
+  $('#evs').innerHTML='';
+  $('#ehint').innerHTML='<span class="searching">检索中<span class="dots">…</span></span>';
+  hud();
+
+  try{
+    // WSA 的 Cnt 只接受 10/20/30/40/50，用户选的 6/10/20 在前端再裁一次，保证数量符合用户选择
+    const fetchCnt = S.cnt <= 10 ? 10 : S.cnt;
+    const r = await fetch(`${API}/api/search?q=${encodeURIComponent(claim)}&cnt=${fetchCnt}`);
+    const data = await r.json();
+    if(!data.ok) throw new Error(data.error||'检索失败');
+    S.items = (data.items||[]).slice(0, S.cnt);
+    renderEvidence();
+    if(!S.items.length){
+      $('#ehint').textContent='没召回到相关结果——这本身就是信息，说明网上公开可查的信源很少。';
+    }else{
+      $('#ehint').textContent=`真实召回 ${S.items.length} 条`;
+    }
+    document.querySelectorAll('.jb').forEach(b=>b.disabled=false);
+    scoreRelevance(claim);
+  }catch(e){
+    $('#ehint').textContent='检索出错：'+(e.message||e);
+    document.querySelectorAll('.jb').forEach(b=>b.disabled=false);
+  }
+}
+
+function renderEvidence(){
+  $('#evs').innerHTML = S.items.map((it,i)=>{
+    const link = it.url ? esc(it.url) : '';
+    const siteHtml = link
+      ? `<a href="${link}" target="_blank" rel="noopener noreferrer">${esc(it.site||it.url)}</a>`
+      : esc(it.site||'来源未知');
+    return `<div class="ev show" data-i="${i}">
+      <div class="top"><span class="tier ${it.tier}">${TNAME[it.tier]||it.tier}</span><span class="site">${siteHtml}</span></div>
+      <div class="tx" id="evtx${i}">${esc(it.title)}${it.title&&it.passage?' — ':''}${esc(it.passage).slice(0,220)}</div>
+      <div class="hl-row"><button class="hlbtn" data-i="${i}">高亮关键句</button></div>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('.hlbtn').forEach(b=>{
+    b.onclick=()=>toggleHighlight(parseInt(b.dataset.i,10), b);
+  });
+}
+
+/* 点击「高亮关键句」：找出段落里跟说法重叠度最高的一句，用 <mark> 包起来 */
+function toggleHighlight(i, btn){
+  const on = btn.classList.toggle('on');
+  const box = $('#evtx'+i);
+  const it = S.items[i];
+  if(!on){ box.innerHTML = esc(it.title)+(it.title&&it.passage?' — ':'')+esc(it.passage).slice(0,220); btn.textContent='高亮关键句'; return; }
+  btn.textContent='取消高亮';
+  const sentences = String(it.passage||'').split(/(?<=[。！？.!?])/).filter(s=>s.trim().length>3);
+  const claimWords = S.claim.replace(/[的了是对吗能会否否则]/g,'').split('').filter(Boolean);
+  let best=sentences[0]||'', bestScore=-1;
+  sentences.forEach(s=>{
+    let sc=0; claimWords.forEach(w=>{ if(s.includes(w)) sc++; });
+    if(sc>bestScore){ bestScore=sc; best=s; }
+  });
+  const full = esc(it.title)+(it.title&&it.passage?' — ':'')+esc(it.passage).slice(0,220);
+  if(best && it.passage && it.passage.includes(best.trim())){
+    const escBest = esc(best);
+    const marked = full.replace(escBest, '<mark>'+escBest+'</mark>');
+    box.innerHTML = marked;
+  }else{
+    box.innerHTML = full;
+  }
+}
+
+/* 用 Jev 给每条证据打相关性/立场分，算出整体倾向（仅做参考，不当标准答案） */
+async function scoreRelevance(claim){
+  if(!S.items.length) return;
+  try{
+    const r = await fetch(`${API}/api/judge`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ claim, items: S.items.slice(0,12) })
+    });
+    const data = await r.json();
+    if(!data.ok) return;
+    const valid = data.results.filter(x=>typeof x.stance==='number');
+    if(!valid.length) return;
+    const avg = valid.reduce((a,x)=>a+x.stance,0)/valid.length; // 0=反驳 1=中立 2=支持
+    S.avgStance = avg;
+  }catch(e){ /* 打分失败不影响主流程 */ }
+}
+
+function judge(v){
+  if(S.answered)return; S.answered=true;
+  document.querySelectorAll('.jb').forEach(b=>b.disabled=true);
+
+  const hi = S.items.filter(it=>HI_TIERS.includes(it.tier)).length;
+  // 没有预设答案：用 Jev 给的整体立场作参考锚点评估这次判断是否"站得住"
+  let refVerdict = null;
+  if(S.avgStance!=null){
+    if(S.avgStance < 0.65) refVerdict='假';
+    else if(S.avgStance > 1.35) refVerdict='真';
+    else refVerdict='说不准';
+  }
+  const ok = refVerdict ? (v===refVerdict) : (v==='说不准'); // 证据打分失败时，选"说不准"算稳妥不扣分
+
+  let pts=0;
+  if(ok){ pts=100+Math.min(hi*8,40)+S.streak*15; S.streak++;S.right++;S.best=Math.max(S.best,S.streak); }
+  else { S.streak=0;S.wrong++; }
+  S.score+=pts; hud();
+
+  const r=$('#res');
+  r.className='res on '+(ok?(v==='说不准'?'mid':'ok'):'no');
+  $('#rtag').textContent=ok?'判得住':'有争议';
+  $('#rtitle').textContent = refVerdict
+    ? (ok ? '和证据整体倾向一致' : `证据整体更倾向「${refVerdict}」`)
+    : '证据相关性打分失败，选"说不准"不扣分';
+  $('#rpts').textContent=(pts>0?'+':'')+pts+(ok&&S.streak>1?` · ${S.streak} 连击`:'');
+
+  if(S.avgStance!=null){
+    $('#stanceMeter').style.display='block';
+    const pct = Math.max(0,Math.min(100, (S.avgStance/2)*100));
+    $('#stanceMk').style.left = pct+'%';
+    $('#stanceTxt').textContent = `${S.items.length} 条证据里，Jev 判断平均立场偏向 ${S.avgStance<0.65?'反驳这个说法':S.avgStance>1.35?'支持这个说法':'中立/证据分歧'}（分数 ${S.avgStance.toFixed(2)} / 2，仅供参考，不是权威结论）`;
+  }
+  $('#rexpl').innerHTML = hi
+    ? `这 ${S.items.length} 条证据里有 ${hi} 条来自官方/学术/主流信源，点证据卡片上的域名可以直接跳转去看原文核对。`
+    : `这次召回里没有官方/学术/主流信源，多是垂直或自媒体内容——证据强度本身就弱，"说不准"往往是更稳的选择。`;
+  $('#next').textContent='再验一条';
+}
+
+function next(){ $('#claimInput').value=''; runRoundReset(); }
+function runRoundReset(){
+  $('#game').classList.remove('on'); $('#start').style.display='block';
+  $('#startErr').textContent='';
+}
+function endSession(){
+  $('#game').classList.remove('on'); $('#end').classList.add('on');
+  $('#escore').textContent=S.score; $('#eright').textContent=S.right;
+  $('#ewrong').textContent=S.wrong; $('#ebest').textContent=S.best;
+  let r,v;
+  if(S.score>=1200){r='首席鉴定师';v='大多数判断都站得住，证据也读得细。';}
+  else if(S.score>=900){r='资深鉴定师';v='判断比较稳，偶尔会被低可信来源带偏。';}
+  else if(S.score>=600){r='见习鉴定师';v='方向没错。记住：证据不足或分歧大时选"说不准"，不扣分。';}
+  else {r='实习生';v='没关系，鉴定不是比谁快，是比谁愿意先看证据再判。';}
+  $('#erank').textContent='「'+r+'」'; $('#evd').textContent=v;
+}
+function hud(){ $('#hs').textContent=S.score; $('#hc').textContent=S.streak; $('#hstreak').className='hbox'+(S.streak>=3?' hot':''); }
+
+$('#startBtn').onclick=start;
+$('#again').onclick=()=>{ $('#end').classList.remove('on'); $('#start').style.display='block'; };
+$('#next').onclick=next;
+$('#endBtn').onclick=endSession;
+document.querySelectorAll('.jb').forEach(b=>b.onclick=()=>judge(b.dataset.v));
+document.addEventListener('keydown',e=>{
+  if(!$('#game').classList.contains('on'))return;
+  if(e.key==='1')judge('真'); else if(e.key==='2')judge('假'); else if(e.key==='3')judge('说不准');
+  else if(e.key==='Enter'&&$('#res').classList.contains('on'))next();
+});
+</script>
+
+<!-- ===== 有据门户 · 悬浮返回条 ===== -->
+<style>
+.yj-nav{position:fixed;left:14px;bottom:14px;z-index:9999;display:flex;align-items:center;gap:6px;
+  font-family:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif;font-size:12px;
+  background:rgba(17,24,39,.86);color:#fff;border-radius:99px;padding:7px 8px 7px 12px;
+  box-shadow:0 6px 18px rgba(0,0,0,.18);backdrop-filter:blur(6px);text-decoration:none;
+  transition:opacity .15s,transform .15s}
+.yj-nav:hover{opacity:.92;transform:translateY(-1px)}
+.yj-nav .yj-ico{font-size:13px;line-height:1}
+.yj-nav .yj-txt{white-space:nowrap}
+.yj-nav .yj-sep{opacity:.4;margin:0 2px}
+@media (max-width:480px){.yj-nav{left:8px;bottom:8px;font-size:11px;padding:6px 7px 6px 10px}}
+</style>
+<a class="yj-nav" href="https://youju.robai.dpdns.org/" title="回到有据总入口，看全部产品">
+  <span class="yj-ico">🏠</span><span class="yj-txt">总入口</span><span class="yj-sep">·</span><span class="yj-txt">有据</span>
+</a>
+</body>
+</html>

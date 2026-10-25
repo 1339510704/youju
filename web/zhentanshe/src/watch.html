@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 侦探社 · 盯梢</title>
+<style>
+:root{
+  --ink:#111827; --ink2:#4B5563; --ink3:#9CA3AF;
+  --paper:#F7F5EF; --card:#FFFFFF; --line:#E5E1D8;
+  --teal:#0F766E; --teal-bg:#ECFDF5; --amber:#B45309; --amber-bg:#FFFBEB;
+  --red:#991B1B; --red-bg:#FEF2F2; --blue:#1D4ED8;
+  --sans:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif;
+  --serif:"Songti SC","Noto Serif SC","SimSun",serif;
+  --mono:"JetBrains Mono",Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);line-height:1.62}
+.top{border-bottom:1px solid var(--line);background:rgba(247,245,239,.94);backdrop-filter:blur(10px);position:sticky;top:0;z-index:50}
+.top-in{max-width:1000px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px}
+.brand .mark{width:32px;height:32px;border-radius:9px;background:var(--ink);color:#fff;display:grid;place-items:center;font-family:var(--serif);font-size:16px}
+.brand .nm{font-family:var(--serif);font-weight:700;font-size:18px;letter-spacing:.04em}
+.brand .sub{font-size:11px;color:var(--ink3);letter-spacing:.08em}
+.top .sp{flex:1}
+.tbtn{font-size:12px;font-weight:700;padding:6px 13px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink2);cursor:pointer;text-decoration:none}
+.tbtn:hover{border-color:var(--ink3);color:var(--ink)}
+.wrap{max-width:1000px;margin:0 auto;padding:0 24px 70px}
+.hero{padding:34px 0 18px}
+.hero h1{font-family:var(--serif);font-size:clamp(30px,4.4vw,44px);font-weight:700;line-height:1.2}
+.hero h1 em{font-style:normal;color:var(--teal)}
+.hero p{margin-top:10px;font-size:14px;color:var(--ink2);max-width:640px}
+.add{border:1px solid var(--line);background:#fff;border-radius:14px;padding:16px 18px;margin-bottom:18px;box-shadow:0 12px 32px rgba(17,24,39,.05)}
+.add .row{display:flex;gap:9px;flex-wrap:wrap}
+.add input{flex:1;min-width:220px;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-family:var(--sans);font-size:14px;outline:none;background:#FFFDF9}
+.add input:focus{border-color:var(--teal);background:#fff}
+.add select{border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-family:var(--sans);font-size:13px;font-weight:600;background:#fff;color:var(--ink2);cursor:pointer;outline:none}
+.add button{padding:10px 22px;border:0;border-radius:9px;background:var(--ink);color:#fff;font-size:13.5px;font-weight:800;cursor:pointer;font-family:var(--sans)}
+.add button:hover{background:#000}
+.add button:disabled{background:var(--ink3);cursor:wait}
+.add .hint{font-size:11.5px;color:var(--ink3);margin-top:10px;line-height:1.7}
+.list{display:grid;gap:12px}
+.w{border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
+.w-h{padding:14px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.w-h .q{font-size:15px;font-weight:800;flex:1;min-width:180px}
+.w-h .tag{font-family:var(--mono);font-size:9.5px;color:var(--ink3);border:1px solid var(--line);border-radius:99px;padding:2px 8px}
+.w-h .del{font-size:11px;color:var(--ink3);cursor:pointer;background:none;border:0;font-family:var(--sans)}
+.w-h .del:hover{color:var(--red)}
+.w-b{padding:14px 18px}
+.stat{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:10px}
+.stat div{font-size:11.5px;color:var(--ink3)}
+.stat b{display:block;font-family:var(--mono);font-size:17px;color:var(--ink);font-weight:700}
+.diff{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.diff span{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px}
+.diff .a{background:var(--teal-bg);color:var(--teal)}
+.diff .r{background:var(--red-bg);color:var(--red)}
+.diff .c{background:var(--amber-bg);color:var(--amber)}
+.diff .n{background:#F3F4F6;color:var(--ink3)}
+.changes{border-top:1px dashed var(--line);padding-top:10px;margin-top:8px}
+.changes .ch{font-size:11px;font-weight:800;color:var(--ink2);margin-bottom:6px}
+.changes li{list-style:none;font-size:12px;color:var(--ink2);padding:4px 0;display:flex;gap:8px}
+.changes li::before{content:"·";color:var(--teal);font-weight:900}
+.changes li a{color:var(--blue);text-decoration:none;font-size:11px}
+.changes li a:hover{text-decoration:underline}
+.run{padding:8px 16px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink2);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans)}
+.run:hover{border-color:var(--teal);color:var(--teal)}
+.empty{border:1px dashed var(--line);border-radius:14px;padding:48px 20px;text-align:center;color:var(--ink3);font-size:13px;line-height:1.9}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(16px);background:var(--ink);color:#FFF3E0;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:200}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.foot{text-align:center;font-size:11px;color:var(--ink3);margin-top:34px;line-height:1.9}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="top-in">
+    <div class="brand">
+      <div class="mark">盯</div>
+      <div>
+        <div class="nm">AI 侦探社 · 盯梢</div>
+        <div class="sub">MONITOR · DIFF · ALERT</div>
+      </div>
+    </div>
+    <div class="sp"></div>
+    <a class="tbtn" href="https://youju.robai.dpdns.org/" title="回到有据总入口，看全部产品">🏠 总入口</a>
+    <a class="tbtn" href="/">← 回到查证</a>
+    <a class="tbtn" href="/sources">来源战绩</a>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="hero">
+    <h1>不是每次重新查<br>而是<em>盯着它变</em></h1>
+    <p>把一个问题挂上去，后台每 6 小时跑一次。只有证据真的变了（新增/消失/内容被替换）才记一笔。</p>
+  </div>
+
+  <div class="add">
+    <div class="row">
+      <input id="q" placeholder="要盯的问题，例：冷轧 APS 排产算法 / 某政策实施细则">
+      <select id="ind">
+        <option value="">垂域：不限</option>
+        <option value="gov">政府</option>
+        <option value="news">新闻</option>
+        <option value="acad">学术</option>
+        <option value="finance">财经</option>
+      </select>
+      <button id="add">开始盯梢</button>
+    </div>
+    <div class="hint">每条盯梢会保存「结果 URL + 正文指纹」快照。下次运行时对比：URL 新增 / URL 消失 / 同 URL 但正文指纹变了。</div>
+  </div>
+
+  <div class="list" id="list">
+    <div class="empty">还没有盯梢任务。上面加一个试试。</div>
+  </div>
+
+  <div class="foot">
+    有据 · 盯梢 ｜ 每 6 小时自动检查一次（Cloudflare Cron）<br>
+    快照存在 Workers KV，只存 URL、标题、站点和正文指纹，不存全文
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s=>document.querySelector(s);
+
+async function api(path, opts){
+  const r = await fetch(path, opts);
+  const j = await r.json().catch(()=>null);
+  if(!j) throw new Error('返回无法解析');
+  if(!j.ok) throw new Error(j.error || '失败');
+  return j;
+}
+
+function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function fmt(t){ if(!t) return '还没跑过'; try{ return new Date(t).toLocaleString('zh-CN',{hour12:false}); }catch(e){ return t; } }
+
+async function load(){
+  try{
+    const {watches} = await api('/api/watch');
+    if(!watches.length){
+      $('#list').innerHTML = '<div class="empty">还没有盯梢任务。上面加一个试试。</div>';
+      return;
+    }
+    $('#list').innerHTML = watches.map(w=>{
+      const d = w.lastDiff || {};
+      const hasChange = (d.added||0)+(d.removed||0)+(d.changed||0) > 0;
+      const hist = (w.history||[])[0];
+      return `<div class="w">
+        <div class="w-h">
+          <span class="q">${esc(w.query)}</span>
+          ${w.industry?`<span class="tag">垂域 ${esc(w.industry)}</span>`:''}
+          <button class="run" onclick="runOne('${w.id}')">立即检查</button>
+          <button class="del" onclick="del('${w.id}')">删除</button>
+        </div>
+        <div class="w-b">
+          <div class="stat">
+            <div>证据条数<b>${w.lastCount||0}</b></div>
+            <div>上次检查<b style="font-size:12px;font-family:var(--sans);font-weight:600">${fmt(w.lastRun)}</b></div>
+          </div>
+          ${w.lastRun?`
+            <div class="diff">
+              <span class="${(d.added||0)>0?'a':'n'}">新增 ${d.added||0}</span>
+              <span class="${(d.removed||0)>0?'r':'n'}">消失 ${d.removed||0}</span>
+              <span class="${(d.changed||0)>0?'c':'n'}">内容变化 ${d.changed||0}</span>
+              ${hasChange?'':'<span class="n">本次无实质变化</span>'}
+            </div>`:''}
+          ${hist?`
+            <div class="changes">
+              <div class="ch">最近一次变化 · ${fmt(hist.at)}</div>
+              <ul>
+                ${(hist.added||[]).slice(0,4).map(x=>`<li>新增：${esc(x.title)} <a href="${esc(x.url)}" target="_blank" rel="noopener">打开 ↗</a></li>`).join('')}
+                ${(hist.removed||[]).slice(0,4).map(x=>`<li>消失：${esc(x.title)}</li>`).join('')}
+                ${(hist.changed||[]).slice(0,4).map(x=>`<li>内容变了：${esc(x.title)} <a href="${esc(x.url)}" target="_blank" rel="noopener">打开 ↗</a></li>`).join('')}
+              </ul>
+            </div>`:''}
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    $('#list').innerHTML = `<div class="empty">加载失败：${esc(e.message)}</div>`;
+  }
+}
+
+async function add(){
+  const q = $('#q').value.trim();
+  if(!q){ $('#q').focus(); return; }
+  const btn = $('#add'); btn.disabled = true; btn.textContent = '添加中…';
+  try{
+    await api('/api/watch', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({query:q, industry:$('#ind').value})
+    });
+    $('#q').value = '';
+    toast('已加入盯梢，正在跑第一次');
+    await load();
+    // 立刻跑一次建立基线
+    const {watches} = await api('/api/watch');
+    const w = watches.find(x=>x.query===q);
+    if(w){ await api('/api/watch/run?id='+w.id, {method:'POST'}); await load(); toast('基线已建立'); }
+  }catch(e){ toast('添加失败：'+e.message); }
+  btn.disabled = false; btn.textContent = '开始盯梢';
+}
+
+async function runOne(id){
+  toast('正在检查…');
+  try{
+    await api('/api/watch/run?id='+id, {method:'POST'});
+    await load();
+    toast('检查完成');
+  }catch(e){ toast('检查失败：'+e.message); }
+}
+
+async function del(id){
+  if(!confirm('删除这条盯梢？')) return;
+  try{ await api('/api/watch?id='+id, {method:'DELETE'}); await load(); toast('已删除'); }
+  catch(e){ toast('删除失败：'+e.message); }
+}
+
+let tm=null;
+function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(tm); tm=setTimeout(()=>t.classList.remove('on'),2400); }
+
+$('#add').onclick = add;
+$('#q').addEventListener('keydown', e=>{ if(e.key==='Enter') add(); });
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<view class="page page-bar">
+  <member-banner wx:if="{{memberExpired}}" />
+  <view class="bg-layer" style="{{bgStyle}}"></view>
+
+  <block wx:if="{{!space}}">
+    <view class="empty"><view class="empty-text">加载中…</view></view>
+  </block>
+
+  <block wx:else>
+    <view class="page-head">
+      <view class="flex-between">
+        <view class="flex-1">
+          <view class="ph-title">待办提醒</view>
+          <view class="ph-sub">{{left}} 项未完成{{remCount ? ' · ' + remCount + ' 个待提醒' : ''}}</view>
+        </view>
+        <view wx:if="{{hasTemplateId && !subOk}}" class="btn btn-ghost btn-sm" bindtap="subscribe">开微信提醒</view>
+        <view wx:elif="{{hasTemplateId}}" class="tag tag-success sub-on" bindtap="subscribe">✓ 微信提醒已开</view>
+      </view>
+    </view>
+
+    <view class="card mt-20 todo-stat">
+      <view class="todo-stat-cell">
+        <view class="todo-stat-num">{{left}}</view>
+        <view class="t-2 fz22">待办</view>
+      </view>
+      <view class="todo-stat-cell">
+        <view class="todo-stat-num">{{remCount}}</view>
+        <view class="t-2 fz22">待提醒</view>
+      </view>
+      <view class="todo-stat-cell">
+        <view class="todo-stat-num">{{doneCount}}</view>
+        <view class="t-2 fz22">已完成</view>
+      </view>
+    </view>
+
+    <view wx:if="{{hasTemplateId}}" class="t-3 fz22 todo-test" bindtap="testPush">收不到提醒？点此发一条测试</view>
+
+    <view wx:if="{{list.length === 0}}" class="empty">
+      <image class="empty-img" src="/images/ic/todo.png" />
+      <view class="empty-text">还没有待办，点下面加一条</view>
+    </view>
+
+    <view wx:else class="list mt-20">
+      <!-- 左滑露出「删除」，点行本身收起 -->
+      <view wx:for="{{list}}" wx:key="_id" class="swipe">
+        <view class="swipe-body" style="transform:translateX({{_swipeRightId === item._id ? '172rpx' : (_swipeId === item._id ? '-172rpx' : '0')}});"
+              bindtouchstart="swipeStart" bindtouchmove="swipeMove" bindtouchend="swipeEnd"
+              data-id="{{item._id}}" bindtap="onItemTap">
+          <view class="row">
+            <view class="circle-hit" catchtap="toggle" data-id="{{item._id}}">
+              <view class="circle {{item.done ? 'circle-on' : ''}}" hover-class="circle-hover" hover-stay-time="80">
+                <text wx:if="{{item.done}}" class="tick">✓</text>
+              </view>
+            </view>
+            <view class="flex-1 ml-16">
+              <view class="todo-text {{item.done ? 't-3 strike' : ''}}">{{item.content}}</view>
+              <view wx:if="{{item.dueText}}" class="{{!item.done && item.overdue ? 'due-over' : 'due-line'}}">
+                {{item.dueText}}
+              </view>
+              <view wx:if="{{item.notifyText}}" class="due-line">
+                <image class="ico-inline" src="/images/ic/reminder.png" />{{item.notifyText}}<text wx:if="{{item.notifyWho}}"> · {{item.notifyWho}}</text>
+              </view>
+              <view wx:if="{{item.createdText}}" class="t-3 fz20 mt-4">{{item.createdText}} 创建</view>
+            </view>
+          </view>
+        </view>
+        <view class="swipe-act swipe-act-left" catchtap="toggle" data-id="{{item._id}}">完成</view>
+        <view class="swipe-act" catchtap="remove" data-id="{{item._id}}">删除</view>
+      </view>
+    </view>
+  </block>
+
+  <view class="actionbar">
+    <view class="btn btn-primary btn-lg btn-fill" bindtap="openAdd">＋ 新建待办</view>
+  </view>
+
+  <view wx:if="{{showAdd}}" class="mask" bindtap="closeAdd">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-head">
+        <view class="sheet-title">{{_editId ? '编辑待办' : '新建待办'}}</view>
+        <view class="sheet-close" bindtap="closeAdd">✕</view>
+      </view>
+      <input class="sheet-input" placeholder="要做什么？" value="{{content}}" bindinput="onContent" />
+
+      <view class="field">
+        <text class="field-label">截止日期</text>
+        <picker mode="date" value="{{dueDate}}" bindchange="onDate">
+          <view class="tag">{{dueDate || '不设截止'}}</view>
+        </picker>
+      </view>
+
+      <view class="field">
+        <text class="field-label">到点提醒</text>
+        <view class="flex-c gap-12">
+          <view class="tag" bindtap="openRem">{{remDate ? remDate + ' ' + remTime : '不提醒'}}</view>
+          <text wx:if="{{remDate}}" class="t-primary fz24" catchtap="clearRem">清除</text>
+        </view>
+      </view>
+
+      <!-- 提醒谁：全家人 / 仅我自己 / 指定成员 -->
+      <view wx:if="{{remDate}}" class="field">
+        <text class="field-label">提醒谁</text>
+        <picker mode="selector" range="{{toOptions}}" value="{{toIdx}}" bindchange="onNotifyTo">
+          <view class="tag">{{toOptions[toIdx]}}</view>
+        </picker>
+      </view>
+      <view wx:if="{{remDate && notifyTo === 'some'}}" class="mem-pick">
+        <view wx:for="{{memberView}}" wx:key="openid"
+              class="chip {{item.on ? 'chip-on' : ''}}"
+              bindtap="toggleMember" data-o="{{item.openid}}">{{item.nickName}}</view>
+      </view>
+
+      <view class="btn btn-primary btn-block" style="margin-top:56rpx" bindtap="save">保存</view>
+    </view>
+  </view>
+
+  <!-- 日期 + 时间：一行选完 -->
+  <view wx:if="{{showRem}}" class="mask" bindtap="closeRem">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-head">
+        <view class="sheet-title">提醒时间</view>
+        <view class="sheet-close" bindtap="closeRem">✕</view>
+      </view>
+      <view class="rem-dt">
+        <picker mode="date" value="{{remDatePick}}" bindchange="onRemDate">
+          <view class="tag">{{remDatePick}}</view>
+        </picker>
+        <picker mode="time" value="{{remTime}}" bindchange="onRemTime">
+          <view class="tag">{{remTime}}</view>
+        </picker>
+      </view>
+      <view class="btn btn-primary btn-block" style="margin-top:56rpx" bindtap="confirmRem">确定</view>
+    </view>
+  </view>
+
+</view>

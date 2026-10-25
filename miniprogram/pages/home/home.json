@@ -1,0 +1,6 @@
+{
+  "usingComponents": { "member-banner": "/components/member-banner/member-banner" },
+  "navigationBarTitleText": "",
+  "enablePullDownRefresh": false,
+  "disableSwipeBack": true
+}

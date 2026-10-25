@@ -1,0 +1,17 @@
+name = "portal"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+account_id = "4bbd55c894f7cb80337f01f497baa1a9"
+
+[[rules]]
+type = "Text"
+globs = ["**/*.html"]
+fallthrough = true
+
+# 根域 robai.dpdns.org 不绑定任何产品，门户走独立子域
+[[routes]]
+pattern = "youju.robai.dpdns.org"
+custom_domain = true
+
+[observability]
+enabled = true

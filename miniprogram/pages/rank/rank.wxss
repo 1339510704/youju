@@ -1,0 +1,24 @@
+/* 小红花排行页私有样式 */
+.link-danger { color: #d9534a; }
+.rank-hero { display: flex; align-items: center; justify-content: space-between; padding: 36rpx 32rpx; }
+.rank-hero-main { flex: 1; min-width: 0; }
+.rank-hero-no { font-size: 60rpx; font-weight: 800; letter-spacing: -1rpx; line-height: 1.1; color: var(--text); margin-top: 6rpx; }
+.rank-hero-earn { color: var(--brand-btn); font-weight: 700; }
+.rank-hero-side { flex: none; display: flex; flex-direction: column; align-items: center; padding-left: 24rpx; }
+.rank-hero-num { font-size: 56rpx; font-weight: 800; line-height: 1.1; margin-top: 4rpx; }
+
+.rank-sub { display: flex; align-items: center; gap: 12rpx; margin-top: 6rpx; }
+.lv-chip { display: inline-flex; align-items: center; gap: 6rpx; height: 40rpx; padding: 0 14rpx;
+  border-radius: var(--radius-pill); background: var(--brand-soft); color: var(--brand-deep);
+  font-size: 22rpx; font-weight: 600; }
+
+/* 排行榜行右侧：小红花数量在上，管理操作胶囊在下，避免挤在一起 */
+.rank-right { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 12rpx; }
+.rank-right .flower-num { font-size: 34rpx; }
+.rank-ops { display: flex; align-items: center; gap: 12rpx; }
+.rank-op { font-size: 22rpx; font-weight: 600; padding: 8rpx 18rpx; border-radius: var(--radius-pill);
+  background: var(--brand-soft); color: var(--brand-deep); flex-shrink: 0; }
+.rank-op:active { opacity: .6; }
+.rank-op-danger { background: #fbe9e8; color: #d9534a; }
+
+

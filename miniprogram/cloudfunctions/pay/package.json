@@ -1,0 +1,9 @@
+{
+  "name": "pay",
+  "version": "1.0.0",
+  "description": "微信虚拟支付：下单/发货推送/兜底查单",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

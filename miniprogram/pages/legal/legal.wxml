@@ -1,0 +1,115 @@
+<view class="page">
+  <view class="bg-layer" style="{{bgStyle}}"></view>
+
+  <view class="page-head">
+    <view class="ph-title">隐私与协议</view>
+    <view class="ph-sub">{{appName}} · 最近更新 {{updated}}</view>
+  </view>
+
+  <view class="tabs mt-12">
+    <view class="tab-item {{tab === 'privacy' ? 'on' : ''}}" data-t="privacy" bindtap="switchTab">隐私政策</view>
+    <view class="tab-item {{tab === 'terms' ? 'on' : ''}}" data-t="terms" bindtap="switchTab">用户协议</view>
+  </view>
+
+  <!-- ============ 隐私政策 ============ -->
+  <block wx:if="{{tab === 'privacy'}}">
+    <view class="card mt-20">
+      <view class="t-2 fz24">本政策说明 {{appName}}（以下简称「本小程序」）如何处理你的个人信息。使用本小程序即表示你已阅读并同意本政策。</view>
+    </view>
+
+    <view class="card mt-16">
+      <view class="lp-h">一、我们收集哪些信息</view>
+      <view class="lp-p t-2">1. 微信身份标识（OpenID）：你首次打开时由微信平台自动下发，仅用于区分不同用户，不包含你的手机号、微信号或真实姓名。</view>
+      <view class="lp-p t-2">2. 昵称与头像：你在「我的 → 资料」中主动点击后，我们才获取你的微信头像与昵称，仅用于在家庭成员列表、点单记录、待办与小红花排行中显示你是谁；你也可以手动输入昵称，并随时修改或不再使用。</view>
+      <view class="lp-p t-2">3. 你主动填写的内容：家庭待办、重要节日、定时提醒、记账记录、家庭菜单与点菜记录等。</view>
+      <view class="lp-p t-2">4. 你主动上传的图片：菜品图片、自定义背景等，存放在微信云存储中。</view>
+      <view class="lp-p t-2">我们不会收集你的通讯录、精确位置、完整相册、面部或声纹等生物识别信息。</view>
+
+      <view class="lp-h">二、我们如何使用信息</view>
+      <view class="lp-p t-2">· 仅用于在你本人所在的空间内展示与同步数据。</view>
+      <view class="lp-p t-2">· 不同空间之间数据相互隔离，非本空间成员无法查看该空间内容。</view>
+      <view class="lp-p t-2">· 不会用于广告推送，不会出售、出租或共享给任何第三方。</view>
+
+      <view class="lp-h">三、信息的存储与保护</view>
+      <view class="lp-p t-2">数据存储于微信云开发（腾讯云）环境，受微信平台安全机制保护。涉及权限的操作均在服务端完成校验，前端无法越权读取数据。</view>
+
+      <view class="lp-h">四、是否共享给第三方</view>
+      <view class="lp-p t-2">当前版本未接入任何第三方统计或广告服务，也不会把你的内容发送给任何第三方用于分析或营销。</view>
+
+      <view class="lp-h">五、你的权利</view>
+      <view class="lp-p t-2">· 查看与修改：进入「我的 → 资料卡」，可随时修改昵称、头像与自定义背景。</view>
+      <view class="lp-p t-2">· 删除数据：进入「我的 → 隐私与数据 → 删除我的数据」，可一次性清除个人资料与积分记录，并从所有空间中移除。删除数据不涉及退款，已购买的虚拟商品（如会员）不予退还，详见用户协议「付费与虚拟商品」。</view>
+      <view class="lp-p t-2">· 退出空间：进入「我的 → 退出当前空间」，退出后不再参与该空间的数据同步。</view>
+
+      <view class="lp-h">六、未成年人保护</view>
+      <view class="lp-p t-2">本小程序为家庭日常记录工具。未成年人请在监护人指导下使用。</view>
+
+      <view class="lp-h">七、政策更新</view>
+      <view class="lp-p t-2">本政策如有更新，我们会调整页面顶部的更新日期；涉及重大变更时，会在小程序内另行提示。</view>
+    </view>
+  </block>
+
+  <!-- ============ 用户协议 ============ -->
+  <block wx:else>
+    <view class="card mt-20">
+      <view class="t-2 fz24">本协议是你与 {{appName}} 开发者之间关于使用本小程序的约定。使用本小程序即表示你已阅读并同意本协议。</view>
+    </view>
+
+    <view class="card mt-16">
+      <view class="lp-h">一、服务内容</view>
+      <view class="lp-p t-2">{{appName}}是一款家庭日常记录工具，提供日常待办、重要节日、定时提醒、理财记账、家庭菜单与点菜、成员积分等功能。</view>
+
+      <view class="lp-h">二、账号与使用</view>
+      <view class="lp-p t-2">你使用微信登录即可使用，无需单独注册账号。同一微信账号在不同空间中的数据相互独立。</view>
+
+      <view class="lp-h">三、内容规范</view>
+      <view class="lp-p t-2">你承诺不利用本服务发布或存储以下内容：</view>
+      <view class="lp-p t-2">· 违反国家法律法规的；</view>
+      <view class="lp-p t-2">· 危害国家安全、破坏民族团结的；</view>
+      <view class="lp-p t-2">· 淫秽色情、暴力、赌博、诈骗的；</view>
+      <view class="lp-p t-2">· 侵犯他人知识产权、名誉权、隐私权的；</view>
+      <view class="lp-p t-2">· 垃圾广告与骚扰信息。</view>
+      <view class="lp-p t-2">违反上述约定的，我们有权停止提供服务并删除相关内容。</view>
+
+      <view class="lp-h">四、小红花积分</view>
+      <view class="lp-p t-2">· 小红花是本小程序内部的积分凭证，通过完成日常记录等行为获得，仅可用于兑换本小程序内的功能与奖励。</view>
+      <view class="lp-p t-2">· 小红花不具备货币属性，不能提现、转账或交易，不具任何财产价值。</view>
+      <view class="lp-p t-2">· 兑换所得的功能与奖励以兑换页面展示为准。因你违反本协议被停止服务的，已获得的权益不予折现或补偿。</view>
+
+      <view class="lp-h">五、免责与风险提示</view>
+      <view class="lp-p t-2">· 记账、理财规划等功能仅作为个人记录工具，不构成任何投资建议，据此操作的风险由你自行承担。</view>
+      <view class="lp-p t-2">· 因设备故障、网络中断、微信平台规则调整等不可抗力导致的数据异常，我们将在合理范围内协助恢复，但不承担由此产生的间接损失。</view>
+      <view class="lp-p t-2">· 请自行妥善保管空间邀请码，因邀请码泄露导致他人加入你的空间，我们不承担责任。</view>
+
+      <view class="lp-h">六、服务变更</view>
+      <view class="lp-p t-2">我们可能因政策或技术原因调整、暂停部分功能，并会尽力提前告知。</view>
+
+      <view class="lp-h">七、付费与虚拟商品（会员）</view>
+      <view class="lp-p t-2">· 本小程序提供会员等虚拟商品，付款成功后即时生效，属在线交付的虚拟服务。</view>
+      <view class="lp-p t-2">· 基于虚拟商品的特性，一经购买并生效，不支持退款、退换或转让，请在付款前确认购买档位与金额。</view>
+      <view class="lp-p t-2">· 会员到期后，相关功能（如家庭背景图）会自动隐藏；续费成功后自动恢复。</view>
+      <view class="lp-p t-2">· 通过兑换码获得的会员，兑换码一经使用即失效，同样不支持退款。</view>
+      <view class="lp-p t-2">· 删除个人数据仅清除你在本小程序的资料与记录，已购买的虚拟权益不予退还。</view>
+      <view class="lp-p t-2">· 若因平台规则调整或本服务终止导致无法继续提供服务，将按未使用的剩余时长与你友好协商处理。</view>
+
+      <view class="lp-h">八、适用法律</view>
+      <view class="lp-p t-2">本协议适用中华人民共和国法律。如发生争议，双方应友好协商解决。</view>
+    </view>
+  </block>
+
+  <view class="card mt-16" style="margin-bottom:32rpx">
+    <view class="t-2 fz24">提示：涉及昵称头像获取的功能，均需你主动点击授权，我们不会在启动时强制索取。</view>
+  </view>
+
+  <!-- 系统状态（开发自检，普通用户一般无需关注） -->
+  <view class="sec" style="margin-top:40rpx">系统状态</view>
+  <view class="list">
+    <view class="diag-row">
+      <view class="diag-dot {{diag.sdk ? 'ok' : 'bad'}}">{{diag.sdk ? '✓' : '!'}}</view><view class="flex-1 ml-12 t-2 fz26">云开发环境</view>
+    </view>
+    <view class="diag-row">
+      <view class="diag-dot {{diag.db ? 'ok' : 'bad'}}">{{diag.db ? '✓' : '!'}}</view><view class="flex-1 ml-12 t-2 fz26">数据库集合</view>
+    </view>
+  </view>
+
+</view>

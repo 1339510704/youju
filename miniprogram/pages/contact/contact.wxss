@@ -1,0 +1,15 @@
+/* 联系我（二级页）私有样式 */
+.about-bio { font-size: 30rpx; font-weight: 600; color: var(--text); line-height: 1.5; margin-bottom: 16rpx; }
+.contact-card { padding: 28rpx; }
+.contact-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 8rpx; padding: 16rpx 0; border-top: 2rpx solid var(--line);
+}
+.contact-qr-wrap {
+  margin-top: 20rpx; display: flex; flex-direction: column;
+  align-items: center; text-align: center;
+}
+.contact-qr {
+  width: 360rpx; height: 360rpx; border-radius: 20rpx;
+  background: #fff; border: 2rpx solid var(--line);
+}

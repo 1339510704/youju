@@ -1,0 +1,5 @@
+{
+  "usingComponents": { "member-banner": "/components/member-banner/member-banner" },
+  "navigationBarTitleText": "",
+  "disableSwipeBack": true
+}
